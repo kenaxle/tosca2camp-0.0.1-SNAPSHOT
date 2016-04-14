@@ -1,0 +1,9 @@
+capabilities:
+  host:
+    properties:
+      architecture: x86_64
+      type: linux 
+      distribution: fedora 
+      version: 18.0
+     
+ 
