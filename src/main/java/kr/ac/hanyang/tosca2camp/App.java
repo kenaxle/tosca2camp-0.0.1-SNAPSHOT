@@ -13,6 +13,9 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
+import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
+import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
+import kr.ac.hanyang.tosca2camp.assignments.RequirementAs.Builder;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AdminEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AttachmentCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.BindableNetworkCapability;
@@ -23,6 +26,7 @@ import kr.ac.hanyang.tosca2camp.datatypes.capabilities.NodeCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.OperatingSystemCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.PublicEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ScalableCapability;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.RootNode;
 import kr.ac.hanyang.tosca2camp.toscaTypes.MapType;
 
 
@@ -32,6 +36,12 @@ import kr.ac.hanyang.tosca2camp.toscaTypes.MapType;
  */
 public class App{
     
+	@SuppressWarnings("rawtypes")
+	public static <V> NodeTemplate parseNode(String type, Map<String, Object> nodeMap){
+		return new RootNode.Builder<V>("Root", type, "ToscaID", "status").build();
+	}
+	
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static CapabilityAs parseCap(String type, Map<String, Object> property){
 		Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
@@ -141,6 +151,41 @@ public class App{
 		
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <V> RelationshipTemplate parseRelationship(String name, Map<String, Object> property){
+		Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
+		//RelationshipTemplate relationShip;
+		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(name,"desc");
+		for (String key:propertyMap.keySet()){
+			builder.addProperties(new PropertyAs.Builder<V>(key,(V)propertyMap.get(key)).build());
+		}
+		return builder.build();
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T, U, V> RequirementAs parseRequirement(String type, Map<String, Object> requirement){
+		RequirementAs.Builder<T, U, V> reqBuilder = new RequirementAs.Builder<T, U, V>(type);
+		for (String key:requirement.keySet()){
+			switch (key){
+				case "node":
+					reqBuilder.node((U)parseNode(key, (Map)requirement.get(key)));
+					break;
+				case "relationship":
+					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
+					String relType = (String) relationshipMap.get("type"); // get the type of relationship
+					Map<String, Object> relProperties = (Map<String, Object>) relationshipMap.get("properties");
+					reqBuilder.relationship((V)parseRelationship(relType, relProperties));
+					break;
+				case "capabilities":
+					//parse the capabilities
+					//builder.addNumCpu(((Integer) propertyMap.get(key)).intValue());
+					break;
+				default:
+					break;
+			}
+		}
+		return reqBuilder.build();
+	}
 	
 	public static void main( String[] args ) throws Exception{
 
