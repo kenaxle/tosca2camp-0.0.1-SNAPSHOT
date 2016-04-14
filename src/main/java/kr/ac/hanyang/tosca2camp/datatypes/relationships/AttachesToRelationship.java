@@ -7,12 +7,14 @@ public class AttachesToRelationship extends RootRelationship{
 	
 public static class Builder extends RootRelationship.Builder{
 		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Builder(String name, String type, String location){
 			super(name, type);
 			super.description("Tosca AttachesTo Relationship Type")
 				 .addProperties(new PropertyAs.Builder("location", location).build());
 		}
 		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Builder(String name, String location){
 			super(name, "tosca.relationships.AttachesTo");
 			super.description("Tosca AttachesTo Relationship Type")
@@ -20,6 +22,7 @@ public static class Builder extends RootRelationship.Builder{
 		}
 		
 		//TODO property and attribute are set at the same time
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Builder device(String device){
 			super.addProperties(new PropertyAs.Builder("device", device).build())
 				 .addAttributes(new AttributeAs.Builder("device", "").build());

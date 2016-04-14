@@ -26,34 +26,34 @@ public class CapabilityAs<V> {
 			attributes = new LinkedHashMap<String, AttributeAs<V>>();
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T derivedFrom(String derived_from){
 			this.derived_from = derived_from;
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T description(String description){
 			this.description = description;
 			return (T) this;
 		}
 		
-		public T addProperty(MapEntry mapEntry){
-			properties.put(mapEntry.getName(), (PropertyAs<V>) mapEntry);
+		@SuppressWarnings("unchecked")
+		public T addProperty(PropertyAs<V> property){
+			properties.put(property.getName(), property);
 			return (T) this;
 		}
 		
-		public T addAttribute(MapEntry mapEntry){
-			attributes.put(mapEntry.getName(), (AttributeAs<V>) mapEntry);
+		@SuppressWarnings("unchecked")
+		public T addAttribute(AttributeAs<V> attribute){
+			attributes.put(attribute.getName(), attribute);
 			return (T) this;
 		}
 		
-		public CapabilityAs build(){
-			return new CapabilityAs(this);
+		public CapabilityAs<V> build(){
+			return new CapabilityAs<V>(this);
 		}
 	
-	}
-	
-	public Builder getBuilder(){
-		return new Builder();
 	}
 	
 	protected CapabilityAs(Builder<V, ?> builder){
@@ -75,17 +75,18 @@ public class CapabilityAs<V> {
 
 	public Map<String, AttributeAs<V>> getAttributes() {return attributes;}
 
+	@SuppressWarnings("unused")
 	public String toString(){
 		
-		String propStr = "properties: \n";
-		String attrStr = "attributes: \n";
-//		for(PropertyAs propAs:this.properties){
-//			propStr += propAs.toString()+"\n";
-//		}
-//		for(PropertyAs attrAs:this.properties){
-//			attrStr += attrAs.toString()+"\n";
-//		}
-		return  "   type: "+type+"\n";//+
-		       //propStr+attrStr;
+		String propStr = "   properties: \n";
+		String attrStr = "   attributes: \n";
+		for(String propAs:this.properties.keySet()){
+			propStr += "   "+properties.get(propAs)+"\n";
+		}
+		for(String attrAs:this.properties.keySet()){
+			attrStr += "   "+attributes.get(attrAs)+"\n";
+		}
+		return  "   "+type+":"+"\n"+
+		       propStr+attrStr;
 	}
 }

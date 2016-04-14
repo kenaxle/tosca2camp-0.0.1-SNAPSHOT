@@ -1,9 +1,14 @@
 capabilities:
   host:
     properties:
+      disk_size: 10 
+      num_cpus: 4
+      mem_size: 1 
+  os:
+    properties:
       architecture: x86_64
       type: linux 
       distribution: fedora 
-      version: 18.0
+      version: "18.0" 
      
  

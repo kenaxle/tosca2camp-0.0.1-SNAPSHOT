@@ -17,6 +17,7 @@ public static class Builder extends ConnectsToRelationship.Builder{
 		}
 		
 		//TODO change this to credential type
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Builder credential(String credential){
 			super.addProperties(new PropertyAs.Builder("credential", credential).build());
 			return this;

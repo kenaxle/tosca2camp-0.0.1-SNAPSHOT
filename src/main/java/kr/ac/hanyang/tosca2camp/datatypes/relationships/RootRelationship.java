@@ -7,6 +7,7 @@ public class RootRelationship extends RelationshipTemplate{
 	
 public static class Builder extends RelationshipTemplate.Builder<Builder>{
 		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Builder(String name, String type){
 			super(name, type);
 			super.description("Tosca Root Relationship Type")
@@ -16,6 +17,7 @@ public static class Builder extends RelationshipTemplate.Builder<Builder>{
 				 .build();
 		}
 		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Builder(String name){
 			super(name, "tosca.relationships.Root");
 			super.description("Tosca Root Relationship Type")

@@ -9,7 +9,7 @@ public class RequirementAs<T , U, V> {
 	private U node; //TODO this is the nodetemplate or node type
 	private V relationship; //TODO
 	
-	private RequirementAs(Builder builder){	
+	private RequirementAs(Builder<T, U, V> builder){	
 		this.name = builder.name;
 		this.capability = (T) builder.capability;
 		this.node = (U) builder.node;
@@ -24,23 +24,23 @@ public class RequirementAs<T , U, V> {
 		
 		public Builder(String name){this.name = name;}
 		
-		public Builder capability(T capability){
+		public Builder<T, U, V> capability(T capability){
 			this.capability = capability;
 			return this;
 		}
 		
-		public Builder node(U node){
+		public Builder<T, U, V> node(U node){
 			this.node = node;
 			return this;
 		}
 		
-		public Builder relationship(V relationship){
+		public Builder<T, U, V> relationship(V relationship){
 			this.relationship = relationship;
 			return this;
 		}
 		
-		public RequirementAs build(){
-			return new RequirementAs(this);
+		public RequirementAs<T, U, V> build(){
+			return new RequirementAs<T,U,V>(this);
 		}
 		
 	}
@@ -52,7 +52,7 @@ public class RequirementAs<T , U, V> {
 		 
 		switch (capability.getClass().getSimpleName()){
 			case "CapabilityAs":
-				CapabilityAs capAs = (CapabilityAs) capability;
+				CapabilityAs<?> capAs = (CapabilityAs<?>) capability;
 				capType = capAs.getType();
 				break;
 			case "CapabilityDef":

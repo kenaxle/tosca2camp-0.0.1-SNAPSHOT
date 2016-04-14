@@ -2,7 +2,6 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitions.*;
-import kr.ac.hanyang.tosca2camp.definitions.CapabilityDef.Builder;
 import kr.ac.hanyang.tosca2camp.toscaTypes.MapEntry;
 
 public class NodeTemplate<V> {
@@ -18,7 +17,7 @@ public class NodeTemplate<V> {
 	private Map<String, ArtifactDef> artifacts;
 	//TODO Nodefilter and copy should be implemented
 	
-	public static class Builder <V, T extends Builder>{
+	public static class Builder <V, T extends Builder<?, ?>>{
 
 		private String type;
 		private String description;
@@ -35,41 +34,49 @@ public class NodeTemplate<V> {
 			this.type = type;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T description(String description){
 			this.description = description;
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T directives(List<String> directives){
 			this.directives = directives;
 			return (T) this;
 		}
 		
-		public T addProperty(PropertyAs<V> properties){
-			this.properties.put(properties.getName(), properties);
+		@SuppressWarnings("unchecked")
+		public T addProperty(PropertyAs<V> property){
+			this.properties.put(property.getName(), property);
 			return (T) this;
 		}
 		
-		public T addAttribute(MapEntry mapEntry){
-			this.attributes.put(mapEntry.getName(), (AttributeAs<V>) mapEntry);
+		@SuppressWarnings("unchecked")
+		public T addAttribute(AttributeAs<V> attribute){
+			this.attributes.put(attribute.getName(), attribute);
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T addRequirement(RequirementAs<?,?,?> requirement){
 			this.requirements.put(requirement.getName(), requirement);
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T addCapability(CapabilityAs<V> capability){
 			this.capabilities.put(capability.getType(), capability);
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T addInterface(InterfaceDef inface){
 			this.interfaces.put(inface.getName(), inface);
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T addArtifact(ArtifactDef artifact){
 			this.artifacts.put(artifact.getName(), artifact);
 			return (T) this;

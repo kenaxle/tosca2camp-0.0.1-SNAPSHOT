@@ -1,36 +1,22 @@
 package kr.ac.hanyang.tosca2camp.datatypes.nodes;
 
 import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
-import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AttachmentCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.BindableNetworkCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ContainerCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.EndpointCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.NodeCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.OperatingSystemCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ScalableCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.relationships.DependsOnRelationship;
 
 public class ComputeNode extends RootNode {
 
+@SuppressWarnings("rawtypes")
 public static class Builder extends RootNode.Builder{
 		
-		@SuppressWarnings("unchecked")
 		public Builder(String id, String toscaName, String status){		
 			super("tosca.nodes.Compute",id,toscaName,status);
 			super.description("The TOSCA Compute Node type");
-//			super.addCapability(new ContainerCapability.Builder("tosca.capabilities.Container").build())
-//			     .addCapability(new EndpointCapability.Builder("tosca.capabilities.Endpoint.Admin","","","").build())
-//			     .addCapability(new OperatingSystemCapability.Builder("tosca.capabilities.OperatingSystem","").build())
-//			     .addCapability(new ScalableCapability.Builder("tosca.capabilities.Scalable","").build())
-//			     .addCapability(new BindableNetworkCapability.Builder("tosca.capabilities.network.Bindable").build())
-//			     .addRequirement(new RequirementAs.Builder("local_storage").capability(new AttachmentCapability.Builder("tosca.capabilities.Attachement").build())
-//																	.node(new BlockStorageNode.Builder("tosca.nodes.BlockStorage","","","").build())
-//																	.relationship(new DependsOnRelationship.Builder("dependsOn").build())
-//																	.build());
+			super.build();
 		}
 		
 //		public Builder(String type, String id, String toscaName, String status){		
@@ -47,55 +33,65 @@ public static class Builder extends RootNode.Builder{
 //																	.build());
 //		}
 		
+		@SuppressWarnings({ "unchecked" })
 		public Builder privateAddress(String privateAddress){
 			super.addAttribute(new AttributeAs.Builder("private_address",privateAddress).build());
 			return this;
 		}
 		
+		@SuppressWarnings({ "unchecked" })
 		public Builder publicAddress(String publicAddress){
 			super.addAttribute(new AttributeAs.Builder("public_address",publicAddress).build());
 			return this;
 		}
 		
 		//TODO use a string for now but this should be a map type
+		@SuppressWarnings({ "unchecked" })
 		public Builder networks(String networks){
 			super.addAttribute(new AttributeAs.Builder("networks",networks).build());
 			return this;
 		}
 		
 		//TODO use a string for now but this should be a map type
+		@SuppressWarnings({ "unchecked" })
 		public Builder ports(String ports){
 			super.addAttribute(new AttributeAs.Builder("ports",ports).build());
 			return this;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Builder addContainerCapability(ContainerCapability conCap){
-			super.addCapability(conCap).build();
+			super.addCapability(conCap);
 			return this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public Builder addEndpointCapability(EndpointCapability conCap){
-			super.addCapability(conCap).build();
+			super.addCapability(conCap);
 			return this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public Builder addOSCapability(OperatingSystemCapability conCap){
-			super.addCapability(conCap).build();
+			super.addCapability(conCap);
 			return this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public Builder addScalableCapability(ScalableCapability conCap){
-			super.addCapability(conCap).build();
+			super.addCapability(conCap);
 			return this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public Builder addBindableCapability(BindableNetworkCapability conCap){
-			super.addCapability(conCap).build();
+			super.addCapability(conCap);
 			return this;
 		}
 		
+		@SuppressWarnings({ "unchecked" })
 		public Builder addRequirement(RequirementAs requirement){
-			super.addRequirement(requirement).build();
+			super.addRequirement(requirement);
 			return this;
 		}
 		

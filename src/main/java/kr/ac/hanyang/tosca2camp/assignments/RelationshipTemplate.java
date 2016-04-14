@@ -4,6 +4,7 @@ import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitions.*;
 import kr.ac.hanyang.tosca2camp.toscaTypes.MapEntry;
 
+@SuppressWarnings("rawtypes")
 public class RelationshipTemplate {
 	private String name;
 	private String type;
@@ -14,8 +15,7 @@ public class RelationshipTemplate {
 	private Map<String, InterfaceDef> interfaces;
 
 	//TODO copy should be implemented
-	
-	public static class Builder <T extends Builder>{
+	public static class Builder <T extends Builder<T>>{
 		private String name;
 		private String type;
 		private String alias;
@@ -29,26 +29,31 @@ public class RelationshipTemplate {
 			this.type = type;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T alias(String alias){
 			this.alias = alias;
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T description(String description){
 			this.description = description;
 			return (T) this;
 		}
 		
-		public T addProperties(MapEntry mapEntry){
-			this.properties.put(mapEntry.getName(),(PropertyAs<?>) mapEntry);
+		@SuppressWarnings("unchecked")
+		public T addProperties(PropertyAs property){
+			this.properties.put(property.getName(),property);
 			return (T) this;
 		}
 		
-		public T addAttributes(MapEntry mapEntry){
-			this.attributes.put(mapEntry.getName(),(AttributeAs<?>) mapEntry);
+		@SuppressWarnings("unchecked")
+		public T addAttributes(AttributeAs attribute){
+			this.attributes.put(attribute.getName(),attribute);
 			return (T) this;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public T addInterfaces(InterfaceDef iterface){
 			this.interfaces.put(iterface.getName(),iterface);
 			return (T) this;
@@ -59,6 +64,7 @@ public class RelationshipTemplate {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected RelationshipTemplate(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;

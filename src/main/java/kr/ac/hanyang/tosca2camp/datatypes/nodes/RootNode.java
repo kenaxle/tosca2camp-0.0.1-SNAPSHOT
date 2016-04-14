@@ -1,23 +1,18 @@
 package kr.ac.hanyang.tosca2camp.datatypes.nodes;
 
 
-import java.util.ArrayList;
-
 import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ContainerCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.NodeCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.relationships.DependsOnRelationship;
 
+@SuppressWarnings("rawtypes")
 public class RootNode extends NodeTemplate {
 	
 	public static class Builder<V> extends NodeTemplate.Builder<V,Builder>{
 		
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({ "unchecked" })
 		public Builder(String type, String id, String toscaName, String status){		
 			super(type);
 			super.description("The TOSCA Root Node type")
@@ -37,6 +32,7 @@ public class RootNode extends NodeTemplate {
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked" })
 	protected RootNode(Builder builder){
 		super(builder);
 	}

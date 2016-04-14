@@ -2,8 +2,9 @@ package kr.ac.hanyang.tosca2camp.datatypes.capabilities;
 
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 
-public class RootCapability extends CapabilityAs{
+public class RootCapability<V> extends CapabilityAs<V>{
 	
+	@SuppressWarnings("rawtypes")
 	public static class Builder extends CapabilityAs.Builder{
 		
 		public Builder(String type, String desc){
@@ -17,6 +18,7 @@ public class RootCapability extends CapabilityAs{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected RootCapability(Builder builder){
 		super(builder);
 	}
