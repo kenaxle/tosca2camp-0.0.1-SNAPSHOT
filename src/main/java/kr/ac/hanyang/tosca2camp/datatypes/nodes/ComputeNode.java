@@ -19,20 +19,12 @@ public static class Builder extends RootNode.Builder{
 			super.build();
 		}
 		
-//		public Builder(String type, String id, String toscaName, String status){		
-//			super(type,id,toscaName,status);
-//			super.description("The TOSCA Compute Node type");
-//			super.addCapability(new NodeCapability.Builder("host","tosca.capabilities.Container","").build())
-//			     .addCapability(new NodeCapability.Builder("endpoint","tosca.capabilities.Endpoint.Admin","").build())
-//			     .addCapability(new NodeCapability.Builder("os","tosca.capabilities.OperatingSystem","").build())
-//			     .addCapability(new NodeCapability.Builder("scalable","tosca.capabilities.Scalable","").build())
-//			     .addCapability(new NodeCapability.Builder("binding","tosca.capabilities.network.Bindable","").build())
-//			     .addRequirement(new RequirementAs.Builder("local_storage").capability(new CapabilityAs.Builder("attachment","tosca.capabilities.Attachement").build())
-//																	.node(new NodeTemplate.Builder<Builder>("tosca.nodes.BlockStorage").build())
-//																	.relationship(new DependsOnRelationship.Builder("dependsOn").build())
-//																	.build());
-//		}
-		
+		public Builder(String type, String id, String toscaName, String status){		
+			super(type,id,toscaName,status);
+			super.description("The TOSCA Compute Node type");
+			super.build();
+		}
+
 		@SuppressWarnings({ "unchecked" })
 		public Builder privateAddress(String privateAddress){
 			super.addAttribute(new AttributeAs.Builder("private_address",privateAddress).build());

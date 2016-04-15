@@ -21,7 +21,7 @@ public class RootNode extends NodeTemplate {
 			.addAttribute(new AttributeAs.Builder("state",status).build())
 			.addCapability(new NodeCapability.Builder("tosca.capabilities.Node").build())
 			.addRequirement(new RequirementAs.Builder("dependency").capability(new NodeCapability.Builder("tosca.capabilities.Node").build())
-																	.node(new NodeTemplate.Builder<V, Builder>("tosca.nodes.Root").build())
+																	.node(new RootNode.Builder<V>("tosca.nodes.Root", "NodeID", "NodeName", "NodeStatus").build())
 																	.relationship(new DependsOnRelationship.Builder("dependsOn").build())
 																	.build());	
 		}

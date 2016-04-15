@@ -2,20 +2,15 @@ package kr.ac.hanyang.tosca2camp;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.Map;
 
-import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
+import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate.Builder;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.assignments.RequirementAs.Builder;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AdminEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AttachmentCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.BindableNetworkCapability;
@@ -26,8 +21,18 @@ import kr.ac.hanyang.tosca2camp.datatypes.capabilities.NodeCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.OperatingSystemCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.PublicEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ScalableCapability;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.ApplicationContainerNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.BlockStorageNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.ComputeNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.DBMSNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.DatabaseNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.LoadBalancerNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.ObjectStorageNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.RootNode;
-import kr.ac.hanyang.tosca2camp.toscaTypes.MapType;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.RuntimeContainerNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.SoftwareComponentNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebApplicationNode;
+import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
 
 
 /**
@@ -36,14 +41,145 @@ import kr.ac.hanyang.tosca2camp.toscaTypes.MapType;
  */
 public class App{
     
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
+		NodeTemplate.Builder<V, Builder<?,?>> nodeBuilder;
+		switch((String) nodeMap.get("type")){
+		case "Compute": 
+			ComputeNode.Builder compNodeBuilder = new ComputeNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "container":	
+							compNodeBuilder.addContainerCapability((ContainerCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "Endpoint.Admin":
+							compNodeBuilder.addEndpointCapability((AdminEndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "OperatingSystem":	
+							compNodeBuilder.addOSCapability((OperatingSystemCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "Scalable":
+							compNodeBuilder.addScalableCapability((ScalableCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "network.Bindable":
+							compNodeBuilder.addBindableCapability((BindableNetworkCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							compNodeBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						compNodeBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			break;
+		case "SoftwareComponent":
+			SoftwareComponentNode.Builder softCompBuilder = new SoftwareComponentNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "component_version":	
+							softCompBuilder.componentVersion((String) propMap.get(propertyItem));
+							break;
+						case "admin_credential":
+							softCompBuilder.adminCreds((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							softCompBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						softCompBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			break;
+		case "WebServer":
+			WebServerNode.Builder webNodeBuilder = new WebServerNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						webNodeBuilder.addCapability(parseCapability(capabilityType,capMap));
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						webNodeBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			break;
+		case "WebApplication":
+			nodeBuilder = new WebApplicationNode.Builder("toscaID",name,"status");
+			break;
+		case "DBMS":
+			nodeBuilder = new DBMSNode.Builder("toscaID",name,"status");
+			break;
+		case "Database":
+			nodeBuilder = new DatabaseNode.Builder("toscaID",name,"status","Dbname"); //fix this
+			break;
+		case "ObjectStorage":
+			nodeBuilder = new ObjectStorageNode.Builder("toscaID",name,"status","storage_name");
+			break;
+		case "BlockStorage":
+			nodeBuilder = new BlockStorageNode.Builder("toscaID",name,"status","storage_size");
+			break;
+		case "Container.Runtime":
+			nodeBuilder = new RuntimeContainerNode.Builder("toscaID",name,"status","Dbname"); //fix this
+			break;
+		case "Container.Application":
+			nodeBuilder = new ApplicationContainerNode.Builder("toscaID",name,"status","storage_name");
+			break;
+		case "LoadBalancer":
+			nodeBuilder = new LoadBalancerNode.Builder("toscaID",name,"status","storage_size");
+			break;
+		default:
+			//we dont have a type specified so we should build the root node
+			nodeBuilder = new RootNode.Builder("toscaID",name,"status","storage_size");
+			break;
+		}	
+	}
+	
+	
 	@SuppressWarnings("rawtypes")
-	public static <V> NodeTemplate parseNode(String type, Map<String, Object> nodeMap){
+	public static <V> NodeTemplate parseRequirementNode(String type, Map<String, Object> nodeMap){
 		return new RootNode.Builder<V>("Root", type, "ToscaID", "status").build();
 	}
 	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static CapabilityAs parseCap(String type, Map<String, Object> property){
+	public static CapabilityAs parseCapability(String type, Map<String, Object> property){
 		Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
 		CapabilityAs returnCap;
 		switch (type){
@@ -151,6 +287,7 @@ public class App{
 		
 	}
 	
+	//TODO p.g. 261 should be able to parse extended grammar with properties
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <V> RelationshipTemplate parseRelationship(String name, Map<String, Object> property){
 		Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
@@ -162,13 +299,23 @@ public class App{
 		return builder.build();
 	}
 	
+	
+	//TODO p.g. 260 - 261 this should be able to parse short or extended form 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static <T, U, V> RequirementAs parseRequirement(String type, Map<String, Object> requirement){
-		RequirementAs.Builder<T, U, V> reqBuilder = new RequirementAs.Builder<T, U, V>(type);
+	public static <T, U, V> RequirementAs parseRequirement(String name, Map<String, Object> requirement){
+		RequirementAs.Builder<T, U, V> reqBuilder = new RequirementAs.Builder<T, U, V>(name);
 		for (String key:requirement.keySet()){
 			switch (key){
+				case "capability":
+					Map<String, Object> capMap = (Map<String, Object>) requirement.get(key);
+					for(String key2:capMap.keySet()){
+						String capType = (String) capMap.get(key2); // get the type of capability
+						Map<String, Object> capProperties = (Map<String, Object>) capMap.get("properties");
+						reqBuilder.capability((T)parseCapability(key2, capProperties));
+					}
+					break;
 				case "node":
-					reqBuilder.node((U)parseNode(key, (Map)requirement.get(key)));
+					reqBuilder.node((U)parseRequirementNode(key, (Map)requirement.get(key)));
 					break;
 				case "relationship":
 					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
@@ -176,10 +323,7 @@ public class App{
 					Map<String, Object> relProperties = (Map<String, Object>) relationshipMap.get("properties");
 					reqBuilder.relationship((V)parseRelationship(relType, relProperties));
 					break;
-				case "capabilities":
-					//parse the capabilities
-					//builder.addNumCpu(((Integer) propertyMap.get(key)).intValue());
-					break;
+				
 				default:
 					break;
 			}
@@ -205,7 +349,7 @@ public class App{
 					
 					//parse the capability here.
 					
-					CapabilityAs myCap = parseCap(key2, propObj);
+					CapabilityAs myCap = parseCapability(key2, propObj);
 					System.out.println(myCap);
 					
 //					for(String key3:propObj.keySet()){
