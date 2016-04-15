@@ -7,7 +7,6 @@ import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate.Builder;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
@@ -43,7 +42,7 @@ public class App{
     
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
-		NodeTemplate.Builder<V, Builder<?,?>> nodeBuilder;
+		//NodeTemplate.Builder<V, Builder<?,?>> nodeBuilder;
 		switch((String) nodeMap.get("type")){
 		case "Compute": 
 			ComputeNode.Builder compNodeBuilder = new ComputeNode.Builder("toscaID",name,"status");
@@ -86,7 +85,7 @@ public class App{
 					break;
 				}
 			}
-			break;
+			return compNodeBuilder.build();
 		case "SoftwareComponent":
 			SoftwareComponentNode.Builder softCompBuilder = new SoftwareComponentNode.Builder("toscaID",name,"status");
 			for (String key:nodeMap.keySet()){
@@ -119,7 +118,7 @@ public class App{
 					break;
 				}
 			}
-			break;
+			return softCompBuilder.build();
 		case "WebServer":
 			WebServerNode.Builder webNodeBuilder = new WebServerNode.Builder("toscaID",name,"status");
 			for (String key:nodeMap.keySet()){
@@ -127,7 +126,23 @@ public class App{
 				case "capabilities":
 					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
 					for(String capabilityType:capMap.keySet()){
-						webNodeBuilder.addCapability(parseCapability(capabilityType,capMap));
+						switch(capabilityType){
+						case "data_endpoint":	
+							webNodeBuilder.addDataEndPtCapability((EndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "admin_endpoint":
+							webNodeBuilder.addAdminEndPtCapability((AdminEndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "host":	
+							webNodeBuilder.addHostCapability((ContainerCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							webNodeBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
 					}
 					break;
 				case "requirements":
@@ -139,35 +154,321 @@ public class App{
 					break;
 				}
 			}
-			break;
+			return webNodeBuilder.build();
 		case "WebApplication":
-			nodeBuilder = new WebApplicationNode.Builder("toscaID",name,"status");
-			break;
+			WebApplicationNode.Builder webAppBuilder = new WebApplicationNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "context_root":	
+							webAppBuilder.contextRoot((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							webAppBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "app_endpoint":	
+							webAppBuilder.addAppEndpointCapability((EndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							webAppBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						webAppBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			return webAppBuilder.build();
 		case "DBMS":
-			nodeBuilder = new DBMSNode.Builder("toscaID",name,"status");
-			break;
+			DBMSNode.Builder dbmsBuilder = new DBMSNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "root_password":	
+							dbmsBuilder.rootPassword((String) propMap.get(propertyItem));
+							break;
+						case "port":	
+							dbmsBuilder.port(((Integer) propMap.get(propertyItem)).intValue()); //this may have to be the wrapper
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							dbmsBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "host":	
+							dbmsBuilder.addHostCapability((ContainerCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							dbmsBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				}
+			}
+			return dbmsBuilder.build();
 		case "Database":
-			nodeBuilder = new DatabaseNode.Builder("toscaID",name,"status","Dbname"); //fix this
-			break;
+			DatabaseNode.Builder databaseBuilder = new DatabaseNode.Builder("toscaID",name,"status",(String)nodeMap.get("name")); 
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "port":	
+							databaseBuilder.port(((Integer) propMap.get(propertyItem)).intValue());
+							break;
+						case "user":	
+							databaseBuilder.user((String) propMap.get(propertyItem));
+							break;
+						case "password":	
+							databaseBuilder.password((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							databaseBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "database_endpoint":	
+							databaseBuilder.addDatabaseEndpointCapability((DatabaseEndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							databaseBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						databaseBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			return databaseBuilder.build();
 		case "ObjectStorage":
-			nodeBuilder = new ObjectStorageNode.Builder("toscaID",name,"status","storage_name");
-			break;
+			ObjectStorageNode.Builder objStorageBuilder = new ObjectStorageNode.Builder("toscaID",name,"status",(String)nodeMap.get("name"));
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "size":	
+							objStorageBuilder.size((String) propMap.get(propertyItem));
+							break;
+						case "maxsize":	
+							objStorageBuilder.maxSize((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							objStorageBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "storage_endpoint":	
+							objStorageBuilder.addStorageEndpointCapability((EndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							objStorageBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				}
+			}
+			return objStorageBuilder.build();
 		case "BlockStorage":
-			nodeBuilder = new BlockStorageNode.Builder("toscaID",name,"status","storage_size");
-			break;
+			BlockStorageNode.Builder blkStorageBuilder = new BlockStorageNode.Builder("toscaID",name,"status",(String)nodeMap.get("size"));
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "volume_id":	
+							blkStorageBuilder.volumeId((String) propMap.get(propertyItem));
+							break;
+						case "snapshot_id":	
+							blkStorageBuilder.snapshotId((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							blkStorageBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "attachment":	
+							blkStorageBuilder.addAttachmentCapability((AttachmentCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							blkStorageBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				}
+			}
+			return blkStorageBuilder.build();
 		case "Container.Runtime":
-			nodeBuilder = new RuntimeContainerNode.Builder("toscaID",name,"status","Dbname"); //fix this
-			break;
+			RuntimeContainerNode.Builder runtimeBuilder = new RuntimeContainerNode.Builder("toscaID",name,"status"); 
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "host":	
+							runtimeBuilder.addHostCapability((ContainerCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						case "scalable":
+							runtimeBuilder.addScalableCapability((ScalableCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							runtimeBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				}
+			}
+			return runtimeBuilder.build();
 		case "Container.Application":
-			nodeBuilder = new ApplicationContainerNode.Builder("toscaID",name,"status","storage_name");
-			break;
+			ApplicationContainerNode.Builder contBuilder = new ApplicationContainerNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						contBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			return contBuilder.build();
 		case "LoadBalancer":
-			nodeBuilder = new LoadBalancerNode.Builder("toscaID",name,"status","storage_size");
-			break;
+			LoadBalancerNode.Builder loadBuilder = new LoadBalancerNode.Builder("toscaID",name,"status");
+			for (String key:nodeMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propMap = (Map<String,Object>) nodeMap.get(key);
+					for(String propertyItem:propMap.keySet()){
+						switch(propertyItem){
+						case "algorithm":	
+							loadBuilder.algorithm((String) propMap.get(propertyItem));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							loadBuilder.addProperty(new PropertyAs.Builder<V>(propertyItem, (V) propMap.get(propertyItem)).build());
+							break;
+						}
+					}
+					break;
+				case "capabilities":
+					Map<String,Object> capMap = (Map<String,Object>) nodeMap.get(key);
+					for(String capabilityType:capMap.keySet()){
+						switch(capabilityType){
+						case "client":	
+							loadBuilder.addClientCapability((PublicEndpointCapability)parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						default:
+							//add code to add a property that may not be in the spec
+							//this allows future expansion;
+							//TODO this could instead throw an exception
+							loadBuilder.addCapability(parseCapability(capabilityType,(Map<String, Object>)capMap.get(capabilityType)));
+							break;
+						}
+					}
+					break;
+				case "requirements":
+					Map<String,Object> reqMap = (Map<String,Object>) nodeMap.get(key);
+					for(String requirementName:reqMap.keySet()){
+						Map<String,Object> reqInnerMap = (Map<String,Object>) reqMap.get(key);
+						loadBuilder.addRequirement(parseRequirement(requirementName,reqInnerMap));
+					}
+					break;
+				}
+			}
+			return loadBuilder.build();
+			//break;
 		default:
 			//we dont have a type specified so we should build the root node
-			nodeBuilder = new RootNode.Builder("toscaID",name,"status","storage_size");
-			break;
+			return new RootNode.Builder("toscaID",name,"status","storage_size").build();
 		}	
 	}
 	
@@ -311,7 +612,7 @@ public class App{
 					for(String key2:capMap.keySet()){
 						String capType = (String) capMap.get(key2); // get the type of capability
 						Map<String, Object> capProperties = (Map<String, Object>) capMap.get("properties");
-						reqBuilder.capability((T)parseCapability(key2, capProperties));
+						reqBuilder.capability((T)parseCapability(capType, capProperties));
 					}
 					break;
 				case "node":
@@ -343,7 +644,7 @@ public class App{
 				
 				
 				for(String key2:capObj.keySet()){
-					@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
+					@SuppressWarnings({ "unchecked" })
 					Map<String, Object> propObj = (Map<String, Object>) capObj.get(key2);
 					//System.out.println(key2);
 					

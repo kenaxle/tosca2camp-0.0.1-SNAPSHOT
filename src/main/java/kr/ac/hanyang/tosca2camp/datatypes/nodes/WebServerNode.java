@@ -1,7 +1,9 @@
 package kr.ac.hanyang.tosca2camp.datatypes.nodes;
 
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
+import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AdminEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ContainerCapability;
+import kr.ac.hanyang.tosca2camp.datatypes.capabilities.EndpointCapability;
 
 public class WebServerNode extends SoftwareComponentNode {
 
@@ -22,15 +24,27 @@ public static class Builder extends SoftwareComponentNode.Builder{
 		}
 		
 		//TODO using a string but should change to a version type
+//		@SuppressWarnings({ "unchecked", "rawtypes" })
+//		public Builder componentVersion(String version){
+//			super.addProperty(new PropertyAs.Builder("version",version).build());
+//			return this;
+//		}
+//		
+//		@SuppressWarnings({ "rawtypes", "unchecked" })
+//		public Builder adminCreds(String adminCreds){
+//			super.addProperty(new PropertyAs.Builder("admin_credentials",adminCreds).build());
+//			return this;
+//		}
+		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public Builder componentVersion(String version){
-			super.addProperty(new PropertyAs.Builder("version",version).build());
+		public Builder addDataEndPtCapability(EndpointCapability noCap){
+			super.addCapability(noCap);
 			return this;
 		}
 		
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public Builder adminCreds(String adminCreds){
-			super.addProperty(new PropertyAs.Builder("admin_credentials",adminCreds).build());
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public Builder addAdminEndPtCapability(AdminEndpointCapability noCap){
+			super.addCapability(noCap);
 			return this;
 		}
 		

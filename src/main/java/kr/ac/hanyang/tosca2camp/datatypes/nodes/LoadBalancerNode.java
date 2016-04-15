@@ -36,7 +36,7 @@ public static class Builder extends RootNode.Builder{
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Builder addPublicEndpointCapability(PublicEndpointCapability conCap){
+		public Builder addClientCapability(PublicEndpointCapability conCap){
 			super.addCapability(conCap);
 			return this;
 		}

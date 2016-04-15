@@ -30,13 +30,13 @@ public static class Builder extends RootNode.Builder{
 		}
 		
 		@SuppressWarnings({ "unchecked" })
-		public Builder privateAddress(String contextRoot){
+		public Builder contextRoot(String contextRoot){
 			super.addProperty(new PropertyAs.Builder("context_root",contextRoot).build());
 			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Builder addEndpointCapability(EndpointCapability endCap){
+		public Builder addAppEndpointCapability(EndpointCapability endCap){
 			super.addCapability(endCap);
 			return this;
 		}
