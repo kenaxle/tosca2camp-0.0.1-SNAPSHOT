@@ -6,13 +6,13 @@ public class RoutesToRelationship extends ConnectsToRelationship{
 	
 public static class Builder extends ConnectsToRelationship.Builder{
 		
-		public Builder(String name, String type){
-			super(name, type);
+		public Builder(String name, String type, String id, String toscaName){
+			super(name, type, id, toscaName);
 			super.description("Tosca RoutesTo Relationship Type");
 		}
 		
-		public Builder(String name){
-			super(name, "tosca.relationships.RoutesTo");
+		public Builder(String name, String id, String toscaName){
+			super(name, "RoutesTo",id, toscaName);
 			super.description("Tosca RoutesTo Relationship Type");
 		}
 		

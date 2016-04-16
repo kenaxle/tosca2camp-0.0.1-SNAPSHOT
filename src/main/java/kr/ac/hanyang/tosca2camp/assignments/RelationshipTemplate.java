@@ -2,7 +2,6 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitions.*;
-import kr.ac.hanyang.tosca2camp.toscaTypes.MapEntry;
 
 @SuppressWarnings("rawtypes")
 public class RelationshipTemplate {
@@ -15,14 +14,14 @@ public class RelationshipTemplate {
 	private Map<String, InterfaceDef> interfaces;
 
 	//TODO copy should be implemented
-	public static class Builder <T extends Builder<T>>{
+	public static class Builder <V, T extends Builder<V, T>>{
 		private String name;
 		private String type;
 		private String alias;
 		private String description;
-		private Map<String, PropertyAs> properties;
-		private Map<String, AttributeAs> attributes;
-		private Map<String, InterfaceDef> interfaces;
+		private Map<String, PropertyAs<V>> properties = new LinkedHashMap<String, PropertyAs<V>>();
+		private Map<String, AttributeAs<V>> attributes= new LinkedHashMap<String, AttributeAs<V>>();
+		private Map<String, InterfaceDef> interfaces= new LinkedHashMap<String, InterfaceDef>();
 		
 		public Builder(String name,String type){
 			this.name = name;

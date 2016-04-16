@@ -8,15 +8,15 @@ public class AttachesToRelationship extends RootRelationship{
 public static class Builder extends RootRelationship.Builder{
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public Builder(String name, String type, String location){
-			super(name, type);
+		public Builder(String name, String type, String id, String toscaName, String location){
+			super(name, type, id, toscaName);
 			super.description("Tosca AttachesTo Relationship Type")
 				 .addProperties(new PropertyAs.Builder("location", location).build());
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public Builder(String name, String location){
-			super(name, "tosca.relationships.AttachesTo");
+		public Builder(String name, String id, String toscaName, String location){
+			super(name, "AttachesTo", id, toscaName);
 			super.description("Tosca AttachesTo Relationship Type")
 			     .addProperties(new PropertyAs.Builder("location", location).build());
 		}

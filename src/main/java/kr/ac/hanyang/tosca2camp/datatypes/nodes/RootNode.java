@@ -12,6 +12,23 @@ public class RootNode extends NodeTemplate {
 	
 	public static class Builder<V> extends NodeTemplate.Builder<V,Builder>{
 		
+		
+		@SuppressWarnings({ "unchecked" })
+		public Builder( String id, String toscaName, String status){		
+			super("Root");
+			super.description("The TOSCA Root Node type")
+			.addAttribute(new AttributeAs.Builder("tosca_id",id).build())
+			.addAttribute(new AttributeAs.Builder("tosca_name",toscaName).build())
+			.addAttribute(new AttributeAs.Builder("state",status).build())
+			.addCapability(new NodeCapability.Builder("tosca.capabilities.Node").build())
+			.addRequirement(new RequirementAs.Builder("dependency").capability(new NodeCapability.Builder("tosca.capabilities.Node").build())
+																	.node(new NodeTemplate.Builder("Root").build())
+																	.relationship(new DependsOnRelationship.Builder("baseDependency","DependsOn","ToscaID","DependsOn").build())
+																	.build());	
+		}
+		
+		
+		
 		@SuppressWarnings({ "unchecked" })
 		public Builder(String type, String id, String toscaName, String status){		
 			super(type);
@@ -21,8 +38,8 @@ public class RootNode extends NodeTemplate {
 			.addAttribute(new AttributeAs.Builder("state",status).build())
 			.addCapability(new NodeCapability.Builder("tosca.capabilities.Node").build())
 			.addRequirement(new RequirementAs.Builder("dependency").capability(new NodeCapability.Builder("tosca.capabilities.Node").build())
-																	.node(new RootNode.Builder<V>("tosca.nodes.Root", "NodeID", "NodeName", "NodeStatus").build())
-																	.relationship(new DependsOnRelationship.Builder("dependsOn").build())
+																	.node(new NodeTemplate.Builder("Root").build())
+																	.relationship(new DependsOnRelationship.Builder("baseDependency","DependsOn","ToscaID","DependsOn").build())
 																	.build());	
 		}
 		

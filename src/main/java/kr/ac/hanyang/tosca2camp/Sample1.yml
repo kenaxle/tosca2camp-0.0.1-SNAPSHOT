@@ -1,14 +1,28 @@
-capabilities:
-  host:
-    properties:
-      disk_size: 10 
-      num_cpus: 4
-      mem_size: 1 
-  os:
-    properties:
-      architecture: x86_64
-      type: linux 
-      distribution: fedora 
-      version: "18.0" 
-     
+ node_templates:
+    my_server:
+      type: Compute
+      capabilities:
+        host:
+          properties:
+            disk_size: 10 
+            num_cpus: 4
+            mem_size: 1 
+        os:
+          properties:
+            architecture: x86_64
+            type: linux 
+            distribution: fedora 
+            version: "18.0"
+      requirements:
+        - local_storage:
+            node: my_storage
+            relationship:
+              type: AttachesTo
+              properties:
+                location: ./drives
  
+    my_storage:
+      type: BlockStorage
+      properties:
+        size: 27 
+        snapshot_id: snapID

@@ -1,6 +1,5 @@
 package kr.ac.hanyang.tosca2camp.datatypes.nodes;
 
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AdminEndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ContainerCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.EndpointCapability;

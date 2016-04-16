@@ -11,7 +11,7 @@ public class NodeTemplate<V> {
 	private List<String> directives;
 	private Map<String, PropertyAs<V>> properties;
 	private Map<String, AttributeAs<V>> attributes;
-	private Map<String, RequirementAs<?, ?, ?>> requirements;
+	private List<RequirementAs<?,?,?>> requirements;
 	private Map<String, CapabilityAs<V>> capabilities;
 	private Map<String, InterfaceDef> interfaces;
 	private Map<String, ArtifactDef> artifacts;
@@ -24,7 +24,7 @@ public class NodeTemplate<V> {
 		private List<String> directives;
 		private Map<String, PropertyAs<V>> properties = new LinkedHashMap<String, PropertyAs<V>>();
 		private Map<String, AttributeAs<V>> attributes = new LinkedHashMap<String, AttributeAs<V>>();
-		private Map<String, RequirementAs<?,?,?>> requirements = new LinkedHashMap<String, RequirementAs<?,?,?>>();
+		private List<RequirementAs<?,?,?>> requirements = new ArrayList<RequirementAs<?,?,?>>();
 		private Map<String, CapabilityAs<V>> capabilities = new LinkedHashMap<String, CapabilityAs<V>>();
 		private Map<String, InterfaceDef> interfaces = new LinkedHashMap<String, InterfaceDef>();
 		private Map<String, ArtifactDef> artifacts = new LinkedHashMap<String, ArtifactDef>();
@@ -60,7 +60,7 @@ public class NodeTemplate<V> {
 		
 		@SuppressWarnings("unchecked")
 		public T addRequirement(RequirementAs<?,?,?> requirement){
-			this.requirements.put(requirement.getName(), requirement);
+			this.requirements.add(requirement);
 			return (T) this;
 		}
 		
@@ -112,7 +112,7 @@ public class NodeTemplate<V> {
 
 	public Map<String, AttributeAs<V>> getAttributes() {return attributes;}
 
-	public Map<String, RequirementAs<?,?,?>> getRequirements() {return requirements;}
+	public List<RequirementAs<?,?,?>> getRequirements() {return requirements;}
 
 	public Map<String, CapabilityAs<V>> getCapabilities() {return capabilities;}
 
