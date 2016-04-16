@@ -2,8 +2,6 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 
-import kr.ac.hanyang.tosca2camp.toscaTypes.MapEntry;
-
 public class CapabilityAs<V> {
 	private String type;
 	private String derived_from; //URI string
@@ -74,17 +72,27 @@ public class CapabilityAs<V> {
 	public Map<String, PropertyAs<V>> getProperties() {return properties;}
 
 	public Map<String, AttributeAs<V>> getAttributes() {return attributes;}
+	
+	public V getAttributeValue(String key){
+		if (attributes.containsKey(key))
+			return (V) attributes.get(key).getValue();
+		return null;
+	}
+	public V getPropertyValue(String key){
+		if (properties.containsKey(key))
+			return (V) properties.get(key).getValue();
+		return null;
+	}
 
-	@SuppressWarnings("unused")
 	public String toString(){
 		
-		String propStr = "   properties: \n";
-		String attrStr = "   attributes: \n";
+		String propStr = "      properties: \n";
+		String attrStr = "      attributes: \n";
 		for(String propAs:this.properties.keySet()){
-			propStr += "   "+properties.get(propAs)+"\n";
+			propStr += "      "+properties.get(propAs)+"\n";
 		}
-		for(String attrAs:this.properties.keySet()){
-			attrStr += "   "+attributes.get(attrAs)+"\n";
+		for(String attrAs:this.attributes.keySet()){
+			attrStr += "      "+attributes.get(attrAs)+"\n";
 		}
 		return  "   "+type+":"+"\n"+
 		       propStr+attrStr;

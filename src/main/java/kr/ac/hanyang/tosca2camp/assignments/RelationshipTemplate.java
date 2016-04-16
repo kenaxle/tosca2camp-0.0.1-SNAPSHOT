@@ -4,7 +4,7 @@ import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitions.*;
 
 @SuppressWarnings("rawtypes")
-public class RelationshipTemplate {
+public class RelationshipTemplate<V> {
 	private String name;
 	private String type;
 	private String alias;
@@ -87,6 +87,19 @@ public class RelationshipTemplate {
 	public Map<String, AttributeAs> getAttributes() {return attributes;}
 
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
+	
+	@SuppressWarnings("unchecked")
+	public V getAttributeValue(String key){
+		if (attributes.containsKey(key))
+			return (V) attributes.get(key).getValue();
+		return null;
+	}
+	@SuppressWarnings("unchecked")
+	public V getPropertyValue(String key){
+		if (properties.containsKey(key))
+			return (V) properties.get(key).getValue();
+		return null;
+	}
 
 	//TODO fix toString
 	public String toString(){

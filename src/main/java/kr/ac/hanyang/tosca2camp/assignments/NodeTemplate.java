@@ -2,7 +2,6 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitions.*;
-import kr.ac.hanyang.tosca2camp.toscaTypes.MapEntry;
 
 public class NodeTemplate<V> {
 
@@ -30,7 +29,6 @@ public class NodeTemplate<V> {
 		private Map<String, ArtifactDef> artifacts = new LinkedHashMap<String, ArtifactDef>();
 		
 		public Builder( String type){
-
 			this.type = type;
 		}
 		
@@ -119,6 +117,17 @@ public class NodeTemplate<V> {
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
 
 	public Map<String, ArtifactDef> getArtifacts() {return artifacts;}
+	
+	public V getAttributeValue(String key){
+		if (attributes.containsKey(key))
+			return (V) attributes.get(key).getValue();
+		return null;
+	}
+	public V getPropertyValue(String key){
+		if (properties.containsKey(key))
+			return (V) properties.get(key).getValue();
+		return null;
+	}
 
 	//TODO fix the toString
 	public String toString(){

@@ -11,8 +11,8 @@ public static class Builder extends RootNode.Builder{
 	    //TODO size should be scalar unit type 
 		@SuppressWarnings("unchecked")
 		public Builder(String id, String toscaName, String status,String size){		
-			super("tosca.nodes.Compute",id,toscaName,status);
-			super.description("The TOSCA Compute Node type");
+			super("tosca.nodes.BlockStorage",id,toscaName,status);
+			super.description("The TOSCA BlockStorage Node type");
 			super.addProperty((new PropertyAs.Builder("size",size).build()))
 			.build();
 //			 .addCapability(new NodeCapability.Builder("attachment","tosca.capabilities.Attachment","").build()).build();
@@ -21,7 +21,7 @@ public static class Builder extends RootNode.Builder{
 		@SuppressWarnings("unchecked")
 		public Builder(String type, String id, String toscaName, String status,String size){		
 			super(type,id,toscaName,status);
-			super.description("The TOSCA Compute Node type");
+			super.description("The TOSCA BlockStorage Node type");
 			super.addProperty((new PropertyAs.Builder("size",size).build()))
 			.build();
 //				 .addCapability(new NodeCapability.Builder("attachment","tosca.capabilities.Attachment","").build()).build();

@@ -47,26 +47,31 @@ public class RequirementAs<T , U, V> {
 	
 	public String getName(){ return name;}
 	
-	public String toString(){
-		String capType="";
-		 
-		switch (capability.getClass().getSimpleName()){
-			case "CapabilityAs":
-				CapabilityAs<?> capAs = (CapabilityAs<?>) capability;
-				capType = capAs.getType();
-				break;
-			case "CapabilityDef":
-				CapabilityDef capDef = (CapabilityDef) capability;
-				capType = capDef.getType();
-				break;
-			default:break; 
+	@SuppressWarnings({ "rawtypes" })
+	public String toString(){	
+		String retString="  - "+name+"\n";
+		if (node != null) 
+			retString+= "      node: "+(String)((NodeTemplate) node).getAttributeValue("tosca_name") +"\n";
+		if (capability != null){
+			String capType="";
+			switch (capability.getClass().getSimpleName()){
+				case "CapabilityAs":
+					CapabilityAs<?> capAs = (CapabilityAs<?>) capability;
+					capType = capAs.getType();
+					break;
+				case "CapabilityDef":
+					CapabilityDef capDef = (CapabilityDef) capability;
+					capType = capDef.getType();
+					break;
+				default:break; 
+			}
+			retString+="      Capability: "+capType+"\n";
 		}
-		
-		RelationshipTemplate relTemp = (RelationshipTemplate) relationship;
-		return  "-"+name+"\n"+
-				"   "+node+
-				"   Capability: "+capType+"\n"+
-				"   relationship: "+relTemp.getType()+"\n";
+		if (relationship != null){
+			RelationshipTemplate relTemp = (RelationshipTemplate) relationship;
+			retString+="      relationship: "+relTemp.getType()+"\n";
+		}
+		return  retString;
 	}
 	
 }

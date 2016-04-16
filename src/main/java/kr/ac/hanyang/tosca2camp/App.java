@@ -2,7 +2,6 @@ package kr.ac.hanyang.tosca2camp;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,8 @@ public class App{
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
 		//NodeTemplate.Builder<V, Builder<?,?>> nodeBuilder;
-		try{
+		//try{
+		if (nodeMap != null){
 			switch((String) nodeMap.get("type")){
 			case "Compute": 
 				ComputeNode.Builder compNodeBuilder = new ComputeNode.Builder("toscaID",name,"status");
@@ -480,16 +480,10 @@ public class App{
 				//we dont have a type specified so we should build the root node
 				return new RootNode.Builder("toscaID",name,"status","storage_size").build();
 			}	
-		}catch(Exception e){
+		}else{
 			//System.out.println(e.getMessage());
 			return new RootNode.Builder<V>( "get_tosca_ID", name, "get_tosca_status").build();
 		}
-	}
-	
-	
-	@SuppressWarnings("rawtypes")
-	public static <V> NodeTemplate parseRequirementNode(String type, Map<String, Object> nodeMap){
-		return new RootNode.Builder<V>("Root", type, "ToscaID", "status").build();
 	}
 	
 	
@@ -605,11 +599,11 @@ public class App{
 	//TODO p.g. 261 should be able to parse extended grammar with properties
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <V> RelationshipTemplate parseRelationship(String name, Map<String, Object> property){
-		Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
+		//Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
 		//RelationshipTemplate relationShip;
 		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(name,"desc");
-		for (String key:propertyMap.keySet()){
-			builder.addProperties(new PropertyAs.Builder<V>(key,(V)propertyMap.get(key)).build());
+		for (String key:property.keySet()){
+			builder.addProperties(new PropertyAs.Builder<V>(key,(V)property.get(key)).build());
 		}
 		return builder.build();
 	}
@@ -630,7 +624,7 @@ public class App{
 					}
 					break;
 				case "node":
-					reqBuilder.node((U)parseNode((String) requirement.get(key), new LinkedHashMap<String, Object>())); //create an empty node with the name. this will be a root node
+					reqBuilder.node((U)parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
 					break;
 				case "relationship":
 					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
@@ -657,7 +651,23 @@ public class App{
 				
 				break;
 			case "topology_template":
+				Map<String, Object> topologyTemplateMap = (Map<String,Object>) toscaMap.get(key);
+				for (String topologyItem:topologyTemplateMap.keySet()){
+					switch (topologyItem){
+					case "inputs":break;
+					case "node_templates":
+						Map<String, Object> nodeTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
+						for(String nodeTemplate:nodeTemplateMap.keySet()){
+							System.out.println(parseNode(nodeTemplate,(Map<String,Object>)nodeTemplateMap.get(nodeTemplate)));
+							//Map<String, Object> propObj = (Map<String, Object>) capObj.get(key2);
+						}
+						break;
+					case "outputs":	break;
+					default:
+						break;
 				
+					}
+				}
 				break;
 			default:
 				break;
@@ -674,61 +684,30 @@ public class App{
 	public static void main( String[] args ) throws Exception{
 
 			Yaml yaml = new Yaml();
-			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-			for(String key:map.keySet()){
-				
-				switch (key){
-				case "node_templates":
-					Map<String, Object> nodeTempMap = (Map<String, Object>) map.get(key);
-					for(String nodeType:nodeTempMap.keySet()){
-						System.out.println(parseNode(nodeType,(Map<String,Object>)nodeTempMap.get(nodeType)));
-						//Map<String, Object> propObj = (Map<String, Object>) capObj.get(key2);
-					}
-					break;
-				default:
-					break;
+			parseTosca(map);
 			
-				}
-			}
+//			for(String key:map.keySet()){
+//				
+//				switch (key){
+//				case "node_templates":
+//					Map<String, Object> nodeTempMap = (Map<String, Object>) map.get(key);
+//					for(String nodeType:nodeTempMap.keySet()){
+//						System.out.println(parseNode(nodeType,(Map<String,Object>)nodeTempMap.get(nodeType)));
+//						//Map<String, Object> propObj = (Map<String, Object>) capObj.get(key2);
+//					}
+//					break;
+//				default:
+//					break;
+//			
+//				}
+//			}
 	}
 }
 				
 				
 				
 				
-				
-				
-				
-					//System.out.println(key2);
-					
-					//parse the capability here.
-					
-					//CapabilityAs myCap = parseCapability(key2, propObj);
-					//System.out.println(myCap);
-					
-//					for(String key3:propObj.keySet()){
-//						@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-//						Map <String, Object> propList = (Map<String, Object>) propObj.get(key3);
-//						System.out.println(key3);
-//						
-//						for(String key4 :propList.keySet()){
-//							try{
-//								int prop = ((Integer) propList.get(key4)).intValue();
-//								System.out.println(prop);
-//							}catch(Exception e){	}
-//							try{
-//								String prop = (String)propList.get(key4);
-//								System.out.println(prop);
-//							}catch(Exception e){ }
-//							try{
-//								double prop = ((Double) propList.get(key4)).doubleValue();
-//								System.out.println(prop);
-//							}catch(Exception e){ }
-//							
-//						}
-//						
-//					}
-					
+
 	
 					
