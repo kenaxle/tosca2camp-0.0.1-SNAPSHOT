@@ -8,7 +8,7 @@ import kr.ac.hanyang.tosca2camp.datatypes.capabilities.EndpointCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.OperatingSystemCapability;
 import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ScalableCapability;
 
-public class ComputeNode extends RootNode {
+public class ComputeNode<V> extends RootNode<V> {
 
 @SuppressWarnings("rawtypes")
 public static class Builder extends RootNode.Builder{

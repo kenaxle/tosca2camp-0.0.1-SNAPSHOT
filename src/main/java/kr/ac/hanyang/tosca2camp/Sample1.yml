@@ -21,8 +21,3 @@
               properties:
                 location: ./drives
  
-    my_storage:
-      type: BlockStorage
-      properties:
-        size: 27 
-        snapshot_id: snapID
