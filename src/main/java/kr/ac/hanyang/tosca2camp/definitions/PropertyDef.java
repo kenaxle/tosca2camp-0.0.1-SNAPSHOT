@@ -6,7 +6,7 @@ public class PropertyDef {
 	private String type;
 	private String description; // description are treated as their own type but for now they will be string
 	private boolean required;
-	private String defaultVal; //TODO don't know what this default value means as yet
+	private String defaultVal; //if the property value is not specified then use this default value
 	private String status;
 	private String constraints; //TODO this type will have to be defined
 	private String entry_schema; 
