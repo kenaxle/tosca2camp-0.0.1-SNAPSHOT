@@ -51,13 +51,13 @@ public class AttributeDef {
 		}
 	}
 	
-	public AttributeDef(AttributeDef origAttr){
+	public static AttributeDef clone(AttributeDef origAttr){
 		AttributeDef.Builder<Builder> copyBuilder = new AttributeDef.Builder<Builder>(origAttr.name, origAttr.type);
-		copyBuilder.description(origAttr.description)
-				   .defaultVal(origAttr.defaultVal)
-				   .status(origAttr.status)
-				   .entry_schema(origAttr.entry_schema)
-				   .build();
+		return copyBuilder.description(origAttr.description)
+				   		  .defaultVal(origAttr.defaultVal)
+				   		  .status(origAttr.status)
+				   		  .entry_schema(origAttr.entry_schema)
+				   		  .build();
 	}
 	
 	private AttributeDef(Builder builder){
@@ -69,7 +69,19 @@ public class AttributeDef {
 		this.entry_schema = builder.entry_schema;
 	}
 	
-	public Builder getBuilder(){ return new Builder();}
+	public Builder getBuilder(String name, String type){ 
+		Builder builder = new Builder(name, type);
+		builder.description = this.description;
+		builder.defaultVal = this.defaultVal;
+		builder.status = this.status;
+		builder.entry_schema = this.entry_schema;
+		return builder;
+	}
+	
+	public String toString(){
+		return "name: "+name+"\n"+
+			   "type: "+type+"\n";
+	}
 	
 }
 

@@ -46,14 +46,6 @@ public class RequirementDef {
 		}
 	}
 	
-	public RequirementDef(RequirementDef origReq){
-		RequirementDef.Builder<Builder> copyBuilder = new RequirementDef.Builder<Builder>(origReq.name,origReq.capability);
-		copyBuilder.node(origReq.nodeType)
-				   .relationship(origReq.relationshipType)
-				   .occurence(origReq.occurence)
-				   .build();
-	}
-	
 	private RequirementDef(Builder builder){
 		this.name = builder.name;
 		this.capability = builder.capability;
@@ -62,7 +54,27 @@ public class RequirementDef {
 		this.occurence = builder.occurence;
 	}
 	
-	public Builder getBuilder(){return new Builder();}
+	public static RequirementDef clone(RequirementDef origReq){
+		RequirementDef.Builder<Builder> copyBuilder = new RequirementDef.Builder<Builder>(origReq.name,origReq.capability);
+		return copyBuilder.node(origReq.nodeType)
+				   		  .relationship(origReq.relationshipType)
+				   		  .occurence(origReq.occurence)
+				   		  .build();
+	}
+	
+	public Builder getBuilder(String name, String capability){
+		Builder builder = new Builder(name, capability);
+		builder.nodeType = this.nodeType;
+		builder.relationshipType = this.relationshipType;
+		builder.occurence = this.occurence;
+		return builder;
+		
+	}
+	
+	public String toString(){
+		return "name: "+name+"\n"+
+			   "capability: "+capability+"\n";
+	}
 
 }
 

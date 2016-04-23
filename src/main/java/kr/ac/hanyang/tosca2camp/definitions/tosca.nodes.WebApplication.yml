@@ -2,10 +2,10 @@ tosca.nodes.WebApplication:
   derived_from: tosca.nodes.Root
   properties:
     context_root:
-    type: string
+       type: string
   capabilities:
     app_endpoint:
-    type: tosca.capabilities.Endpoint
+       type: tosca.capabilities.Endpoint
   requirements:
     - host:
         capability: tosca.capabilities.Container

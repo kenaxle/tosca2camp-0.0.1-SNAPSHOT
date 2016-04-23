@@ -1,5 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OperationDef {
@@ -14,7 +15,7 @@ public class OperationDef {
 		private String name;
 		private String description; // description are treated as their own type but for now they will be string
 		private String implementation; 
-		private List<String> inputs; //TODO define the property definitions or property assignments
+		private List<String> inputs = new ArrayList(); //TODO define the property definitions or property assignments
 		
 		public Builder(String name){
 			this.name = name;

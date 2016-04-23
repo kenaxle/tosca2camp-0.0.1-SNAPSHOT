@@ -19,6 +19,8 @@ public class ListEntry<V>  {
 			this.value = (V) value; 
 		}
 		
+		public Builder(){}
+		
 		public ListEntry<V> build(){
 			return new ListEntry<V>(this);
 		}
@@ -27,6 +29,11 @@ public class ListEntry<V>  {
 	private ListEntry(Builder<V> builder){
 		this.key = builder.key;
 		this.value = (V) builder.value;
+	}
+	
+	public ListEntry(ListEntry origEntry){
+		Builder myBuilder = new Builder(origEntry.key,origEntry.value);
+		myBuilder.build();
 	}
 	
 	public String getName(){return key;}

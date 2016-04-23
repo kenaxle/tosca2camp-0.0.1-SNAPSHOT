@@ -1,5 +1,11 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import kr.ac.hanyang.tosca2camp.toscaTypes.ListEntry;
+
 public class PropertyDef {
 
 	private String name;
@@ -8,7 +14,7 @@ public class PropertyDef {
 	private boolean required;
 	private String defaultVal; //if the property value is not specified then use this default value
 	private String status;
-	private String constraints; //TODO this type will have to be defined
+	private List<ListEntry> constraints; //TODO this type will have to be defined
 	private String entry_schema; 
 	
 	private String deployPath;
@@ -20,15 +26,13 @@ public class PropertyDef {
 		private boolean required;
 		private String defaultVal; //TODO don't know what this default value means as yet
 		private String status;
-		private String constraints; //TODO this type will have to be defined
+		private List<ListEntry> constraints = new ArrayList<ListEntry>(); //TODO this type will have to be defined
 		private String entry_schema; 
 		
 		public Builder(String name, String type){
 			this.name = name;
 			this.type = type;
 		}
-			
-		public Builder() {}
 
 		public T description(String description){
 			this.description = description;
@@ -50,8 +54,8 @@ public class PropertyDef {
 			return (T) this;
 		}
 		
-		public T constraints(String constraints){
-			this.constraints = constraints;
+		public T addConstraint(ListEntry constraint){
+			this.constraints.add(constraint);
 			return (T) this;
 		}
 		
@@ -66,17 +70,6 @@ public class PropertyDef {
 	}
 	
 	
-	public PropertyDef(PropertyDef origProp){
-		PropertyDef.Builder<Builder> copyBuilder = new PropertyDef.Builder<Builder>(origProp.name,origProp.type);
-		copyBuilder.description(origProp.description)
-				   .required(origProp.required)
-				   .defaultVal(origProp.defaultVal)
-				   .status(origProp.status)
-				   .constraints(origProp.constraints)
-				   .entry_schema(origProp.entry_schema)
-				   .build();
-	}
-	
 	private PropertyDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -88,6 +81,33 @@ public class PropertyDef {
 		this.entry_schema = builder.entry_schema;
 	}
 	
-	public Builder getBuilder(){ return new Builder();}
+	public static PropertyDef clone(PropertyDef origProp){
+		PropertyDef.Builder<Builder> copyBuilder = new PropertyDef.Builder<Builder>(origProp.name,origProp.type);
+		copyBuilder.description(origProp.description)
+				   .required(origProp.required)
+				   .defaultVal(origProp.defaultVal)
+				   .status(origProp.status);		   
+		for( ListEntry constraint:origProp.constraints){
+			copyBuilder.addConstraint(new ListEntry(constraint)); //make sure to create a copy
+		}
+		return copyBuilder.entry_schema(origProp.entry_schema)
+				   .build();
+	}
+	
+	public Builder getBuilder(String name, String type){ 
+		Builder builder = new Builder(name,type);
+		builder.description = this.description;
+		builder.required = this.required;
+		builder.defaultVal = this.defaultVal;
+		builder.status = this.status;
+		builder.constraints = this.constraints;
+		builder.entry_schema = this.entry_schema;
+		return builder;
+	}
+	
+	public String toString(){
+		return "name: "+name+"\n"+
+			   "type: "+type+"\n";
+	}
 	
 }

@@ -1,5 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NodeDef {
@@ -19,12 +20,12 @@ public class NodeDef {
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private List<PropertyDef> properties; 
-		private List<AttributeDef> attributes;
-		private List<RequirementDef> requirements;
-		private List<CapabilityDef> capabilities;
-		private List<InterfaceDef> interfaces;
-		private List<ArtifactDef> artifacts;
+		private List<PropertyDef> properties = new ArrayList(); 
+		private List<AttributeDef> attributes = new ArrayList() ;
+		private List<RequirementDef> requirements = new ArrayList();
+		private List<CapabilityDef> capabilities = new ArrayList();
+		private List<InterfaceDef> interfaces = new ArrayList();
+		private List<ArtifactDef> artifacts = new ArrayList();
 		
 		public Builder(String name, String type){
 			this.name = name;
@@ -77,6 +78,8 @@ public class NodeDef {
 		}
 	}
 	
+	
+	
 	protected NodeDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -89,26 +92,39 @@ public class NodeDef {
 		this.interfaces = builder.interfaces;
 		this.artifacts = builder.artifacts;
 	}
-
-	public NodeDef(NodeDef orig2Copy){
+	
+	public static NodeDef clone(NodeDef orig2Copy){
 		NodeDef.Builder<Builder> copyBuilder = new NodeDef.Builder<>(orig2Copy.getName(), orig2Copy.getType());
 		copyBuilder.derived_from(orig2Copy.getDerived_from())
 				   .description(orig2Copy.getDescription());
-		for(PropertyDef pDef:properties){
-			copyBuilder.addProperty(new PropertyDef(pDef)); //make sure pDef can create a copy
+		for(PropertyDef pDef:orig2Copy.properties){
+			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
 		}
-		for(AttributeDef aDef:attributes){
-			copyBuilder.addAttribute(new AttributeDef(aDef)); //make sure pDef can create a copy
+		for(AttributeDef aDef:orig2Copy.attributes){
+			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
 		}
-		for(RequirementDef rDef:requirements){
-			copyBuilder.addRequirement(new RequirementDef(rDef)); //make sure pDef can create a copy
+		for(RequirementDef rDef:orig2Copy.requirements){
+			copyBuilder.addRequirement(RequirementDef.clone(rDef)); //make sure pDef can create a copy
 		}
-		for(CapabilityDef cDef:capabilities){
-			copyBuilder.addCapabilitiy(new CapabilityDef(cDef)); //make sure pDef can create a copy
+		for(CapabilityDef cDef:orig2Copy.capabilities){
+			copyBuilder.addCapabilitiy(CapabilityDef.clone(cDef)); //make sure pDef can create a copy
 		}
-		copyBuilder.build();		   
+		return copyBuilder.build();		   
 	}
-		
+	
+	public Builder getBuilder(String name, String type){
+		Builder builder = new Builder(name,type);
+		builder.derived_from = this.derived_from;
+		builder.description = this.description;
+		builder.properties = this.properties;
+		builder.attributes = this.attributes;
+		builder.requirements = this.requirements;
+		builder.capabilities = this.capabilities;
+		builder.interfaces = this.interfaces;
+		builder.artifacts = this.artifacts;
+		return builder;
+	}	
+	
 	public String getName() {return name;}
 
 	public String getType() {return type;}
@@ -128,13 +144,28 @@ public class NodeDef {
 	public List<InterfaceDef> getInterfaces() {return interfaces;}
 
 	public List<ArtifactDef> getArtifacts() {return artifacts;}
-
-	public Builder getBuilder(){return new Builder();}
 	
 	public String toString(){
-		return "Name "+name+"\n"+
-			   "Type "+type+"\n"+
-			   "Description "+description+"\n";
+		String props ="";
+		String attrs ="";
+		String caps ="";
+		String reqs ="";
+		for(PropertyDef prop:properties)
+			props+=prop;
+		for(AttributeDef attr:attributes)
+			attrs+=attr;
+		for(CapabilityDef cap:capabilities)
+			caps+=cap;
+		for(RequirementDef req:requirements)
+			reqs+=req;
+		return "Name: "+name+"\n"+
+			   "Type: "+type+"\n"+
+			   "Description: "+description+"\n"+
+			   "properties: \n"+props+"\n"+
+			   "attributes: \n"+attrs+"\n"+
+			   "capabilities: \n"+caps+"\n"+
+			   "requirements: \n"+reqs+"\n";
+			   
 	}
 
 }

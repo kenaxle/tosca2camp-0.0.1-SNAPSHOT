@@ -18,11 +18,9 @@ public class CapabilityDef {
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private List<PropertyDef> properties; 
-		private List<AttributeDef> attributes;
-		private List<String> valid_source_types;
-		
-		public Builder(){};
+		private List<PropertyDef> properties = new ArrayList(); 
+		private List<AttributeDef> attributes = new ArrayList();
+		private List<String> valid_source_types = new ArrayList();
 		
 		public Builder(String name, String type){
 			this.name = name;
@@ -58,17 +56,17 @@ public class CapabilityDef {
 		}
 	}
 		
-	public CapabilityDef(CapabilityDef origCap){
+	public static CapabilityDef clone(CapabilityDef origCap){
 		CapabilityDef.Builder<Builder> copyBuilder = new CapabilityDef.Builder<Builder>(origCap.name,origCap.type);
 		copyBuilder.description(origCap.description)
 				   .derived_from(origCap.derived_from);
-		for(PropertyDef pDef:properties){
-			copyBuilder.addProperty(new PropertyDef(pDef)); //make sure pDef can create a copy
+		for(PropertyDef pDef:origCap.properties){
+			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
 		}
-		for(AttributeDef aDef:attributes){
-			copyBuilder.addAttribute(new AttributeDef(aDef)); //make sure pDef can create a copy
+		for(AttributeDef aDef:origCap.attributes){
+			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
 		}
-		copyBuilder.build();
+		return copyBuilder.build();
 	}
 	
 	
@@ -81,6 +79,18 @@ public class CapabilityDef {
 		this.attributes = builder.attributes;
 		this.valid_source_types = builder.valid_source_types;
 	}
+	
+	public Builder getBuilder(String name, String type){
+		Builder builder = new Builder<Builder>(name,type);
+		builder.derived_from = this.derived_from;
+		builder.description = this.description;
+		builder.properties = this.properties;
+		builder.attributes = this.attributes;
+		builder.valid_source_types = this.valid_source_types;
+		return builder;
+		
+	}
+	
 
 	public String getName() {return name;}
 
@@ -96,6 +106,9 @@ public class CapabilityDef {
 
 	public List<String> getValid_source_types() {return valid_source_types;}
 	
-	public Builder getBuilder(){return new Builder<Builder>();}
+	public String toString(){
+		return "name: "+name+"\n"+
+			   "type: "+type+"\n";
+	}
 
 }

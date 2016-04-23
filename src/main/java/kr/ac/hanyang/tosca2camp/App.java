@@ -36,8 +36,13 @@ import kr.ac.hanyang.tosca2camp.datatypes.nodes.RuntimeContainerNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.SoftwareComponentNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebApplicationNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
+import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
+import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
+import kr.ac.hanyang.tosca2camp.toscaTypes.ListEntry;
 
 
 /**
@@ -46,37 +51,212 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
  */
 public class App{
 	
-	//hardcode the names of the definition files only for testing
-	private String[] nodeDefFileNames = {"nodes.BlockStorage.yml"};
-	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
+	private final String FILEPATH = "C:/Users/Kena/git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/definitions/";
 	
-    
+	//hardcode the names of the definition files only for testing
+	private String[] nodeDefFileNames = {"tosca.nodes.Root.yml","tosca.nodes.BlockStorage.yml","tosca.nodes.Compute.yml",
+										 "tosca.nodes.Container.Application.yml","tosca.nodes.Container.Runtime.yml","tosca.nodes.Database.yml",
+										 "tosca.nodes.DBMS.yml","tosca.nodes.LoadBalancer.yml","tosca.nodes.ObjectStorage.yml",
+										 "tosca.nodes.SoftwareComponent.yml","tosca.nodes.WebApplication.yml","tosca.nodes.WebServer.yml"};
+	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
+	   
+	
+	
 	@SuppressWarnings({ "unused", "unchecked" })
-	private void loadDefinitions() throws FileNotFoundException{
-		for(String fileName: nodeDefFileNames){
+	private void loadDefinition(String fileName) throws FileNotFoundException{
 			Yaml yaml = new Yaml();
-			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/definitions/"+fileName)));
-			for(String defName:map.keySet())
-				System.out.println(parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
-		}
+			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
+			for(String defName:map.keySet())			
+				System.out.println( parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
 	}
 	
 	
 	private <T> NodeDef parseNodeDef(String name, Map<String, Object>nodeMap){
 		String type = (String) nodeMap.get("type");
-		NodeDef parent = (NodeDef) nodeDefinitions.get(nodeMap.get("derived_from"));
+		String parentDef = (String) nodeMap.get("derived_from");
+		
+		NodeDef.Builder<Builder> nodeDefBuilder;
+		NodeDef returnNode;
 		// if not null then copy the nodeDef
 		//TODO find the def in the list if already loaded othewise load the def
-		if (parent != null)
-			NodeDef.Builder<Builder> nodeDefBuilder = parent.getBuilder(); // use this builder to copy the parent info
-		else
-			NodeDef.Builder<Builder> nodeDefBuilder = new NodeDef.Builder<Builder>(name, type); 
-		
-		for(String )
-		
-		
-		return nodeDefBuilder.build();
+		//Builder nDef;
+		if (parentDef!=null){
+			NodeDef parent = (NodeDef) nodeDefinitions.get(parentDef);
+			if(parent !=null){
+				returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality
+				nodeDefBuilder = returnNode.getBuilder(name,type); 
+			}else{
+				//try to load the parent definition
+				try{
+					loadDefinition(FILEPATH+parentDef+".yml");
+				}catch(Exception e){
+					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
+				}
+				nodeDefBuilder = new NodeDef.Builder<Builder>(name, type);
+			}
+		}else{
+			nodeDefBuilder = new NodeDef.Builder<Builder>(name, type); 
+		}
+		//continue parsing the definition.
+		for(String key: nodeMap.keySet()){
+			switch(key){
+			case "properties":
+				Map<String,Object> propDefMap = (Map<String,Object>)nodeMap.get(key);
+				for(String propName:propDefMap.keySet()){
+					nodeDefBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propDefMap.get(propName)));
+				}
+				break;
+			case "attributes":
+				Map<String,Object> attrDefMap = (Map<String,Object>)nodeMap.get(key);
+				for(String attrName:attrDefMap.keySet()){
+					nodeDefBuilder.addAttribute(parseAttrDef(attrName,(Map<String, Object>)attrDefMap.get(attrName)));
+				}
+				break;
+			case "requirements":
+				List<Map<String,Object>> reqDefList = (List<Map<String,Object>>)nodeMap.get(key);
+				for(Map<String, Object> reqMap:reqDefList){
+					//nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqDefMap.get(reqName)));
+					
+					String reqName = reqMap.keySet().iterator().next();
+					nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName)));
+					//propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());
+				}
+				break;
+			case "capabilities":
+				Map<String,Object> capDefMap = (Map<String,Object>)nodeMap.get(key);
+				for(String capName:capDefMap.keySet()){
+					nodeDefBuilder.addCapabilitiy(parseCapDef(capName,(Map<String, Object>)capDefMap.get(capName)));
+				}
+				break;
+			case "interfaces":
+//				Map<String,Object> interDefMap = (Map<String,Object>)nodeMap.get(key);
+//				for(String ifaceName:interDefMap.keySet()){
+//					nodeDefBuilder.addInterface(parseInterDef(ifaceName,(Map<String, Object>)interDefMap.get(ifaceName)));
+//				}
+				break;
+			case "artifacts":
+//				Map<String,Object> artiFactDefMap = (Map<String,Object>)nodeMap.get(key);
+//				for(String artifactName:artiFactDefMap.keySet()){
+//					nodeDefBuilder.addArtifact(parseArtifactDef(artifactName,(Map<String, Object>)artiFactDefMap.get(artifactName)));
+//				}
+				break;
+			default:
+				break;
+			}
+		}		
+		NodeDef rNode = nodeDefBuilder.build();
+		nodeDefinitions.put(name,rNode);
+		return rNode;
 	}
+	
+	public  PropertyDef parsePropDef(String name, Map<String, Object> propMap){
+		String type = (String) propMap.get("type");
+		PropertyDef.Builder propBuilder = new PropertyDef.Builder(name, type);
+		for(String mapItem:propMap.keySet()){
+			switch(mapItem){
+			case "description":
+				propBuilder.description((String)propMap.get(mapItem));
+				break;
+			case "required":
+				propBuilder.required((boolean)propMap.get(mapItem));
+				break;
+			case "default_value":
+				propBuilder.defaultVal((String)propMap.get(mapItem));
+				break;
+			case "status":
+				propBuilder.status((String)propMap.get(mapItem));
+				break;
+			case "constraints":
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> conList = (List<Map<String, Object>>) propMap.get(mapItem);
+				for(Map<String,Object> constraint:conList){
+					String key = constraint.keySet().iterator().next();
+					propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());	
+				}
+				break;
+			case "entry_schema":
+				propBuilder.entry_schema((String)propMap.get(mapItem));
+				break;
+			}
+		}
+		return propBuilder.build();
+	}
+	
+	public  AttributeDef parseAttrDef(String name, Map<String, Object> attrMap){
+		String type = (String) attrMap.get("type");
+		AttributeDef.Builder attrBuilder = new AttributeDef.Builder(name, type);
+		for(String mapItem:attrMap.keySet()){
+			switch(mapItem){
+			case "description":
+				attrBuilder.description((String)attrMap.get(mapItem));
+				break;
+			case "default_value":
+				attrBuilder.defaultVal((String)attrMap.get(mapItem));
+				break;
+			case "status":
+				attrBuilder.status((String)attrMap.get(mapItem));
+				break;
+			case "entry_schema":
+//				attrBuilder.entry_schema((String)attrMap.get(mapItem));
+				break;
+			}
+		}
+		return attrBuilder.build();
+	}
+	
+	public  RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
+		String capability = (String) reqMap.get("capability");
+		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name, capability);
+		for(String mapItem:reqMap.keySet()){
+			switch(mapItem){
+			case "node":
+				reqBuilder.node((String)reqMap.get(mapItem));
+				break;
+			case "relationship":
+				reqBuilder.relationship((String)reqMap.get(mapItem));
+				break;
+			case "occurence":
+				reqBuilder.occurence((String)reqMap.get(mapItem));
+				break;
+			}
+		}
+		return reqBuilder.build();
+	}
+	
+	public  CapabilityDef parseCapDef(String name, Map<String, Object> capMap){
+		String type = (String) capMap.get("type");
+		CapabilityDef.Builder capBuilder = new CapabilityDef.Builder(name, type);
+		for(String mapItem:capMap.keySet()){
+			switch(mapItem){
+			case "description":
+				capBuilder.description((String)capMap.get(mapItem));
+				break;
+			case "derived_from":
+				capBuilder.derived_from((String)capMap.get(mapItem));
+				break;
+			case "properties":
+				Map<String, Object> propMap = (Map<String, Object>) capMap.get(mapItem);
+				for(String propName:propMap.keySet()){
+					capBuilder.addProperty(parsePropDef(propName,propMap));	
+				}
+				break;
+			case "attributes":
+				Map<String, Object> attrMap = (Map<String, Object>) capMap.get(mapItem);
+				for(String attrName:attrMap.keySet()){
+					capBuilder.addAttribute(parseAttrDef(attrName,attrMap));	
+				}
+				break;
+			case "valid_source_types":
+				List<String> sourcesList = (List<String>) capMap.get(mapItem);
+				for(String attrName:sourcesList){
+					capBuilder.addValid_source_types(attrName);	
+				}
+				break;
+			}
+		}
+		return capBuilder.build();
+	}
+	
 	
 	
 
@@ -723,7 +903,9 @@ public class App{
 	public static void main( String[] args ) throws Exception{
 
 		App app = new App();
-		app.loadDefinitions();
+		for(String fileName: app.nodeDefFileNames){
+			app.loadDefinition(app.FILEPATH+fileName);
+		}
 		
 		
 			//Yaml yaml = new Yaml();

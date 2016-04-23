@@ -1,7 +1,6 @@
 tosca.nodes.SoftwareComponent:
   derived_from: tosca.nodes.Root
   properties:
-    # domain-specific software component version
     component_version:
       type: version
       required: false

@@ -1,7 +1,6 @@
 tosca.nodes.LoadBalancer:
   derived_from: tosca.nodes.Root
   properties:
-    # TBD
     algorithm:
       type: string
       required: false
