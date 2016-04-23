@@ -1,0 +1,4 @@
+tosca.capabilities.Endpoint.Database: 
+  type: Endpoint.Database
+  description: Tosca Database Endpoint Capability
+  derived_from: tosca.capabilities.Endpoint 

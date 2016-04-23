@@ -1,0 +1,13 @@
+tosca.capabilities.Scalable: 
+  type: Scalable
+  description: Tosca Scalable Capability
+  derived_from: tosca.capabilities.Root 
+  properties:
+    min_instances:
+    type: integer
+    default: 1
+  max_instances:
+    type: integer
+    default: 1
+  default_instances:
+    type: integer

@@ -1,0 +1,17 @@
+tosca.capabilities.OperatingSystem: 
+  type: OS
+  description: Tosca Operating System Capability
+  derived_from: tosca.capabilities.Root
+  properties:
+    architecture:
+    type: string
+    required: false
+  type:
+    type: string
+    required: false
+  distribution:
+    type: string
+    required: false
+  version:
+    type: version
+    required: false

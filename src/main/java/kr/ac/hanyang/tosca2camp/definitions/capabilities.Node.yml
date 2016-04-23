@@ -1,0 +1,4 @@
+tosca.capabilities.Node:
+   type: Node
+   derived_from: tosca.capabilities.Root
+   description: Tosca Node Capability
