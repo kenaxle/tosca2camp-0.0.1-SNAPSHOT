@@ -1,4 +1,6 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
+
+import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
 public class AttributeDef {
 
@@ -22,6 +24,8 @@ public class AttributeDef {
 			this.type = type;
 		}
 		
+		public Builder() {}
+
 		public T description(String description){
 			this.description = description;
 			return (T) this;
@@ -47,6 +51,15 @@ public class AttributeDef {
 		}
 	}
 	
+	public AttributeDef(AttributeDef origAttr){
+		AttributeDef.Builder<Builder> copyBuilder = new AttributeDef.Builder<Builder>(origAttr.name, origAttr.type);
+		copyBuilder.description(origAttr.description)
+				   .defaultVal(origAttr.defaultVal)
+				   .status(origAttr.status)
+				   .entry_schema(origAttr.entry_schema)
+				   .build();
+	}
+	
 	private AttributeDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -55,6 +68,8 @@ public class AttributeDef {
 		this.status = builder.status;
 		this.entry_schema = builder.entry_schema;
 	}
+	
+	public Builder getBuilder(){ return new Builder();}
 	
 }
 

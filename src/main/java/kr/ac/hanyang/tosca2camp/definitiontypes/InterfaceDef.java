@@ -1,4 +1,4 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.List;
 
@@ -16,8 +16,10 @@ public class InterfaceDef {
 			this.name = name;
 		}
 		
-		public T inputs(List<String> inputs){
-			this.inputs = inputs;
+		public Builder(){}
+		
+		public T addInput(String input){
+			this.inputs.add(input);
 			return (T) this;
 		}
 		
@@ -26,10 +28,20 @@ public class InterfaceDef {
 		}
 	}
 	
+	
+	public InterfaceDef(InterfaceDef origIDef){
+		InterfaceDef.Builder copyBuilder = new InterfaceDef.Builder(origIDef.name);
+		for(String input:inputs){
+			copyBuilder.addInput(input); 
+		}
+	}
+	
 	private InterfaceDef(Builder builder){
 		this.name = builder.name;
 		this.inputs = builder.inputs;
 	}
+	
+	public Builder getBuilder(){return new Builder();}
 	
 	public String getName(){return name;}
 	

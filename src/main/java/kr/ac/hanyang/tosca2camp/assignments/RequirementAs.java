@@ -1,6 +1,6 @@
 package kr.ac.hanyang.tosca2camp.assignments;
 
-import kr.ac.hanyang.tosca2camp.definitions.CapabilityDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 
 public class RequirementAs<T , U, V> {
 	

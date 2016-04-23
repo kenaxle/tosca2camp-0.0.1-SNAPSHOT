@@ -1,7 +1,8 @@
 package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
-import kr.ac.hanyang.tosca2camp.definitions.*;
+
+import kr.ac.hanyang.tosca2camp.definitiontypes.*;
 
 public class NodeTemplate<V> {
 

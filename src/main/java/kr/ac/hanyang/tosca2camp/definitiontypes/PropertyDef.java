@@ -1,4 +1,4 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 public class PropertyDef {
 
@@ -28,6 +28,8 @@ public class PropertyDef {
 			this.type = type;
 		}
 			
+		public Builder() {}
+
 		public T description(String description){
 			this.description = description;
 			return (T) this;
@@ -63,6 +65,18 @@ public class PropertyDef {
 		}
 	}
 	
+	
+	public PropertyDef(PropertyDef origProp){
+		PropertyDef.Builder<Builder> copyBuilder = new PropertyDef.Builder<Builder>(origProp.name,origProp.type);
+		copyBuilder.description(origProp.description)
+				   .required(origProp.required)
+				   .defaultVal(origProp.defaultVal)
+				   .status(origProp.status)
+				   .constraints(origProp.constraints)
+				   .entry_schema(origProp.entry_schema)
+				   .build();
+	}
+	
 	private PropertyDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -73,5 +87,7 @@ public class PropertyDef {
 		this.constraints = builder.constraints;
 		this.entry_schema = builder.entry_schema;
 	}
+	
+	public Builder getBuilder(){ return new Builder();}
 	
 }

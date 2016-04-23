@@ -1,4 +1,4 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public class NodeDef {
 	private String description; // description are treated as their own type but for now they will be string
 	private List<PropertyDef> properties; 
 	private List<AttributeDef> attributes;
-	private List<String> requirements;
+	private List<RequirementDef> requirements;
 	private List<CapabilityDef> capabilities;
 	private List<InterfaceDef> interfaces;
 	private List<ArtifactDef> artifacts;
@@ -21,7 +21,7 @@ public class NodeDef {
 		private String description; // description are treated as their own type but for now they will be string
 		private List<PropertyDef> properties; 
 		private List<AttributeDef> attributes;
-		private List<String> requirements;
+		private List<RequirementDef> requirements;
 		private List<CapabilityDef> capabilities;
 		private List<InterfaceDef> interfaces;
 		private List<ArtifactDef> artifacts;
@@ -31,6 +31,8 @@ public class NodeDef {
 			this.type = type;
 		}
 		
+		public Builder() {}
+
 		public T derived_from(String derived_from){
 			this.derived_from = derived_from;
 			return (T) this;
@@ -40,33 +42,33 @@ public class NodeDef {
 			this.description = description;
 			return (T) this;
 		}
-		public T properties(List<PropertyDef> properties){
-			this.properties = properties;
+		public T addProperty(PropertyDef property){
+			this.properties.add(property);
 			return (T) this;
 		}
 		
-		public T attributes(List<AttributeDef> attributes){
-			this.attributes = attributes;
+		public T addAttribute(AttributeDef attribute){
+			this.attributes.add(attribute);
 			return (T) this;
 		}
 		
-		public T requirements(List<String> requirements){
-			this.requirements = requirements;
+		public T addRequirement(RequirementDef requirement){
+			this.requirements.add(requirement);
 			return (T) this;
 		}
 		
-		public T capabilities(List<CapabilityDef> capabilities){
-			this.capabilities = capabilities;
+		public T addCapabilitiy(CapabilityDef capability){
+			this.capabilities.add(capability);
 			return (T) this;
 		}
 		
-		public T interfaces(List<InterfaceDef> interfaces){
-			this.interfaces = interfaces;
+		public T addInterface(InterfaceDef iface){
+			this.interfaces.add(iface);
 			return (T) this;
 		}
 		
-		public T artifacts(List<ArtifactDef> artifacts){
-			this.artifacts = artifacts;
+		public T addArtifact(ArtifactDef artifact){
+			this.artifacts.add(artifact);
 			return (T) this;
 		}
 		
@@ -88,6 +90,24 @@ public class NodeDef {
 		this.artifacts = builder.artifacts;
 	}
 
+	public NodeDef(NodeDef orig2Copy){
+		NodeDef.Builder<Builder> copyBuilder = new NodeDef.Builder<>(orig2Copy.getName(), orig2Copy.getType());
+		copyBuilder.derived_from(orig2Copy.getDerived_from())
+				   .description(orig2Copy.getDescription());
+		for(PropertyDef pDef:properties){
+			copyBuilder.addProperty(new PropertyDef(pDef)); //make sure pDef can create a copy
+		}
+		for(AttributeDef aDef:attributes){
+			copyBuilder.addAttribute(new AttributeDef(aDef)); //make sure pDef can create a copy
+		}
+		for(RequirementDef rDef:requirements){
+			copyBuilder.addRequirement(new RequirementDef(rDef)); //make sure pDef can create a copy
+		}
+		for(CapabilityDef cDef:capabilities){
+			copyBuilder.addCapabilitiy(new CapabilityDef(cDef)); //make sure pDef can create a copy
+		}
+		copyBuilder.build();		   
+	}
 		
 	public String getName() {return name;}
 
@@ -101,7 +121,7 @@ public class NodeDef {
 
 	public List<AttributeDef> getAttributes() {return attributes;}
 
-	public List<String> getRequirements() {return requirements;}
+	public List<RequirementDef> getRequirements() {return requirements;}
 
 	public List<CapabilityDef> getCapabilities() {return capabilities;}
 
@@ -109,6 +129,8 @@ public class NodeDef {
 
 	public List<ArtifactDef> getArtifacts() {return artifacts;}
 
+	public Builder getBuilder(){return new Builder();}
+	
 	public String toString(){
 		return "Name "+name+"\n"+
 			   "Type "+type+"\n"+

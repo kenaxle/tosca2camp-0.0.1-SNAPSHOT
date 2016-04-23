@@ -1,4 +1,4 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.List;
 

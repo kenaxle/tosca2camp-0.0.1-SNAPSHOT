@@ -1,6 +1,8 @@
-package kr.ac.hanyang.tosca2camp.definitions;
+package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.*;
+
+import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
 public class CapabilityDef {
 	private String name;
@@ -20,6 +22,8 @@ public class CapabilityDef {
 		private List<AttributeDef> attributes;
 		private List<String> valid_source_types;
 		
+		public Builder(){};
+		
 		public Builder(String name, String type){
 			this.name = name;
 			this.type = type;
@@ -34,18 +38,18 @@ public class CapabilityDef {
 			this.description = description;
 			return (T) this;
 		}
-		public T properties(List<PropertyDef> properties){
-			this.properties = properties;
+		public T addProperty(PropertyDef property){
+			this.properties.add(property);
 			return (T) this;
 		}
 		
-		public T attributes(List<AttributeDef> attributes){
-			this.attributes = attributes;
+		public T addAttribute(AttributeDef attribute){
+			this.attributes.add(attribute);
 			return (T) this;
 		}
 		
-		public T valid_source_types(List<String> valid_source_types){
-			this.valid_source_types = valid_source_types;
+		public T addValid_source_types(String valid_source_type){
+			this.valid_source_types.add(valid_source_type);
 			return (T) this;
 		}
 		
@@ -53,6 +57,20 @@ public class CapabilityDef {
 			return new CapabilityDef(this);
 		}
 	}
+		
+	public CapabilityDef(CapabilityDef origCap){
+		CapabilityDef.Builder<Builder> copyBuilder = new CapabilityDef.Builder<Builder>(origCap.name,origCap.type);
+		copyBuilder.description(origCap.description)
+				   .derived_from(origCap.derived_from);
+		for(PropertyDef pDef:properties){
+			copyBuilder.addProperty(new PropertyDef(pDef)); //make sure pDef can create a copy
+		}
+		for(AttributeDef aDef:attributes){
+			copyBuilder.addAttribute(new AttributeDef(aDef)); //make sure pDef can create a copy
+		}
+		copyBuilder.build();
+	}
+	
 	
 	private CapabilityDef(Builder builder){
 		this.name = builder.name;
@@ -78,6 +96,6 @@ public class CapabilityDef {
 
 	public List<String> getValid_source_types() {return valid_source_types;}
 	
-	
+	public Builder getBuilder(){return new Builder<Builder>();}
 
 }

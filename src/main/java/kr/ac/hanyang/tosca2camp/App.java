@@ -2,6 +2,9 @@ package kr.ac.hanyang.tosca2camp;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +36,8 @@ import kr.ac.hanyang.tosca2camp.datatypes.nodes.RuntimeContainerNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.SoftwareComponentNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebApplicationNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
+import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 
 
 /**
@@ -40,7 +45,41 @@ import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
  *
  */
 public class App{
+	
+	//hardcode the names of the definition files only for testing
+	private String[] nodeDefFileNames = {"nodes.BlockStorage.yml"};
+	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
+	
     
+	@SuppressWarnings({ "unused", "unchecked" })
+	private void loadDefinitions() throws FileNotFoundException{
+		for(String fileName: nodeDefFileNames){
+			Yaml yaml = new Yaml();
+			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/definitions/"+fileName)));
+			for(String defName:map.keySet())
+				System.out.println(parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
+		}
+	}
+	
+	
+	private <T> NodeDef parseNodeDef(String name, Map<String, Object>nodeMap){
+		String type = (String) nodeMap.get("type");
+		NodeDef parent = (NodeDef) nodeDefinitions.get(nodeMap.get("derived_from"));
+		// if not null then copy the nodeDef
+		//TODO find the def in the list if already loaded othewise load the def
+		if (parent != null)
+			NodeDef.Builder<Builder> nodeDefBuilder = parent.getBuilder(); // use this builder to copy the parent info
+		else
+			NodeDef.Builder<Builder> nodeDefBuilder = new NodeDef.Builder<Builder>(name, type); 
+		
+		for(String )
+		
+		
+		return nodeDefBuilder.build();
+	}
+	
+	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
 		//NodeTemplate.Builder<V, Builder<?,?>> nodeBuilder;
@@ -683,9 +722,13 @@ public class App{
 	@SuppressWarnings("unchecked")
 	public static void main( String[] args ) throws Exception{
 
-			Yaml yaml = new Yaml();
-			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-			parseTosca(map);
+		App app = new App();
+		app.loadDefinitions();
+		
+		
+			//Yaml yaml = new Yaml();
+			//Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
+			//parseTosca(map);
 			
 //			for(String key:map.keySet()){
 //				
