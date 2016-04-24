@@ -1,4 +1,0 @@
-tosca.capabilities.Attachment: 
-  type: Attachment
-  description: Tosca Attachment Capability
-  derived_from: tosca.capabilities.Root 

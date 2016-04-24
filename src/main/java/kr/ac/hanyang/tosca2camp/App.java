@@ -58,17 +58,30 @@ public class App{
 										 "tosca.nodes.Container.Application.yml","tosca.nodes.Container.Runtime.yml","tosca.nodes.Database.yml",
 										 "tosca.nodes.DBMS.yml","tosca.nodes.LoadBalancer.yml","tosca.nodes.ObjectStorage.yml",
 										 "tosca.nodes.SoftwareComponent.yml","tosca.nodes.WebApplication.yml","tosca.nodes.WebServer.yml"};
+	private String[] capDefFileNames = {"tosca.capabilities.Root.yml","tosca.capabilities.Scalable.yml","tosca.capabilities.OperatingSystem.yml",
+			 "tosca.capabilities.Node.yml","tosca.capabilities.Endpoint.yml","tosca.capabilities.Endpoint.Database.yml",
+			 "tosca.capabilities.Endpoint.Admin.yml","tosca.capabilities.Container.yml","tosca.capabilities.Bindable.yml",
+			 "tosca.capabilities.Attachment.yml"};
+	
 	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
-	   
+	private Map<String, CapabilityDef> capDefinitions = new LinkedHashMap<String, CapabilityDef>();   
 	
 	
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private void loadDefinition(String fileName) throws FileNotFoundException{
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
 			for(String defName:map.keySet())			
-				System.out.println( parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
+				nodeDefinitions.put(defName,parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
 	}
+	
+	@SuppressWarnings({ "unused", "unchecked" })
+	private void loadCapabilities(String fileName) throws FileNotFoundException{
+		Yaml yaml = new Yaml();
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
+		for(String defName:map.keySet())			
+			 capDefinitions.put(defName,parseCapDef(defName,(Map<String, Object>)map.get(defName)));
+}
 	
 	
 	private <T> NodeDef parseNodeDef(String name, Map<String, Object>nodeMap){
@@ -144,9 +157,9 @@ public class App{
 				break;
 			}
 		}		
-		NodeDef rNode = nodeDefBuilder.build();
-		nodeDefinitions.put(name,rNode);
-		return rNode;
+		returnNode = nodeDefBuilder.build();
+		//nodeDefinitions.put(name,rNode);
+		return returnNode;
 	}
 	
 	public  PropertyDef parsePropDef(String name, Map<String, Object> propMap){
@@ -225,25 +238,49 @@ public class App{
 	
 	public  CapabilityDef parseCapDef(String name, Map<String, Object> capMap){
 		String type = (String) capMap.get("type");
-		CapabilityDef.Builder capBuilder = new CapabilityDef.Builder(name, type);
+		String parentDef = (String) capMap.get("derived_from");
+		
+		CapabilityDef.Builder capBuilder;
+		CapabilityDef returnCapability;
+		// if not null then copy the nodeDef
+		//TODO find the def in the list if already loaded othewise load the def
+		//Builder nDef;
+		if (parentDef!=null){
+			CapabilityDef parent = (CapabilityDef) capDefinitions.get(parentDef);
+			if(parent !=null){
+				returnCapability = CapabilityDef.clone(parent); //copy the parent and then get a builder to add new functionality
+				capBuilder = returnCapability.getBuilder(name,type); 
+			}else{
+				//try to load the parent definition
+				try{
+					loadDefinition(FILEPATH+parentDef+".yml");
+				}catch(Exception e){
+					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
+				}
+				capBuilder = new CapabilityDef.Builder(name, type);
+			}
+		}else{
+			capBuilder = new CapabilityDef.Builder(name, type); 
+		}
+		
 		for(String mapItem:capMap.keySet()){
 			switch(mapItem){
 			case "description":
 				capBuilder.description((String)capMap.get(mapItem));
 				break;
-			case "derived_from":
-				capBuilder.derived_from((String)capMap.get(mapItem));
-				break;
+//			case "derived_from":
+//				capBuilder.derived_from((String)capMap.get(mapItem));
+//				break;
 			case "properties":
 				Map<String, Object> propMap = (Map<String, Object>) capMap.get(mapItem);
 				for(String propName:propMap.keySet()){
-					capBuilder.addProperty(parsePropDef(propName,propMap));	
+					capBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propMap.get(propName)));	
 				}
 				break;
 			case "attributes":
 				Map<String, Object> attrMap = (Map<String, Object>) capMap.get(mapItem);
 				for(String attrName:attrMap.keySet()){
-					capBuilder.addAttribute(parseAttrDef(attrName,attrMap));	
+					capBuilder.addAttribute(parseAttrDef(attrName,(Map<String, Object>)attrMap.get(attrName)));	
 				}
 				break;
 			case "valid_source_types":
@@ -903,10 +940,12 @@ public class App{
 	public static void main( String[] args ) throws Exception{
 
 		App app = new App();
-		for(String fileName: app.nodeDefFileNames){
-			app.loadDefinition(app.FILEPATH+fileName);
+//		for(String fileName: app.nodeDefFileNames){
+//			app.loadDefinition(app.FILEPATH+fileName);
+//		}
+		for(String fileName: app.capDefFileNames){
+			app.loadCapabilities(app.FILEPATH+fileName);
 		}
-		
 		
 			//Yaml yaml = new Yaml();
 			//Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));

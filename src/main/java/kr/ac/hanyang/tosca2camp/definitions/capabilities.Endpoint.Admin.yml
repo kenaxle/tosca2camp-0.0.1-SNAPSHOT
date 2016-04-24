@@ -1,6 +1,0 @@
-tosca.capabilities.Endpoint.Admin: 
-  type: Endpoint.Admin
-  description: Tosca Admin Endpoint Capability
-  derived_from: tosca.capabilities.Endpoint 
-  properties:
-    secure: true
