@@ -1,4 +1,3 @@
 tosca.capabilities.Bindable: 
-   type: Bindable
    description: Tosca Bindable Capability
    derived_from: tosca.capabilities.Node 

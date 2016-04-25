@@ -1,5 +1,4 @@
 tosca.capabilities.Scalable: 
-  type: Scalable
   description: Tosca Scalable Capability
   derived_from: tosca.capabilities.Root 
   properties:

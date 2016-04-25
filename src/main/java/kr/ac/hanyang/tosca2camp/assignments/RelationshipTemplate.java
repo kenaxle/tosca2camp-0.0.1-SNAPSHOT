@@ -15,7 +15,7 @@ public class RelationshipTemplate<V> {
 	private Map<String, InterfaceDef> interfaces;
 
 	//TODO copy should be implemented
-	public static class Builder <V, T extends Builder<V, T>>{
+	public static class Builder <V>{
 		private String name;
 		private String type;
 		private String alias;
@@ -30,33 +30,33 @@ public class RelationshipTemplate<V> {
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T alias(String alias){
+		public Builder alias(String alias){
 			this.alias = alias;
-			return (T) this;
+			return  this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return  this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addProperties(PropertyAs property){
+		public Builder addProperties(PropertyAs property){
 			this.properties.put(property.getName(),property);
-			return (T) this;
+			return  this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addAttributes(AttributeAs attribute){
+		public Builder addAttributes(AttributeAs attribute){
 			this.attributes.put(attribute.getName(),attribute);
-			return (T) this;
+			return  this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addInterfaces(InterfaceDef iterface){
+		public Builder addInterfaces(InterfaceDef iterface){
 			this.interfaces.put(iterface.getName(),iterface);
-			return (T) this;
+			return  this;
 		}
 		
 		public RelationshipTemplate build(){

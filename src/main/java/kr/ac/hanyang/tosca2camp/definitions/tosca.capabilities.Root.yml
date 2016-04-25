@@ -1,3 +1,2 @@
 tosca.capabilities.Root:
-   type: Root
    description: Tosca Root Capability

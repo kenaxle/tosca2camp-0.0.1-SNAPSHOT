@@ -2,6 +2,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.*;
 
+import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
 public class CapabilityDef {
@@ -111,4 +112,8 @@ public class CapabilityDef {
 			   "type: "+type+"\n";
 	}
 
+	public boolean validate(CapabilityAs capAs){
+		return false;
+	}
+	
 }

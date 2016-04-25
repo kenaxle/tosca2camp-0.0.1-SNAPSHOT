@@ -1,5 +1,4 @@
 tosca.capabilities.Endpoint: 
-   type: Endpoint
    description: Tosca Endpoint Capability
    derived_from: tosca.capabilities.Root 
    properties: 

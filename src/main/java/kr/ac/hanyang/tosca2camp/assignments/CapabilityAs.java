@@ -2,14 +2,17 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 
+import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs.Builder;
+
 public class CapabilityAs<V> {
+	public static Builder Builder;
 	private String type;
 	private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
 	private Map<String, PropertyAs<V>> properties;
 	private Map<String, AttributeAs<V>> attributes;
 	
-	public static class Builder <V, T extends Builder<V,T>>{
+	public static class Builder <V>{
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
@@ -24,28 +27,28 @@ public class CapabilityAs<V> {
 			attributes = new LinkedHashMap<String, AttributeAs<V>>();
 		}
 		
-		@SuppressWarnings("unchecked")
-		public T derivedFrom(String derived_from){
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public Builder derivedFrom(String derived_from){
 			this.derived_from = derived_from;
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addProperty(PropertyAs<V> property){
+		public Builder addProperty(PropertyAs<V> property){
 			properties.put(property.getName(), property);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addAttribute(AttributeAs<V> attribute){
+		public Builder addAttribute(AttributeAs<V> attribute){
 			attributes.put(attribute.getName(), attribute);
-			return (T) this;
+			return this;
 		}
 		
 		public CapabilityAs<V> build(){
@@ -54,7 +57,7 @@ public class CapabilityAs<V> {
 	
 	}
 	
-	protected CapabilityAs(Builder<V, ?> builder){
+	protected CapabilityAs(Builder builder){
 		this.type = builder.type;
 		this.derived_from = builder.derived_from;
 		this.description = builder.description;

@@ -1,5 +1,4 @@
 tosca.capabilities.Container: 
-   type: Container
    description: Tosca Container Capability
    derived_from: tosca.capabilities.Root 
    properties: 

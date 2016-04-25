@@ -1,11 +1,10 @@
 tosca.capabilities.Endpoint.Public: 
-   type: Endpoint.Public
    description: Tosca Public Endpoint Capability
    derived_from: tosca.capabilities.Endpoint 
    properties:
       network_name: PUBLIC
       floating:
-         description: > indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.
+         description: indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.
          type: boolean
          default: false
          status: experimental

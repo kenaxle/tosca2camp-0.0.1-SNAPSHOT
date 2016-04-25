@@ -24,7 +24,7 @@ public class PropertyDef {
 		private String type;
 		private String description; // description are treated as their own type but for now they will be string
 		private boolean required;
-		private String defaultVal; //TODO don't know what this default value means as yet
+		private String defaultVal; //TODO this will have to suite the type
 		private String status;
 		private List<ListEntry> constraints = new ArrayList<ListEntry>(); //TODO this type will have to be defined
 		private String entry_schema; 
@@ -105,6 +105,12 @@ public class PropertyDef {
 		return builder;
 	}
 	
+	public String getName(){return name;}
+	public String getType(){return type;}
+	public String getDescription(){return description;}
+	public boolean isRequired(){return required;}
+	public String getDefaultVal(){return defaultVal;}
+		
 	public String toString(){
 		return "name: "+name+"\n"+
 			   "type: "+type+"\n";

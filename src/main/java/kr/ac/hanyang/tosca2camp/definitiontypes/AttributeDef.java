@@ -1,7 +1,5 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
-import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
-
 public class AttributeDef {
 
 	private String name;
@@ -77,6 +75,11 @@ public class AttributeDef {
 		builder.entry_schema = this.entry_schema;
 		return builder;
 	}
+	
+	public String getName(){return name;}
+	public String getType(){return type;}
+	public String getDescription(){return description;}
+	public String getDefaultVal(){return defaultVal;}
 	
 	public String toString(){
 		return "name: "+name+"\n"+

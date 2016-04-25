@@ -2,76 +2,79 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 
-public class RequirementAs<T , U, V> {
+public class RequirementAs {
 	
 	private String name;
-	private T capability; //TODO capability def or type
-	private U node; //TODO this is the nodetemplate or node type
-	private V relationship; //TODO
+	private CapabilityAs capability; //TODO capability def or type
+	private NodeTemplate node; //TODO this is the nodetemplate or node type
+	private RelationshipTemplate relationship; //TODO
 	
-	private RequirementAs(Builder<T, U, V> builder){	
+	private RequirementAs(Builder builder){	
 		this.name = builder.name;
-		this.capability = (T) builder.capability;
-		this.node = (U) builder.node;
-		this.relationship = (V) builder.relationship;
+		this.capability =  builder.capability;
+		this.node =  builder.node;
+		this.relationship =  builder.relationship;
 	}
 	
-	public static class Builder<T,U,V>{
+	public static class Builder{
 		private String name;
-		private T capability; //TODO capability def or type
-		private U node; //TODO this is the nodetemplate or node type
-		private V relationship; //TODO
+		private CapabilityAs capability; //TODO capability def or type
+		private NodeTemplate node; //TODO this is the nodetemplate or node type
+		private RelationshipTemplate relationship; //TODO
 		
 		public Builder(String name){this.name = name;}
 		
-		public Builder<T, U, V> capability(T capability){
+		public Builder capability(CapabilityAs capability){
 			this.capability = capability;
 			return this;
 		}
 		
-		public Builder<T, U, V> node(U node){
+		public Builder node(NodeTemplate node){
 			this.node = node;
 			return this;
 		}
 		
-		public Builder<T, U, V> relationship(V relationship){
+		public Builder relationship(RelationshipTemplate relationship){
 			this.relationship = relationship;
 			return this;
 		}
 		
-		public RequirementAs<T, U, V> build(){
-			return new RequirementAs<T,U,V>(this);
+		public RequirementAs build(){
+			return new RequirementAs(this);
 		}
 		
 	}
-	
+
 	public String getName(){ return name;}
 	
-	@SuppressWarnings({ "rawtypes" })
-	public String toString(){	
-		String retString="  - "+name+"\n";
-		if (node != null) 
-			retString+= "      node: "+(String)((NodeTemplate) node).getAttributeValue("tosca_name") +"\n";
-		if (capability != null){
-			String capType="";
-			switch (capability.getClass().getSimpleName()){
-				case "CapabilityAs":
-					CapabilityAs<?> capAs = (CapabilityAs<?>) capability;
-					capType = capAs.getType();
-					break;
-				case "CapabilityDef":
-					CapabilityDef capDef = (CapabilityDef) capability;
-					capType = capDef.getType();
-					break;
-				default:break; 
-			}
-			retString+="      Capability: "+capType+"\n";
-		}
-		if (relationship != null){
-			RelationshipTemplate relTemp = (RelationshipTemplate) relationship;
-			retString+="      relationship: "+relTemp.getType()+"\n";
-		}
-		return  retString;
-	}
+	public CapabilityAs getCapability(){ return capability;}
+	public NodeTemplate getNode(){return node;}
+	public RelationshipTemplate retRelationship(){return relationship;}
+	
+//	public String toString(){	
+//		String retString="  - "+name+"\n";
+//		if (node != null) 
+//			retString+= "      node: "+(String)((NodeTemplate) node).getAttributeValue("tosca_name") +"\n";
+//		if (capability != null){
+//			String capType="";
+//			switch (capability.getClass().getSimpleName()){
+//				case "CapabilityAs":
+//					CapabilityAs<?> capAs = (CapabilityAs<?>) capability;
+//					capType = capAs.getType();
+//					break;
+//				case "CapabilityDef":
+//					CapabilityDef capDef = (CapabilityDef) capability;
+//					capType = capDef.getType();
+//					break;
+//				default:break; 
+//			}
+//			retString+="      Capability: "+capType+"\n";
+//		}
+//		if (relationship != null){
+//			RelationshipTemplate relTemp = (RelationshipTemplate) relationship;
+//			retString+="      relationship: "+relTemp.getType()+"\n";
+//		}
+//		return  retString;
+//	}
 	
 }

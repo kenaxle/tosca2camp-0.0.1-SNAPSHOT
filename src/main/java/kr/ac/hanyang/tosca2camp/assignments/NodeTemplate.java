@@ -5,80 +5,81 @@ import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitiontypes.*;
 
 public class NodeTemplate<V> {
-
+	private String name;
 	private String type;
 	private String description;
 	private List<String> directives;
 	private Map<String, PropertyAs<V>> properties;
 	private Map<String, AttributeAs<V>> attributes;
-	private List<RequirementAs<?,?,?>> requirements;
+	private List<RequirementAs> requirements;
 	private Map<String, CapabilityAs<V>> capabilities;
 	private Map<String, InterfaceDef> interfaces;
 	private Map<String, ArtifactDef> artifacts;
 	//TODO Nodefilter and copy should be implemented
 	
-	public static class Builder <V, T extends Builder<?, ?>>{
-
+	public static class Builder <V>{
+		private String name;
 		private String type;
 		private String description;
 		private List<String> directives;
 		private Map<String, PropertyAs<V>> properties = new LinkedHashMap<String, PropertyAs<V>>();
 		private Map<String, AttributeAs<V>> attributes = new LinkedHashMap<String, AttributeAs<V>>();
-		private List<RequirementAs<?,?,?>> requirements = new ArrayList<RequirementAs<?,?,?>>();
+		private List<RequirementAs> requirements = new ArrayList<RequirementAs>();
 		private Map<String, CapabilityAs<V>> capabilities = new LinkedHashMap<String, CapabilityAs<V>>();
 		private Map<String, InterfaceDef> interfaces = new LinkedHashMap<String, InterfaceDef>();
 		private Map<String, ArtifactDef> artifacts = new LinkedHashMap<String, ArtifactDef>();
 		
-		public Builder( String type){
+		public Builder( String name, String type){
+			this.name = name;
 			this.type = type;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T directives(List<String> directives){
+		public Builder directives(List<String> directives){
 			this.directives = directives;
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addProperty(PropertyAs<V> property){
+		public Builder addProperty(PropertyAs<V> property){
 			this.properties.put(property.getName(), property);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addAttribute(AttributeAs<V> attribute){
+		public Builder addAttribute(AttributeAs<V> attribute){
 			this.attributes.put(attribute.getName(), attribute);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addRequirement(RequirementAs<?,?,?> requirement){
+		public Builder addRequirement(RequirementAs requirement){
 			this.requirements.add(requirement);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addCapability(CapabilityAs<V> capability){
+		public Builder addCapability(CapabilityAs<V> capability){
 			this.capabilities.put(capability.getType(), capability);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addInterface(InterfaceDef inface){
+		public Builder addInterface(InterfaceDef inface){
 			this.interfaces.put(inface.getName(), inface);
-			return (T) this;
+			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public T addArtifact(ArtifactDef artifact){
+		public Builder addArtifact(ArtifactDef artifact){
 			this.artifacts.put(artifact.getName(), artifact);
-			return (T) this;
+			return this;
 		}
 		
 		public NodeTemplate<V> build(){
@@ -88,8 +89,8 @@ public class NodeTemplate<V> {
 		
 	}
 	
-	protected NodeTemplate(Builder<V,?> builder){
-
+	protected NodeTemplate(Builder builder){
+		this.name = builder.name;
 		this.type = builder.type;
 		this.description = builder.description;
 		this.directives = builder.directives;
@@ -100,6 +101,7 @@ public class NodeTemplate<V> {
 		this.interfaces = builder.interfaces;
 		this.artifacts = builder.artifacts;
 	}
+	public String getName(){return name;}
 	
 	public String getType() {return type;}
 
@@ -111,7 +113,7 @@ public class NodeTemplate<V> {
 
 	public Map<String, AttributeAs<V>> getAttributes() {return attributes;}
 
-	public List<RequirementAs<?,?,?>> getRequirements() {return requirements;}
+	public List<RequirementAs> getRequirements() {return requirements;}
 
 	public Map<String, CapabilityAs<V>> getCapabilities() {return capabilities;}
 
@@ -124,9 +126,16 @@ public class NodeTemplate<V> {
 			return (V) attributes.get(key).getValue();
 		return null;
 	}
+	
 	public V getPropertyValue(String key){
 		if (properties.containsKey(key))
 			return (V) properties.get(key).getValue();
+		return null;
+	}
+	
+	public CapabilityAs getCapabilityAs(String key){
+		if (capabilities.containsKey(key))
+			return capabilities.get(key);
 		return null;
 	}
 

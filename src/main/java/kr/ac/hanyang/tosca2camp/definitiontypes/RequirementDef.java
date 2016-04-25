@@ -2,6 +2,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.List;
 
+import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef.Builder;
 
 public class RequirementDef {
@@ -67,8 +68,18 @@ public class RequirementDef {
 		builder.nodeType = this.nodeType;
 		builder.relationshipType = this.relationshipType;
 		builder.occurence = this.occurence;
-		return builder;
-		
+		return builder;	
+	}
+	
+	public String getCapDefName(){return capability;}
+	public String getNodeDefName(){return nodeType;}
+	public String getRelDefName(){return relationshipType;}
+	
+	
+	public boolean validate(RequirementAs rTemp){
+		boolean valid = true;
+		if (capability.equals(rTemp.getCapability().getType()))
+		return valid;
 	}
 	
 	public String toString(){
