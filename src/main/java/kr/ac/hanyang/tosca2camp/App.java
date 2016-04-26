@@ -239,8 +239,9 @@ public class App{
 		return attrBuilder.build();
 	}
 	
+	@SuppressWarnings({ "rawtypes" })
 	public RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
-		String capability = (String) reqMap.get("capability");
+		String capability = (String) reqMap.get("capability");	
 		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name, capability);
 		for(String mapItem:reqMap.keySet()){
 			switch(mapItem){
@@ -258,6 +259,7 @@ public class App{
 		return reqBuilder.build();
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes"})
 	public CapabilityDef parseCapDef(String name, Map<String, Object> capMap){
 		String type;
 		//capability is normative
@@ -383,24 +385,57 @@ public class App{
 	
 	//-------------------------------------------------------------------------------
 
+	private List<String> getBuildStack(NodeDef nodeDef){
+		List<String> retList = null;
+		if (nodeDef.getDerived_from() == null){
+			retList =  new ArrayList();
+			retList.add(nodeDef.getType());
+		}else 
+		{
+			retList = getBuildStack(nodeDefinitions.get(nodeDef.getDerived_from()));
+			retList.add(nodeDef.getType());
+		}
+		return retList;
+	}
+	
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <V> boolean parseNode(String name, Map<String, Object>nodeMap){
 		boolean valid;
-		
 		String type = (String) nodeMap.get("type");
 		NodeTemplate.Builder<V> nodeBuilder = new NodeTemplate.Builder<>(name, type);
+		String typeName = "";
+		
+		switch(type){
+		case "Root": typeName = "tosca.nodes.Root"; break;
+		case "Compute": typeName = "tosca.nodes.Compute"; break;
+		case "SoftwareComponent": typeName = "tosca.nodes.SoftwareComponent"; break;
+		case "WebServer": typeName = "tosca.nodes.WebServer"; break;
+		case "WebApplication": typeName = "tosca.nodes.WebApplication"; break;
+		case "DBMS": typeName = "tosca.nodes.DBMS"; break;
+		case "Database": typeName = "tosca.nodes.Database"; break;
+		case "ObjectStorage": typeName = "tosca.nodes.ObjectStorage"; break;
+		case "BlockStorage": typeName = "tosca.nodes.BlockStorage"; break;
+		case "Container.Runtime": typeName = "tosca.nodes.Container.Runtime"; break;
+		case "Container.Application": typeName = "tosca.nodes.Container.Application"; break;
+		case "LoadBalancer": typeName = "tosca.nodes.LoadBalancer"; break;
+		default: if(!type.isEmpty())
+					typeName = type;//test if the type is not empty then its long type
+		break; //use the empty string
+		}
+		
 		//try to get the definition or try to load it if its normative
-		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(type);
+		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(typeName);
 		
 			//returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality
 			//nodeDefBuilder = returnNode.getBuilder(name,type); 
 		if(myDefinition == null){
 			//try to load the parent definition
 			try{
-				loadDefinition(FILEPATH+type+".yml");
+				loadDefinition(FILEPATH+typeName+".yml");
 				myDefinition = (NodeDef) nodeDefinitions.get(type);
 			}catch(Exception e){
-				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
+				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
 				return false;
 			}
 			//nodeDefBuilder = new NodeDef.Builder<Builder>(name, type);
@@ -409,23 +444,32 @@ public class App{
 		nodeBuilder.description((String) nodeMap.get("description"));
 		//nodeBuilder.directives(directives); TODO
 		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
-		for(String propertyName:propMap.keySet()){
-			nodeBuilder.addProperty(new PropertyAs.Builder<V>(propertyName,(V)propMap.get(propertyName)).build());
+		if (propMap != null){
+			for(String propertyName:propMap.keySet()){
+				nodeBuilder.addProperty(new PropertyAs.Builder<V>(propertyName,(V)propMap.get(propertyName)).build());
+			}
 		}
 		
 		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
-		for(String attributeName:propMap.keySet()){
-			nodeBuilder.addAttribute(new AttributeAs.Builder<V>(attributeName,(V)propMap.get(attributeName)).build());
+		if (attrMap != null){
+			for(String attributeName:propMap.keySet()){
+				nodeBuilder.addAttribute(new AttributeAs.Builder<V>(attributeName,(V)propMap.get(attributeName)).build());
+			}
 		}
 		
 		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
-		for(String capName:capMap.keySet()){
-			nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
+		if (capMap != null){
+			for(String capName:capMap.keySet()){
+				nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
+			}
 		}
 		
-		Map<String,Object> reqMap = ((Map<String,Object>) nodeMap.get("requirements"));
-		for(String reqName:reqMap.keySet()){
-			nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
+		List<Map<String,Object>> reqList = ((List<Map<String,Object>>) nodeMap.get("requirements"));
+		if (reqList != null){
+			for(Map<String,Object> reqMap:reqList){ 
+				String reqName = reqMap.keySet().iterator().next();
+				nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
+			}
 		}
 		
 		NodeTemplate node = nodeBuilder.build();
