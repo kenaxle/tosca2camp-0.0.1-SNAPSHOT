@@ -10,8 +10,8 @@ public class CapabilityDef {
 	private String type;
 	private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
-	private List<PropertyDef> properties; 
-	private List<AttributeDef> attributes;
+	private Map<String, PropertyDef> properties; 
+	private Map<String, AttributeDef> attributes;
 	private List<String> valid_source_types;
 	
 	public static class Builder <T extends Builder>{
@@ -19,8 +19,8 @@ public class CapabilityDef {
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private List<PropertyDef> properties = new ArrayList(); 
-		private List<AttributeDef> attributes = new ArrayList();
+		private Map<String, PropertyDef> properties = new LinkedHashMap(); 
+		private Map<String, AttributeDef> attributes = new LinkedHashMap();
 		private List<String> valid_source_types = new ArrayList();
 		
 		public Builder(String name, String type){
@@ -38,12 +38,12 @@ public class CapabilityDef {
 			return (T) this;
 		}
 		public T addProperty(PropertyDef property){
-			this.properties.add(property);
+			this.properties.put(property.getName(),property);
 			return (T) this;
 		}
 		
 		public T addAttribute(AttributeDef attribute){
-			this.attributes.add(attribute);
+			this.attributes.put(attribute.getName(),attribute);
 			return (T) this;
 		}
 		
@@ -61,10 +61,12 @@ public class CapabilityDef {
 		CapabilityDef.Builder<Builder> copyBuilder = new CapabilityDef.Builder<Builder>(origCap.name,origCap.type);
 		copyBuilder.description(origCap.description)
 				   .derived_from(origCap.derived_from);
-		for(PropertyDef pDef:origCap.properties){
+		for(String pDefName:origCap.properties.keySet()){
+			PropertyDef pDef = origCap.properties.get(pDefName);
 			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
 		}
-		for(AttributeDef aDef:origCap.attributes){
+		for(String aDefName:origCap.attributes.keySet()){
+			AttributeDef aDef = origCap.attributes.get(aDefName);
 			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
 		}
 		return copyBuilder.build();
@@ -101,9 +103,9 @@ public class CapabilityDef {
 
 	public String getDescription() {return description;}
 
-	public List<PropertyDef> getProperties() {return properties;}
+	public Map<String, PropertyDef> getProperties() {return properties;}
 
-	public List<AttributeDef> getAttributes() {return attributes;}
+	public Map<String, AttributeDef> getAttributes() {return attributes;}
 
 	public List<String> getValid_source_types() {return valid_source_types;}
 	

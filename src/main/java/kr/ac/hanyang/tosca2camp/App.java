@@ -425,8 +425,12 @@ public class App{
 		}
 		
 		//try to get the definition or try to load it if its normative
-		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(typeName);
 		
+		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(typeName);
+		List<String> buildList = getBuildStack(myDefinition);
+		for(String ancestor: buildList){
+			
+		}
 			//returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality
 			//nodeDefBuilder = returnNode.getBuilder(name,type); 
 		if(myDefinition == null){

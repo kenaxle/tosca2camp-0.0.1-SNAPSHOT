@@ -16,6 +16,14 @@ public class RequirementAs {
 		this.relationship =  builder.relationship;
 	}
 	
+	public static RequirementAs clone(RequirementAs orig){
+		Builder copyBuilder = new Builder(orig.name);
+		return copyBuilder.capability(CapabilityAs.clone(orig.capability))
+				          .node(NodeTemplate.clone(orig.node))
+				          .relationship(RelationshipTemplate.clone(orig.relationship))
+				          .build();
+	}
+	
 	public static class Builder{
 		private String name;
 		private CapabilityAs capability; //TODO capability def or type

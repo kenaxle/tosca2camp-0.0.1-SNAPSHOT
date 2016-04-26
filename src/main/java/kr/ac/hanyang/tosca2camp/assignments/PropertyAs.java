@@ -1,18 +1,28 @@
 package kr.ac.hanyang.tosca2camp.assignments;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
+
 // use Generic for late binding the value object
-public class PropertyAs<V> {
+public class PropertyAs {
 
 	private String name;
-	private V value;
+	private Object value;
 	
-	public static class Builder<V>{
+	public static class Builder{
 		private String name;
-		private V value;
+		private Object value;
 		
-		public Builder(String name, V value){
+		public Builder(String name){
 			this.name = name;
-			this.value = (V) value; 
+			this.value =  null; 
+		}
+		
+		public Builder value(Object value){
+			this.value = value;
+			return this;
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -21,13 +31,40 @@ public class PropertyAs<V> {
 		}
 	}
 	
-	private PropertyAs(Builder<V> builder){
+	private PropertyAs(Builder builder){
 		this.name = builder.name;
-		this.value = (V) builder.value;
+		this.value = builder.value;
+	}
+	
+	public Builder getBuilder(String name){
+		Builder builder = new Builder(name);
+		builder.value = this.value;
+		return builder;
+	}
+	
+	public static PropertyAs clone(PropertyAs origProp){
+		PropertyAs.Builder copyBuilder = new PropertyAs.Builder(origProp.name);
+		copyBuilder.value(origProp.getValue());
+		return copyBuilder.build();
+	}
+	
+	public static PropertyAs.Builder getDefinitionBuilder(PropertyDef propDef){
+		
+		Constructor<?> constructor;
+		try {
+			constructor = Class.forName(propDef.getType()).getConstructor(String.class);
+			Object value;
+			value = constructor.newInstance(propDef.getDefaultVal());
+			return new PropertyAs.Builder(propDef.getName()).value(value);
+		} catch (NoSuchMethodException | SecurityException | ClassNotFoundException| InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public String getName(){return name;}	
-	public V getValue(){return value;}
+	public Object getValue(){return value;}
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -38,7 +75,7 @@ public class PropertyAs<V> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PropertyAs<V> other = (PropertyAs<V>) obj;
+		PropertyAs other = (PropertyAs) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

@@ -2,27 +2,32 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 
-public class CapabilityAs<V> {
+import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef.Builder;
+
+public class CapabilityAs {
 	//public static Builder Builder;
 	private String type;
 	private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
-	private Map<String, PropertyAs<V>> properties;
-	private Map<String, AttributeAs<V>> attributes;
+	private Map<String, PropertyAs> properties;
+	private Map<String, AttributeAs> attributes;
 	
-	public static class Builder <V>{
+	public static class Builder{
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private Map<String, PropertyAs<V>> properties; //= new ArrayList<PropertyAs>();
-		private Map<String, AttributeAs<V>> attributes; //= new ArrayList<AttributeAs>();
+		private Map<String, PropertyAs> properties; //= new ArrayList<PropertyAs>();
+		private Map<String, AttributeAs> attributes; //= new ArrayList<AttributeAs>();
 	
 		public Builder(){}
 		
 		public Builder(String type){
 			this.type = type;
-			properties = new LinkedHashMap<String, PropertyAs<V>>();
-			attributes = new LinkedHashMap<String, AttributeAs<V>>();
+			properties = new LinkedHashMap<String, PropertyAs>();
+			attributes = new LinkedHashMap<String, AttributeAs>();
 		}
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -38,19 +43,19 @@ public class CapabilityAs<V> {
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Builder addProperty(PropertyAs<V> property){
+		public Builder addProperty(PropertyAs property){
 			properties.put(property.getName(), property);
 			return this;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Builder addAttribute(AttributeAs<V> attribute){
+		public Builder addAttribute(AttributeAs attribute){
 			attributes.put(attribute.getName(), attribute);
 			return this;
 		}
 		
-		public CapabilityAs<V> build(){
-			return new CapabilityAs<V>(this);
+		public CapabilityAs build(){
+			return new CapabilityAs(this);
 		}
 	
 	}
@@ -63,6 +68,21 @@ public class CapabilityAs<V> {
 		this.attributes = builder.attributes;
 	}
 	
+	public static CapabilityAs clone(CapabilityAs origCap){
+		CapabilityAs.Builder copyBuilder = new CapabilityAs.Builder(origCap.type);
+		copyBuilder.description(origCap.description);
+				
+		for(Object propName:origCap.properties.keySet()){
+			PropertyAs pDef = (PropertyAs) origCap.properties.get(propName);
+			copyBuilder.addProperty(PropertyAs.clone(pDef)); //make sure pDef can create a copy
+		}
+		for(Object attrName:origCap.attributes.keySet()){
+			AttributeAs aDef = (AttributeAs) origCap.attributes.get(attrName);
+			copyBuilder.addAttribute(AttributeAs.clone(aDef)); //make sure pDef can create a copy
+		}
+		return copyBuilder.build();
+	}
+	
 
 	public String getType() {return type;}
 
@@ -70,18 +90,18 @@ public class CapabilityAs<V> {
 
 	public String getDescription() {return description;}
 
-	public Map<String, PropertyAs<V>> getProperties() {return properties;}
+	public Map<String, PropertyAs> getProperties() {return properties;}
 
-	public Map<String, AttributeAs<V>> getAttributes() {return attributes;}
+	public Map<String, AttributeAs> getAttributes() {return attributes;}
 	
-	public V getAttributeValue(String key){
+	public Object getAttributeValue(String key){
 		if (attributes.containsKey(key))
-			return (V) attributes.get(key).getValue();
+			return attributes.get(key).getValue();
 		return null;
 	}
-	public V getPropertyValue(String key){
+	public Object getPropertyValue(String key){
 		if (properties.containsKey(key))
-			return (V) properties.get(key).getValue();
+			return properties.get(key).getValue();
 		return null;
 	}
 
@@ -94,7 +114,7 @@ public class CapabilityAs<V> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CapabilityAs<V> other = (CapabilityAs<V>) obj;
+		CapabilityAs other = (CapabilityAs) obj;
 		if (attributes == null) {
 			if (other.attributes != null)
 				return false;

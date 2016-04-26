@@ -1,7 +1,9 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
@@ -12,18 +14,18 @@ public class RelationshipDef {
 	private String type;
 	private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
-	private List<PropertyDef> properties; 
-	private List<AttributeDef> attributes;
-	private List<InterfaceDef> interfaces;
+	private Map<String, PropertyDef> properties; 
+	private Map<String, AttributeDef> attributes;
+	private Map<String, InterfaceDef> interfaces;
 	private List<String> valid_target_types;
 	
 	public static class Builder <T extends Builder>{
 		private String type;
 		private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private List<PropertyDef> properties = new ArrayList(); 
-		private List<AttributeDef> attributes = new ArrayList();
-		private List<InterfaceDef> interfaces = new ArrayList();
+		private Map<String, PropertyDef> properties = new LinkedHashMap(); 
+		private Map<String, AttributeDef> attributes = new LinkedHashMap();
+		private Map<String, InterfaceDef> interfaces = new LinkedHashMap();
 		private List<String> valid_target_types = new ArrayList();
 		
 		public Builder(String type){
@@ -43,17 +45,17 @@ public class RelationshipDef {
 		}
 		
 		public T addProperty(PropertyDef property){
-			this.properties.add(property);
+			this.properties.put(property.getName(),property);
 			return (T) this;
 		}
 		
 		public T addAttribute(AttributeDef attribute){
-			this.attributes.add(attribute);
+			this.attributes.put(attribute.getName(),attribute);
 			return (T) this;
 		}
 		
 		public T addInterface(InterfaceDef iFace){
-			this.interfaces.add(iFace);
+			this.interfaces.put(iFace.getName(),iFace);
 			return (T) this;
 		}
 		
@@ -83,13 +85,16 @@ public class RelationshipDef {
 		RelationshipDef.Builder<Builder> copyBuilder = new RelationshipDef.Builder<>(origRel.type);
 		copyBuilder.derived_from(origRel.derived_from)
 				   .description(origRel.description);
-		for(PropertyDef pDef:origRel.properties){
+		for(String pDefName:origRel.properties.keySet()){
+			PropertyDef pDef = origRel.properties.get(pDefName);
 			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
 		}
-		for(AttributeDef aDef:origRel.attributes){
+		for(String aDefName:origRel.attributes.keySet()){
+			AttributeDef aDef = origRel.attributes.get(aDefName);
 			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
 		}
-		for(InterfaceDef rDef:origRel.interfaces){
+		for(String rDefName:origRel.interfaces.keySet()){
+			InterfaceDef rDef = origRel.interfaces.get(rDefName);
 			copyBuilder.addInterface(InterfaceDef.clone(rDef)); //make sure pDef can create a copy
 		}
 		for(String cDef:origRel.valid_target_types){
@@ -111,11 +116,13 @@ public class RelationshipDef {
 
 	public boolean validate(RelationshipTemplate rTemp){
 		// (type.equals(rTemp.getType()));
-		for (PropertyDef propItem:properties){
+		for (String propItemName:properties.keySet()){
+			PropertyDef propItem = properties.get(propItemName);
 			if (!propItem.validate((PropertyAs)rTemp.getPropertyAs(propItem.getType())))
 				return false;
 		}
-		for (AttributeDef attrItem:attributes){
+		for (String attrItemName:attributes.keySet()){
+			AttributeDef attrItem = attributes.get(attrItemName);
 			if (!attrItem.validate((AttributeAs)rTemp.getPropertyAs(attrItem.getType())))
 				return false;
 		}
