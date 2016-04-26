@@ -75,6 +75,9 @@ public class App{
 	private Map<String, CapabilityDef> capDefinitions = new LinkedHashMap<String, CapabilityDef>(); 
 	private Map<String, RelationshipDef> relDefinitions = new LinkedHashMap<String, RelationshipDef>();
 	
+	private Map<String, NodeTemplate> nodeTemplates = new LinkedHashMap<String, NodeTemplate>();
+	private Map<String, RelationshipTemplate> relTemplates = new LinkedHashMap<String, RelationshipTemplate>();
+	
 	//load the Normative type definitions
 	//-------------------------------------------------------------------------------
 	@SuppressWarnings({ "unchecked" })
@@ -381,7 +384,9 @@ public class App{
 	//-------------------------------------------------------------------------------
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
+	public <V> boolean parseNode(String name, Map<String, Object>nodeMap){
+		boolean valid;
+		
 		String type = (String) nodeMap.get("type");
 		NodeTemplate.Builder<V> nodeBuilder = new NodeTemplate.Builder<>(name, type);
 		//try to get the definition or try to load it if its normative
@@ -392,10 +397,11 @@ public class App{
 		if(myDefinition == null){
 			//try to load the parent definition
 			try{
-				loadRelationship(FILEPATH+type+".yml");
+				loadDefinition(FILEPATH+type+".yml");
 				myDefinition = (NodeDef) nodeDefinitions.get(type);
 			}catch(Exception e){
 				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
+				return false;
 			}
 			//nodeDefBuilder = new NodeDef.Builder<Builder>(name, type);
 		}
@@ -422,9 +428,37 @@ public class App{
 			nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
 		}
 		
-		return nodeBuilder.build();
+		NodeTemplate node = nodeBuilder.build();
+		valid = myDefinition.validate(node);
+		if (valid){
+			nodeTemplates.put(node.getName(), node);
+			return valid;
+		}
+		return false;
 	}
 	
+	public boolean loadRelationship(String name, Map<String,Object>relMap){
+		boolean valid;
+		String type = (String) relMap.get("type");
+		RelationshipDef myDefinition = (RelationshipDef) relDefinitions.get(type);
+		if(myDefinition == null){
+			//try to load the definition
+			try{
+				loadRelationship(FILEPATH+type+".yml");
+				myDefinition = (RelationshipDef) relDefinitions.get(type);
+			}catch(Exception e){
+				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
+				return false;
+			}
+		}
+		RelationshipTemplate relTemplate = parseRelationship(type,(Map<String, Object>) relMap.get("properties"));
+		valid = myDefinition.validate(relTemplate);
+		if (valid){
+			relTemplates.put(relTemplate.getName(), relTemplate);
+			return valid;
+		}
+		return false;
+	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public CapabilityAs parseCapability(String name, Map<String, Object> capMap){
@@ -470,16 +504,13 @@ public class App{
 	
 	//TODO p.g. 261 should be able to parse extended grammar with properties
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <V> RelationshipTemplate parseRelationship(String name, Map<String, Object> property){
-		//Map<String, Object> propertyMap = (Map<String, Object>) property.get("properties");
-		//RelationshipTemplate relationShip;
-		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(name,"desc");
+	public <V> RelationshipTemplate parseRelationship(String type, Map<String, Object> property){
+		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(type,"desc");
 		for (String key:property.keySet()){
 			builder.addProperties(new PropertyAs.Builder<V>(key,(V)property.get(key)).build());
 		}
 		return builder.build();
-	}
-	
+	}	
 	
 	//TODO p.g. 260 - 261 this should be able to parse short or extended form 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -496,7 +527,7 @@ public class App{
 					}
 					break;
 				case "node":
-					reqBuilder.node(parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
+					reqBuilder.node(new NodeTemplate.Builder<>((String) requirement.get(key), "tosca.nodes.Root").build());//(parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
 					break;
 				case "relationship":
 					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
@@ -537,7 +568,6 @@ public class App{
 					case "outputs":	break;
 					default:
 						break;
-				
 					}
 				}
 				break;
@@ -569,10 +599,11 @@ public class App{
 		}
 		//-----------------------------------------------
 		
-		
-			//Yaml yaml = new Yaml();
-			//Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-			//parseTosca(map);
+		// Parse the Yaml plan
+		//-----------------------------------------------
+	    Yaml yaml = new Yaml();
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
+		app.parseTosca(map);
 			
 //			for(String key:map.keySet()){
 //				

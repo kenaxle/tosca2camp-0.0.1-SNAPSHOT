@@ -121,15 +121,15 @@ public class NodeTemplate<V> {
 
 	public Map<String, ArtifactDef> getArtifacts() {return artifacts;}
 	
-	public V getAttributeValue(String key){
+	public V getAttributeAs(String key){
 		if (attributes.containsKey(key))
-			return (V) attributes.get(key).getValue();
+			return (V) attributes.get(key);
 		return null;
 	}
 	
-	public V getPropertyValue(String key){
+	public V getPropertyAs(String key){
 		if (properties.containsKey(key))
-			return (V) properties.get(key).getValue();
+			return (V) properties.get(key);
 		return null;
 	}
 	
@@ -138,10 +138,19 @@ public class NodeTemplate<V> {
 			return capabilities.get(key);
 		return null;
 	}
-
+	
+	public RequirementAs getRequirementAs(String key) {
+		for(RequirementAs reqItem: requirements){
+			if(reqItem.getName().equals(key))
+				return reqItem;
+		}
+		return null;
+	}
+	
 	//TODO fix the toString
 	public String toString(){
 		return "  type: "+type+"\n";	   
 	}
+	
 	
 }

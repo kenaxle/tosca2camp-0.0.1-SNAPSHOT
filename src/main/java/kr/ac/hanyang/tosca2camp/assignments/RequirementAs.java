@@ -45,11 +45,33 @@ public class RequirementAs {
 		
 	}
 
-	public String getName(){ return name;}
-	
+	public String getName(){ return name;}	
 	public CapabilityAs getCapability(){ return capability;}
 	public NodeTemplate getNode(){return node;}
-	public RelationshipTemplate retRelationship(){return relationship;}
+	public RelationshipTemplate getRelationship(){return relationship;}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RequirementAs other = (RequirementAs) obj;
+		if (capability == null) {
+			if (other.capability != null)
+				return false;
+		} else if (!capability.equals(other.capability))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+	
+	
 	
 //	public String toString(){	
 //		String retString="  - "+name+"\n";

@@ -77,9 +77,9 @@ public class RequirementDef {
 	
 	
 	public boolean validate(RequirementAs rTemp){
-		boolean valid = true;
-		if (capability.equals(rTemp.getCapability().getType()))
-		return valid;
+		return (capability.equals(rTemp.getCapability().getType())&&
+				nodeType.equals(rTemp.getNode().getType())&&
+				relationshipType.equals(rTemp.getRelationship().getType()));	
 	}
 	
 	public String toString(){

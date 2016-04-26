@@ -1,5 +1,8 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
+import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
+import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
+
 public class AttributeDef {
 
 	private String name;
@@ -80,6 +83,20 @@ public class AttributeDef {
 	public String getType(){return type;}
 	public String getDescription(){return description;}
 	public String getDefaultVal(){return defaultVal;}
+	
+	@SuppressWarnings("rawtypes")
+	public boolean validate(AttributeAs attribute){
+		boolean valid = false;
+		if (attribute != null){
+			if (name.equals(attribute.getName())){
+				//the type is valid
+				if (type.equals(attribute.getValue().getClass().getName())){
+					valid = true;
+				}
+			}
+		}
+		return valid;
+	}	
 	
 	public String toString(){
 		return "name: "+name+"\n"+

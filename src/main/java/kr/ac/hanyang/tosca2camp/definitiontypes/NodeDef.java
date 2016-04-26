@@ -3,8 +3,11 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 import java.util.ArrayList;
 import java.util.List;
 
+import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
+import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
+import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 
 public class NodeDef {
 	private String name;
@@ -175,19 +178,11 @@ public class NodeDef {
 		boolean valid = true;
 		node.getType();
 		for(PropertyDef pDef: properties){
-			Object obj = node.getPropertyValue(pDef.getName());
-			if (obj != null){
-				if (obj.getClass().getTypeName() != pDef.getType())
-					valid = false;
-			}else
+			if(!pDef.validate((PropertyAs)node.getPropertyAs(pDef.getName())))
 				valid = false;
 		}
 		for(AttributeDef aDef: attributes){
-			Object obj = node.getAttributeValue(aDef.getName());
-			if (obj != null){
-				if (obj.getClass().getTypeName() != aDef.getType())
-					valid = false;
-			}else
+			if(!aDef.validate((AttributeAs)node.getAttributeAs(aDef.getName())))
 				valid = false;
 		}
 		for(CapabilityDef cDef: capabilities){
@@ -197,14 +192,13 @@ public class NodeDef {
 			}else
 				valid = false;
 		}
-//		for(RequirementDef rDef: requirements){
-//			CapabilityAs capAs = rDef.getCapDefName()
-//			if (capAs != null){
-//				valid = cDef.validate(capAs);
-//			}else
-//				valid = false;
-//		}
-		
+		for(RequirementDef rDef: requirements){
+			RequirementAs reqAs = node.getRequirementAs(rDef.getCapDefName());
+			if (reqAs != null){
+				valid = rDef.validate(reqAs);
+			}else
+				valid = false;
+		}
 		return valid;
 	}
 	

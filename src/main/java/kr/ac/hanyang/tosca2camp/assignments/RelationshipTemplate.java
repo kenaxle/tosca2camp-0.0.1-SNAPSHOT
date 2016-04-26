@@ -90,15 +90,15 @@ public class RelationshipTemplate<V> {
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
 	
 	@SuppressWarnings("unchecked")
-	public V getAttributeValue(String key){
+	public V getAttributeAs(String key){
 		if (attributes.containsKey(key))
-			return (V) attributes.get(key).getValue();
+			return (V) attributes.get(key);
 		return null;
 	}
 	@SuppressWarnings("unchecked")
-	public V getPropertyValue(String key){
+	public V getPropertyAs(String key){
 		if (properties.containsKey(key))
-			return (V) properties.get(key).getValue();
+			return (V) properties.get(key);
 		return null;
 	}
 

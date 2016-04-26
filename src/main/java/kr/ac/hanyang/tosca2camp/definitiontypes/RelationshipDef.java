@@ -3,6 +3,9 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 import java.util.ArrayList;
 import java.util.List;
 
+import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
+import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
+import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef.Builder;
 
 public class RelationshipDef {
@@ -106,6 +109,19 @@ public class RelationshipDef {
 		return builder;
 	}
 
+	public boolean validate(RelationshipTemplate rTemp){
+		// (type.equals(rTemp.getType()));
+		for (PropertyDef propItem:properties){
+			if (!propItem.validate((PropertyAs)rTemp.getPropertyAs(propItem.getType())))
+				return false;
+		}
+		for (AttributeDef attrItem:attributes){
+			if (!attrItem.validate((AttributeAs)rTemp.getPropertyAs(attrItem.getType())))
+				return false;
+		}
+		return true;
+	}
+	
 	public String toString(){
 		return "type: "+type+"\n";
 	}

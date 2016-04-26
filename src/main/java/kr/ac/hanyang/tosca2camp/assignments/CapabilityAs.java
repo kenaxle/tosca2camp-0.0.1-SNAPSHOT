@@ -2,10 +2,8 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.util.*;
 
-import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs.Builder;
-
 public class CapabilityAs<V> {
-	public static Builder Builder;
+	//public static Builder Builder;
 	private String type;
 	private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
@@ -87,6 +85,34 @@ public class CapabilityAs<V> {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CapabilityAs<V> other = (CapabilityAs<V>) obj;
+		if (attributes == null) {
+			if (other.attributes != null)
+				return false;
+		} else if (!attributes.equals(other.attributes))
+			return false;
+		if (properties == null) {
+			if (other.properties != null)
+				return false;
+		} else if (!properties.equals(other.properties))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
+	
 	public String toString(){
 		
 		String propStr = "      properties: \n";

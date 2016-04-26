@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.toscaTypes.ListEntry;
 
 public class PropertyDef {
@@ -18,6 +19,7 @@ public class PropertyDef {
 	private String entry_schema; 
 	
 	private String deployPath;
+	private Object valid;
 	
 	public static class Builder <T extends Builder>{
 		private String name;
@@ -110,7 +112,21 @@ public class PropertyDef {
 	public String getDescription(){return description;}
 	public boolean isRequired(){return required;}
 	public String getDefaultVal(){return defaultVal;}
-		
+	
+	@SuppressWarnings("rawtypes")
+	public boolean validate(PropertyAs property){
+		boolean valid = false;
+		if (property != null){
+			if (name.equals(property.getName())){
+				//the type is valid
+				if (type.equals(property.getValue().getClass().getName())){
+					valid = true;
+				}
+			}
+		}
+		return valid;
+	}
+	
 	public String toString(){
 		return "name: "+name+"\n"+
 			   "type: "+type+"\n";
