@@ -1,0 +1,11 @@
+tosca.datatypes.ScalarType:  
+  derived_from: tosca.datatypes.scalar-unit
+  description: Scalar datatype
+  properties:
+    scalar:
+      type: integer
+    unit:
+      type: string
+      constraints:
+        - valid_values:[d,h,m,s,ms,us,ns]
+  

@@ -1,0 +1,9 @@
+tosca.datatypes.scalar-unit:  
+  derived_from: tosca.datatypes.root
+  description: Scalar datatype
+  properties:
+    scalar:
+      type: integer
+    unit:
+      type: string
+  

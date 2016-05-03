@@ -41,6 +41,7 @@ import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebApplicationNode;
 import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.DataTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
@@ -71,12 +72,18 @@ public class App{
 	private String[] relDefFileNames = {"tosca.relationships.Root.yml","tosca.relationships.ConnectsTo.yml","tosca.relationships.DependsOn.yml",
 			 "tosca.relationships.HostedOn.yml","tosca.relationships.RoutesTo.yml","tosca.relationships.AttachesTo.yml"};
 	
+	private String[] dTypeDefFileNames = {"tosca.datatypes.root.yml","tosca.datatypes.range.yml","tosca.datatypes.scalar-unit.yml",
+			 "tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml","tosca.datatypes.scalar-unit.frequency.yml"};
+	
+	
 	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
 	private Map<String, CapabilityDef> capDefinitions = new LinkedHashMap<String, CapabilityDef>(); 
 	private Map<String, RelationshipDef> relDefinitions = new LinkedHashMap<String, RelationshipDef>();
+	private Map<String, DataTypeDef> dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
 	
 	private Map<String, NodeTemplate> nodeTemplates = new LinkedHashMap<String, NodeTemplate>();
 	private Map<String, RelationshipTemplate> relTemplates = new LinkedHashMap<String, RelationshipTemplate>();
+	
 	
 	private String normalizeType(String shortType){
 		switch(shortType){
@@ -107,7 +114,7 @@ public class App{
 				nodeDefinitions.put(defName,parseNodeDef(defName,(Map<String, Object>)map.get(defName)));
 	}
 	
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private void loadCapability(String fileName) throws FileNotFoundException{
 		Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
@@ -123,10 +130,16 @@ public class App{
 			 relDefinitions.put(defName,parseRelDef(defName,(Map<String, Object>)map.get(defName)));
 	}
 	
+	private void loadDataTypes(String fileName) throws FileNotFoundException{
+		Yaml yaml = new Yaml();
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
+		for(String defName:map.keySet())			
+			 dataDefinitions.put(defName,parseDataTypeDef(defName,(Map<String, Object>)map.get(defName)));
+	}
+	
 	
 	
 	private <T> NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
-		//String type = (String) nodeMap.get("type");
 		String parentDef = (String) nodeMap.get("derived_from");
 		
 		NodeDef.Builder nodeDefBuilder;
@@ -402,6 +415,56 @@ public class App{
 			}
 		}
 		return relBuilder.build();
+	}
+	
+	
+	public DataTypeDef parseDataTypeDef(String name, Map<String, Object> dataMap){
+		String parentDef = (String) dataMap.get("derived_from");
+		
+		DataTypeDef.Builder dataDefBuilder;
+		DataTypeDef returnDef;
+		
+		if (parentDef!=null){
+			DataTypeDef parent = (DataTypeDef) dataDefinitions.get(parentDef);
+			if(parent !=null){
+				returnDef = DataTypeDef.clone(parent); //copy the parent and then get a builder to add new functionality. maybe dont clone.
+				dataDefBuilder = returnDef.getBuilder(name); 
+				dataDefBuilder.derived_from(returnDef); //add the parent
+			}else{
+				//try to load the parent definition
+				try{
+					loadDefinition(FILEPATH+parentDef+".yml");
+					//clone and get builder here also
+				}catch(Exception e){
+					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
+				}
+				dataDefBuilder = new DataTypeDef.Builder(name);
+			}
+		}else{
+			dataDefBuilder = new DataTypeDef.Builder(name); 
+		}
+		for(String key: dataMap.keySet()){
+			switch(key){
+			case "properties":
+				Map<String,Object> propDefMap = (Map<String,Object>)dataMap.get(key);
+				for(String propName:propDefMap.keySet()){
+					dataDefBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propDefMap.get(propName)));
+				}
+				break;
+			case "constraints":
+				List<Map<String,Object>> conDefList = (List<Map<String,Object>>)nodeMap.get(key);
+				for(Map<String, Object> reqMap:reqDefList){
+					//nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqDefMap.get(reqName)));
+					
+					String reqName = reqMap.keySet().iterator().next();
+					nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName)));
+					//propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());
+				}
+				break;	
+			default: 
+				break;
+			}
+		}
 	}
 	
 	//-------------------------------------------------------------------------------

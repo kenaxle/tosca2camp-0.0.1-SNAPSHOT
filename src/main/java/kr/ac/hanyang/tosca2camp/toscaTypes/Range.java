@@ -1,19 +1,20 @@
 package kr.ac.hanyang.tosca2camp.toscaTypes;
 
-public class RangeType {
+public class Range {
 	private int upperBound;
 	private int lowerBound;
 	private boolean isUnbounded;
 	
-	public RangeType(int upperBound, int lowerBound) {
+	public Range(int upperBound, int lowerBound) {
 		this.upperBound = upperBound;
 		this.lowerBound = lowerBound;
 		this.isUnbounded = false;
 	}
 	
-	//may have to set a very large number as the uperbounds
-	public RangeType(int lowerBound) {
+	//may have to set a very large number as the upperbounds
+	public Range(int lowerBound) {
 		this.lowerBound = lowerBound;
+		this.upperBound = -1;
 		this.isUnbounded = true;
 	}
 

@@ -1,0 +1,11 @@
+tosca.datatypes.ScalarType:  
+  derived_from: tosca.datatypes.scalar-unit
+  description: Scalar datatype
+  properties:
+    scalar:
+      type: float
+    unit:
+      type: string
+      constraints:
+        - valid_values:[Hz,kHz,MHz,GHz]
+  
