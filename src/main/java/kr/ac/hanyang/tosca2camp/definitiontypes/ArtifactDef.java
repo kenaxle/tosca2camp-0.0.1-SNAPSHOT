@@ -14,7 +14,7 @@ public class ArtifactDef {
 	private String description; // description are treated as their own type but for now they will be string
 	private String deployPath;
 	
-	public static class Builder <T extends Builder>{
+	public static class Builder{
 		private String name;
 		private String type;
 		private String implementation; //URI string
@@ -27,24 +27,24 @@ public class ArtifactDef {
 			this.type = type;
 		}
 		
-		public T implementation(String implementation){
+		public Builder implementation(String implementation){
 			this.implementation = implementation;
-			return (T) this;
+			return this;
 		}
 		
-		public T repository(String repository){
+		public Builder repository(String repository){
 			this.repository = repository;
-			return (T) this;
+			return this;
 		}
 		
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return this;
 		}
 		
-		public T deployPath(String deployPath){
+		public Builder deployPath(String deployPath){
 			this.deployPath = deployPath;
-			return (T) this;
+			return this;
 		}
 		
 		public ArtifactDef build(){
@@ -60,7 +60,33 @@ public class ArtifactDef {
 		this.deployPath = builder.deployPath;
 	}
 	
+	public Builder getBuilder(String name, String type){ 
+		Builder builder = new Builder(name,type);
+		builder.description = this.description;
+		builder.implementation = this.implementation;
+		builder.repository = this.repository;
+		return builder;
+	}
+	
 	public String getName(){return name;}
 	
+	public String getType(){
+		switch(type){
+		case "string": return "java.lang.String";
+		case "integer": return "java.lang.Integer";
+		case "float": return "java.lang.Double";
+		case "boolean": return "java.lang.Boolean";
+		case "list": return "java.util.ArrayList";
+		case "map": return "java.util.LinkedHashMap";
+		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
+		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
+		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
+		default: return type; 		
+		}	
+	}
+	
+	public String getDescription(){return description;}
+	public String getImplementation(){return implementation;}
+	public String getRepository(){return repository;}
 	
 }

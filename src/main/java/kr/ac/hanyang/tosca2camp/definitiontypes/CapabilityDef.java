@@ -8,48 +8,48 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 public class CapabilityDef {
 	private String name;
 	private String type;
-	private String derived_from; //URI string
+	private CapabilityDef derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
 	private Map<String, PropertyDef> properties; 
 	private Map<String, AttributeDef> attributes;
 	private List<String> valid_source_types;
 	
-	public static class Builder <T extends Builder>{
+	public static class Builder {
 		private String name;
 		private String type;
-		private String derived_from; //URI string
+		private CapabilityDef derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
-		private Map<String, PropertyDef> properties = new LinkedHashMap(); 
-		private Map<String, AttributeDef> attributes = new LinkedHashMap();
-		private List<String> valid_source_types = new ArrayList();
+		private Map<String, PropertyDef> properties = new LinkedHashMap<String, PropertyDef>(); 
+		private Map<String, AttributeDef> attributes = new LinkedHashMap<String, AttributeDef>();
+		private List<String> valid_source_types = new ArrayList<String>();
 		
 		public Builder(String name, String type){
 			this.name = name;
 			this.type = type;
 		}
 		
-		public T derived_from(String derived_from){
+		public Builder derived_from(CapabilityDef derived_from){
 			this.derived_from = derived_from;
-			return (T) this;
+			return this;
 		}
 		
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return this;
 		}
-		public T addProperty(PropertyDef property){
+		public Builder addProperty(PropertyDef property){
 			this.properties.put(property.getName(),property);
-			return (T) this;
+			return this;
 		}
 		
-		public T addAttribute(AttributeDef attribute){
+		public Builder addAttribute(AttributeDef attribute){
 			this.attributes.put(attribute.getName(),attribute);
-			return (T) this;
+			return this;
 		}
 		
-		public T addValid_source_types(String valid_source_type){
+		public Builder addValid_source_types(String valid_source_type){
 			this.valid_source_types.add(valid_source_type);
-			return (T) this;
+			return this;
 		}
 		
 		public CapabilityDef build(){
@@ -58,7 +58,7 @@ public class CapabilityDef {
 	}
 		
 	public static CapabilityDef clone(CapabilityDef origCap){
-		CapabilityDef.Builder<Builder> copyBuilder = new CapabilityDef.Builder<Builder>(origCap.name,origCap.type);
+		CapabilityDef.Builder copyBuilder = new CapabilityDef.Builder(origCap.name,origCap.type);
 		copyBuilder.description(origCap.description)
 				   .derived_from(origCap.derived_from);
 		for(String pDefName:origCap.properties.keySet()){
@@ -84,7 +84,7 @@ public class CapabilityDef {
 	}
 	
 	public Builder getBuilder(String name, String type){
-		Builder builder = new Builder<Builder>(name,type);
+		Builder builder = new Builder(name,type);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
 		builder.properties = this.properties;
@@ -99,7 +99,7 @@ public class CapabilityDef {
 
 	public String getType() {return type;}
 
-	public String getDerived_from() {return derived_from;}
+	public CapabilityDef getDerived_from() {return derived_from;}
 
 	public String getDescription() {return description;}
 

@@ -1,9 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
-import java.util.List;
-
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef.Builder;
 
 public class RequirementDef {
 	private String name;
@@ -13,7 +10,7 @@ public class RequirementDef {
 	private String occurence; // must fix
 	
 	
-	public static class Builder <T extends Builder>{
+	public static class Builder {
 		private String name;
 		private String capability;
 		private String nodeType; 
@@ -27,19 +24,19 @@ public class RequirementDef {
 		
 		public Builder() {}
 
-		public T node(String node){
+		public Builder node(String node){
 			this.nodeType = node;
-			return (T) this;
+			return this;
 		}
 		
-		public T relationship(String relationship){
+		public Builder relationship(String relationship){
 			this.relationshipType = relationship;
-			return (T) this;
+			return this;
 		}
 		
-		public T occurence(String occurence){
+		public Builder occurence(String occurence){
 			this.occurence = occurence;
-			return (T) this;
+			return this;
 		}
 		
 		public RequirementDef build(){
@@ -56,7 +53,7 @@ public class RequirementDef {
 	}
 	
 	public static RequirementDef clone(RequirementDef origReq){
-		RequirementDef.Builder<Builder> copyBuilder = new RequirementDef.Builder<Builder>(origReq.name,origReq.capability);
+		RequirementDef.Builder copyBuilder = new RequirementDef.Builder(origReq.name,origReq.capability);
 		return copyBuilder.node(origReq.nodeType)
 				   		  .relationship(origReq.relationshipType)
 				   		  .occurence(origReq.occurence)

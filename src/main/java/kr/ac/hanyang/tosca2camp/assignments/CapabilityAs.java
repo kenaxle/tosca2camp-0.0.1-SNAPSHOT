@@ -5,19 +5,18 @@ import java.util.*;
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
-import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef.Builder;
 
 public class CapabilityAs {
 	//public static Builder Builder;
 	private String type;
-	private String derived_from; //URI string
+	//private String derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
 	private Map<String, PropertyAs> properties;
 	private Map<String, AttributeAs> attributes;
 	
 	public static class Builder{
 		private String type;
-		private String derived_from; //URI string
+		//private String derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
 		private Map<String, PropertyAs> properties; //= new ArrayList<PropertyAs>();
 		private Map<String, AttributeAs> attributes; //= new ArrayList<AttributeAs>();
@@ -30,25 +29,25 @@ public class CapabilityAs {
 			attributes = new LinkedHashMap<String, AttributeAs>();
 		}
 		
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public Builder derivedFrom(String derived_from){
-			this.derived_from = derived_from;
-			return this;
-		}
+
+//		public Builder derivedFrom(String derived_from){
+//			this.derived_from = derived_from;
+//			return this;
+//		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder description(String description){
 			this.description = description;
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addProperty(PropertyAs property){
 			properties.put(property.getName(), property);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addAttribute(AttributeAs attribute){
 			attributes.put(attribute.getName(), attribute);
 			return this;
@@ -62,7 +61,7 @@ public class CapabilityAs {
 	
 	protected CapabilityAs(Builder builder){
 		this.type = builder.type;
-		this.derived_from = builder.derived_from;
+		//this.derived_from = builder.derived_from;
 		this.description = builder.description;
 		this.properties = builder.properties;
 		this.attributes = builder.attributes;
@@ -83,10 +82,33 @@ public class CapabilityAs {
 		return copyBuilder.build();
 	}
 	
+	public static Builder getDefinitionBuilder(String type, CapabilityDef definition){
+		Builder builder = new Builder(type);
+		if (! type.equals(definition.getType())) return null; //type mismatch. trying to build from the incorrect type
+		if (definition.getDerived_from() != null) 
+			builder = getDefinitionBuilder(definition.getDerived_from().getType(),definition.getDerived_from());
+		for(String propName:definition.getProperties().keySet()){
+			PropertyDef propDef = definition.getProperties().get(propName);
+			if (propDef.isRequired()){
+				builder.addProperty(PropertyAs.getDefinitionBuilder(propDef).build());
+			}
+		}
+		
+		for(String attrName:definition.getAttributes().keySet()){
+			AttributeDef attrDef = definition.getAttributes().get(attrName);
+			builder.addAttribute(AttributeAs.getDefinitionBuilder(attrDef).build());
+		}
+		
+		builder/*.derivedFrom(definition.getDerived_from())*/
+			   .description(definition.getDescription());
+		
+		return builder;	
+	}
+	
 
 	public String getType() {return type;}
 
-	public String getDerived_from() {return derived_from;}
+	//public String getDerived_from() {return derived_from;}
 
 	public String getDescription() {return description;}
 
@@ -105,7 +127,6 @@ public class CapabilityAs {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

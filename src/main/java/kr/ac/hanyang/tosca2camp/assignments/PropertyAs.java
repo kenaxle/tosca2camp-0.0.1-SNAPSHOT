@@ -25,7 +25,6 @@ public class PropertyAs {
 			return this;
 		}
 		
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public PropertyAs build(){
 			return new PropertyAs(this);
 		}
@@ -66,7 +65,7 @@ public class PropertyAs {
 	public String getName(){return name;}	
 	public Object getValue(){return value;}
 	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

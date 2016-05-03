@@ -1,0 +1,10 @@
+tosca.datatypes.network.NetworkInfo: 
+  properties: 
+    network_name: 
+      type: string
+    network_id: 
+      type: string
+    addresses: 
+      type: list 
+      entry_schema: 
+        type: string

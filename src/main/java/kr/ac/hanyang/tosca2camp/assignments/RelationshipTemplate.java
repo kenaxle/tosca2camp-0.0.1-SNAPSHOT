@@ -3,9 +3,8 @@ package kr.ac.hanyang.tosca2camp.assignments;
 import java.util.*;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.*;
-import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef.Builder;
 
-@SuppressWarnings("rawtypes")
+
 public class RelationshipTemplate {
 	private String name;
 	private String type;
@@ -30,31 +29,31 @@ public class RelationshipTemplate {
 			this.type = type;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder alias(String alias){
 			this.alias = alias;
 			return  this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder description(String description){
 			this.description = description;
 			return  this;
 		}
 		
-		@SuppressWarnings("unchecked")
-		public Builder addProperties(PropertyAs property){
+
+		public Builder addProperty(PropertyAs property){
 			this.properties.put(property.getName(),property);
 			return  this;
 		}
 		
-		@SuppressWarnings("unchecked")
-		public Builder addAttributes(AttributeAs attribute){
+
+		public Builder addAttribute(AttributeAs attribute){
 			this.attributes.put(attribute.getName(),attribute);
 			return  this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addInterfaces(InterfaceDef iterface){
 			this.interfaces.put(iterface.getName(),iterface);
 			return  this;
@@ -65,7 +64,7 @@ public class RelationshipTemplate {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	protected RelationshipTemplate(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -81,11 +80,11 @@ public class RelationshipTemplate {
 		copyBuilder.description(origRel.description);
 		for(Object propName:origRel.properties.keySet()){
 			PropertyAs pDef = (PropertyAs) origRel.properties.get(propName);
-			copyBuilder.addProperties(PropertyAs.clone(pDef)); //make sure pDef can create a copy
+			copyBuilder.addProperty(PropertyAs.clone(pDef)); //make sure pDef can create a copy
 		}
 		for(Object aDefName:origRel.attributes.keySet()){
 			AttributeAs aDef = (AttributeAs) origRel.attributes.get(aDefName);
-			copyBuilder.addAttributes(AttributeAs.clone(aDef)); //make sure pDef can create a copy
+			copyBuilder.addAttribute(AttributeAs.clone(aDef)); //make sure pDef can create a copy
 		}
 		for(Object iDefName:origRel.interfaces.keySet()){
 			InterfaceDef iDef = (InterfaceDef) origRel.interfaces.get(iDefName);
@@ -94,6 +93,26 @@ public class RelationshipTemplate {
 		return copyBuilder.build();		   
 	}
 	
+	
+	public static Builder getDefinitionBuilder(String name, String type, NodeDef definition){
+		Builder builder = new Builder(name,type);
+		if (! type.equals(definition.getTypeName())) return null; //type mismatch. trying to build from the incorrect type
+		if (definition.getDerived_from() != null) 
+			builder = getDefinitionBuilder(name,definition.getDerived_from().getTypeName(),definition.getDerived_from()); // recursively build the parent
+		for(String propName:definition.getProperties().keySet()){
+			PropertyDef propDef = definition.getProperties().get(propName);
+			if (propDef.isRequired()){
+				builder.addProperty(PropertyAs.getDefinitionBuilder(propDef).build());
+			}
+		}
+		
+		for(String attrName:definition.getAttributes().keySet()){
+			AttributeDef attrDef = definition.getAttributes().get(attrName);
+			builder.addAttribute(AttributeAs.getDefinitionBuilder(attrDef).build());
+		}
+		
+		return builder;
+	}
 		
 	public String getName() {return name;}
 	
@@ -109,13 +128,13 @@ public class RelationshipTemplate {
 
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
 	
-	@SuppressWarnings("unchecked")
+
 	public Object getAttributeAs(String key){
 		if (attributes.containsKey(key))
 			return attributes.get(key);
 		return null;
 	}
-	@SuppressWarnings("unchecked")
+
 	public Object getPropertyAs(String key){
 		if (properties.containsKey(key))
 			return properties.get(key);

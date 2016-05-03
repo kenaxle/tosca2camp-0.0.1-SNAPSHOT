@@ -21,7 +21,7 @@ public class PropertyDef {
 	private String deployPath;
 	private Object valid;
 	
-	public static class Builder <T extends Builder>{
+	public static class Builder{
 		private String name;
 		private String type;
 		private String description; // description are treated as their own type but for now they will be string
@@ -34,36 +34,37 @@ public class PropertyDef {
 		public Builder(String name, String type){
 			this.name = name;
 			this.type = type;
+			this.defaultVal = "";
 		}
 
-		public T description(String description){
+		public Builder description(String description){
 			this.description = description;
-			return (T) this;
+			return this;
 		}
 		
-		public T required(boolean required){
+		public Builder required(boolean required){
 			this.required = required;
-			return (T) this;
+			return this;
 		}
 		
-		public T defaultVal(String defaultVal){
+		public Builder defaultVal(String defaultVal){
 			this.defaultVal = defaultVal;
-			return (T) this;
+			return this;
 		}
 		
-		public T status(String status){
+		public Builder status(String status){
 			this.status = status;
-			return (T) this;
+			return this;
 		}
 		
-		public T addConstraint(ListEntry constraint){
+		public Builder addConstraint(ListEntry constraint){
 			this.constraints.add(constraint);
-			return (T) this;
+			return this;
 		}
 		
-		public T entry_schema(String entry_schema){
+		public Builder entry_schema(String entry_schema){
 			this.entry_schema = entry_schema;
-			return (T) this;
+			return this;
 		}
 		
 		public PropertyDef build(){
@@ -84,7 +85,7 @@ public class PropertyDef {
 	}
 	
 	public static PropertyDef clone(PropertyDef origProp){
-		PropertyDef.Builder<Builder> copyBuilder = new PropertyDef.Builder<Builder>(origProp.name,origProp.type);
+		PropertyDef.Builder copyBuilder = new PropertyDef.Builder(origProp.name,origProp.type);
 		copyBuilder.description(origProp.description)
 				   .required(origProp.required)
 				   .defaultVal(origProp.defaultVal)
@@ -110,7 +111,22 @@ public class PropertyDef {
 	
 	
 	public String getName(){return name;}
-	public String getType(){return type;}
+	
+	public String getType(){
+		switch(type){
+		case "string": return "java.lang.String";
+		case "integer": return "java.lang.Integer";
+		case "float": return "java.lang.Double";
+		case "boolean": return "java.lang.Boolean";
+		case "list": return "java.util.ArrayList";
+		case "map": return "java.util.LinkedHashMap";
+		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
+		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
+		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
+		default: return type; 		
+		}	
+	}
+	
 	public String getDescription(){return description;}
 	public boolean isRequired(){return required;}
 	public String getDefaultVal(){return defaultVal;}

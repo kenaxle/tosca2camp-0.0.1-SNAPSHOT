@@ -1,14 +1,11 @@
 package kr.ac.hanyang.tosca2camp.assignments;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.*;
-import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 
 public class NodeTemplate {
 	private String name;
@@ -40,53 +37,53 @@ public class NodeTemplate {
 			this.type = type;
 		}
 		
-		public Builder(NodeDef definition){
-			
-		}
+//		public Builder(NodeDef definition){
+//			
+//		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder description(String description){
 			this.description = description;
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder directives(List<String> directives){
 			this.directives = directives;
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addProperty(PropertyAs property){
 			this.properties.put(property.getName(), property);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addAttribute(AttributeAs attribute){
 			this.attributes.put(attribute.getName(), attribute);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addRequirement(RequirementAs requirement){
 			this.requirements.add(requirement);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addCapability(CapabilityAs capability){
 			this.capabilities.put(capability.getType(), capability);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addInterface(InterfaceDef inface){
 			this.interfaces.put(inface.getName(), inface);
 			return this;
 		}
 		
-		@SuppressWarnings("unchecked")
+
 		public Builder addArtifact(ArtifactDef artifact){
 			this.artifacts.put(artifact.getName(), artifact);
 			return this;
@@ -99,7 +96,7 @@ public class NodeTemplate {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	protected NodeTemplate(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -134,10 +131,11 @@ public class NodeTemplate {
 		return copyBuilder.build();		   
 	}
 
-	public Builder getDefinitionBuilder(String name, String type, NodeDef definition){
+	public static Builder getDefinitionBuilder(String name, String type, NodeDef definition){
 		Builder builder = new Builder(name,type);
-		if (! type.equals(definition.getType())) return null; //type mismatch
-		
+		if (! type.equals(definition.getTypeName())) return null; //type mismatch. trying to build from the incorrect type
+		if (definition.getDerived_from() != null) 
+			builder = getDefinitionBuilder(name,definition.getDerived_from().getTypeName(),definition.getDerived_from()); // recursively build the parent
 		for(String propName:definition.getProperties().keySet()){
 			PropertyDef propDef = definition.getProperties().get(propName);
 			if (propDef.isRequired()){
@@ -151,20 +149,18 @@ public class NodeTemplate {
 		}
 		
 		for(String capName:definition.getCapabilities().keySet()){
-			CapabilityDef attrDef = definition.getAttributes().get(attrName);
-			Constructor constructor;
-			try {
-				constructor = Class.forName(definition.getType()).getConstructor(String.class);
-				Object value;
-				value = constructor.newInstance(attrDef.getDefaultVal());
-				builder.addProperty(new PropertyAs.Builder(attrName,value).build());
-			} catch (NoSuchMethodException | SecurityException | ClassNotFoundException| InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
-				e.printStackTrace();
-			}
+			CapabilityDef capDef = definition.getCapabilities().get(capName);
+			String capType =  capDef.getType();
+			builder.addCapability(CapabilityAs.getDefinitionBuilder(capType, capDef).build());
 		}
 		
-		return null;
+//		for(RequirementDef reqDef:definition.getRequirements()){
+//			CapabilityDef capDef = definition.getCapabilities().get(capName);
+//			String capType =  capDef.getType();
+//			builder.addCapability(CapabilityAs.getDefinitionBuilder(capType, capDef).build());
+//		}
+		
+		return builder;
 	}
 	
 	public String getName(){return name;}

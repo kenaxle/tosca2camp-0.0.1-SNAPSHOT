@@ -1,7 +1,5 @@
 package kr.ac.hanyang.tosca2camp.assignments;
 
-import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
-
 public class RequirementAs {
 	
 	private String name;
@@ -23,6 +21,7 @@ public class RequirementAs {
 				          .relationship(RelationshipTemplate.clone(orig.relationship))
 				          .build();
 	}
+	
 	
 	public static class Builder{
 		private String name;

@@ -2,6 +2,7 @@ package kr.ac.hanyang.tosca2camp.assignments;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 
@@ -49,7 +50,7 @@ public class AttributeAs {
 	}
 	
 	public static AttributeAs.Builder getDefinitionBuilder(AttributeDef attrDef){
-		Constructor constructor;
+		Constructor<?> constructor;
 		try {
 			constructor = Class.forName(attrDef.getType()).getConstructor(String.class);
 			Object value;

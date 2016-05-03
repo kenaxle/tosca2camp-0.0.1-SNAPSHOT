@@ -10,5 +10,17 @@ public abstract class ScalarType<T> {
 		this.scalarVal = scalarVal;
 		this.unit = unit;
 	}
+	
+	public T getScalar(){
+		return scalarVal;
+	}
+	
+	public String getUnit(){
+		return unit;
+	}
+	
+	public void setScalar( T scalar){
+		this.scalarVal = scalar;
+	}
 		
 }

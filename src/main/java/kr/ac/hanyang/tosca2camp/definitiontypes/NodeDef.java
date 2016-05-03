@@ -12,9 +12,8 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 
 public class NodeDef {
-	private String name;
-	private String type;
-	private String derived_from; //URI string
+	private String typeName;
+	private NodeDef derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
 	private Map<String, PropertyDef> properties; 
 	private Map<String, AttributeDef> attributes;
@@ -24,9 +23,8 @@ public class NodeDef {
 	private Map<String, ArtifactDef> artifacts;
 	
 	public static class Builder {
-		private String name;
-		private String type;
-		private String derived_from; //URI string
+		private String typeName;
+		private NodeDef derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
 		private Map<String, PropertyDef> properties = new LinkedHashMap<String, PropertyDef>(); 
 		private Map<String, AttributeDef> attributes = new LinkedHashMap<String, AttributeDef>() ;
@@ -35,14 +33,13 @@ public class NodeDef {
 		private Map<String, InterfaceDef> interfaces = new LinkedHashMap<String, InterfaceDef>();
 		private Map<String, ArtifactDef> artifacts = new LinkedHashMap<String, ArtifactDef>();
 		
-		public Builder(String name, String type){
-			this.name = name;
-			this.type = type;
+		public Builder(String typeName){
+			this.typeName = typeName;
 		}
 		
 		public Builder() {}
 
-		public Builder derived_from(String derived_from){
+		public Builder derived_from(NodeDef derived_from){
 			this.derived_from = derived_from;
 			return  this;
 		}
@@ -89,8 +86,7 @@ public class NodeDef {
 	
 	
 	protected NodeDef(Builder builder){
-		this.name = builder.name;
-		this.type = builder.type;
+		this.typeName = builder.typeName;
 		this.derived_from = builder.derived_from;
 		this.description = builder.description;
 		this.properties = builder.properties;
@@ -102,7 +98,7 @@ public class NodeDef {
 	}
 	
 	public static NodeDef clone(NodeDef orig2Copy){
-		NodeDef.Builder copyBuilder = new NodeDef.Builder(orig2Copy.getName(), orig2Copy.getType());
+		NodeDef.Builder copyBuilder = new NodeDef.Builder(orig2Copy.getTypeName());
 		copyBuilder.derived_from(orig2Copy.getDerived_from())
 				   .description(orig2Copy.getDescription());
 		for(String pDefName:orig2Copy.properties.keySet()){
@@ -123,8 +119,8 @@ public class NodeDef {
 		return copyBuilder.build();		   
 	}
 	
-	public Builder getBuilder(String name, String type){
-		Builder builder = new Builder(name,type);
+	public Builder getBuilder(String typeName){
+		Builder builder = new Builder(typeName);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
 		builder.properties = this.properties;
@@ -136,11 +132,10 @@ public class NodeDef {
 		return builder;
 	}	
 	
-	public String getName() {return name;}
 
-	public String getType() {return type;}
+	public String getTypeName() {return typeName;}
 
-	public String getDerived_from() {return derived_from;}
+	public NodeDef getDerived_from() {return derived_from;}
 
     public String getDescription() {return description;}
 
@@ -175,8 +170,7 @@ public class NodeDef {
 		}
 		for(RequirementDef req:requirements)
 			reqs+=req;
-		return "Name: "+name+"\n"+
-			   "Type: "+type+"\n"+
+		return "TypeName: "+typeName+"\n"+
 			   "Description: "+description+"\n"+
 			   "properties: \n"+props+"\n"+
 			   "attributes: \n"+attrs+"\n"+

@@ -78,6 +78,25 @@ public class App{
 	private Map<String, NodeTemplate> nodeTemplates = new LinkedHashMap<String, NodeTemplate>();
 	private Map<String, RelationshipTemplate> relTemplates = new LinkedHashMap<String, RelationshipTemplate>();
 	
+	private String normalizeType(String shortType){
+		switch(shortType){
+		case "Root": return "tosca.nodes.Root"; 
+		case "Compute": return "tosca.nodes.Compute";
+		case "SoftwareComponent": return "tosca.nodes.SoftwareComponent"; 
+		case "WebServer": return "tosca.nodes.WebServer";
+		case "WebApplication": return "tosca.nodes.WebApplication"; 
+		case "DBMS": return "tosca.nodes.DBMS";
+		case "Database": return "tosca.nodes.Database"; 
+		case "ObjectStorage": return "tosca.nodes.ObjectStorage"; 
+		case "BlockStorage": return "tosca.nodes.BlockStorage";
+		case "Container.Runtime": return "tosca.nodes.Container.Runtime"; 
+		case "Container.Application": return "tosca.nodes.Container.Application";
+		case "LoadBalancer": return "tosca.nodes.LoadBalancer";
+		default: return shortType;//test if the type is not empty then its long type
+		}
+	}
+	
+	
 	//load the Normative type definitions
 	//-------------------------------------------------------------------------------
 	@SuppressWarnings({ "unchecked" })
@@ -106,8 +125,8 @@ public class App{
 	
 	
 	
-	private <T> NodeDef parseNodeDef(String name, Map<String, Object>nodeMap){
-		String type = (String) nodeMap.get("type");
+	private <T> NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
+		//String type = (String) nodeMap.get("type");
 		String parentDef = (String) nodeMap.get("derived_from");
 		
 		NodeDef.Builder nodeDefBuilder;
@@ -118,19 +137,21 @@ public class App{
 		if (parentDef!=null){
 			NodeDef parent = (NodeDef) nodeDefinitions.get(parentDef);
 			if(parent !=null){
-				returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality
-				nodeDefBuilder = returnNode.getBuilder(name,type); 
+				returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality. maybe dont clone.
+				nodeDefBuilder = returnNode.getBuilder(typeName); 
+				nodeDefBuilder.derived_from(returnNode); //add the parent
 			}else{
 				//try to load the parent definition
 				try{
 					loadDefinition(FILEPATH+parentDef+".yml");
+					//clone and get builder here also
 				}catch(Exception e){
 					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
 				}
-				nodeDefBuilder = new NodeDef.Builder(name, type);
+				nodeDefBuilder = new NodeDef.Builder(typeName);
 			}
 		}else{
-			nodeDefBuilder = new NodeDef.Builder(name, type); 
+			nodeDefBuilder = new NodeDef.Builder(typeName); 
 		}
 		//continue parsing the definition.
 		for(String key: nodeMap.keySet()){
@@ -239,7 +260,7 @@ public class App{
 		return attrBuilder.build();
 	}
 	
-	@SuppressWarnings({ "rawtypes" })
+
 	public RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
 		String capability = (String) reqMap.get("capability");	
 		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name, capability);
@@ -384,26 +405,12 @@ public class App{
 	}
 	
 	//-------------------------------------------------------------------------------
-
-	private List<String> getBuildStack(NodeDef nodeDef){
-		List<String> retList = null;
-		if (nodeDef.getDerived_from() == null){
-			retList =  new ArrayList();
-			retList.add(nodeDef.getType());
-		}else 
-		{
-			retList = getBuildStack(nodeDefinitions.get(nodeDef.getDerived_from()));
-			retList.add(nodeDef.getType());
-		}
-		return retList;
-	}
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <V> boolean parseNode(String name, Map<String, Object>nodeMap){
-		boolean valid;
+	public <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
 		String type = (String) nodeMap.get("type");
-		NodeTemplate.Builder<V> nodeBuilder = new NodeTemplate.Builder<>(name, type);
+		NodeTemplate.Builder nodeBuilder; // = new NodeTemplate.Builder(name, type);
 		String typeName = "";
 		
 		switch(type){
@@ -424,40 +431,33 @@ public class App{
 		break; //use the empty string
 		}
 		
-		//try to get the definition or try to load it if its normative
-		
+		//try to get the definition or try to load it if its normative		
 		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(typeName);
-		List<String> buildList = getBuildStack(myDefinition);
-		for(String ancestor: buildList){
-			
-		}
-			//returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality
-			//nodeDefBuilder = returnNode.getBuilder(name,type); 
 		if(myDefinition == null){
-			//try to load the parent definition
+			//try to load the definition
 			try{
 				loadDefinition(FILEPATH+typeName+".yml");
-				myDefinition = (NodeDef) nodeDefinitions.get(type);
+				myDefinition = (NodeDef) nodeDefinitions.get(typeName);
 			}catch(Exception e){
 				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
-				return false;
+				return null;
 			}
-			//nodeDefBuilder = new NodeDef.Builder<Builder>(name, type);
 		}
+		nodeBuilder = NodeTemplate.getDefinitionBuilder(name, typeName, myDefinition);
+		//nodeBuilder.description((String) nodeMap.get("description"));
 		
-		nodeBuilder.description((String) nodeMap.get("description"));
 		//nodeBuilder.directives(directives); TODO
 		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
 		if (propMap != null){
 			for(String propertyName:propMap.keySet()){
-				nodeBuilder.addProperty(new PropertyAs.Builder<V>(propertyName,(V)propMap.get(propertyName)).build());
+				nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
 			}
 		}
 		
 		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
 		if (attrMap != null){
 			for(String attributeName:propMap.keySet()){
-				nodeBuilder.addAttribute(new AttributeAs.Builder<V>(attributeName,(V)propMap.get(attributeName)).build());
+				nodeBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
 			}
 		}
 		
@@ -475,14 +475,7 @@ public class App{
 				nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
 			}
 		}
-		
-		NodeTemplate node = nodeBuilder.build();
-		valid = myDefinition.validate(node);
-		if (valid){
-			nodeTemplates.put(node.getName(), node);
-			return valid;
-		}
-		return false;
+		return nodeBuilder.build();
 	}
 	
 	public boolean loadRelationship(String name, Map<String,Object>relMap){
@@ -508,9 +501,9 @@ public class App{
 		return false;
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	public CapabilityAs parseCapability(String name, Map<String, Object> capMap){
-		CapabilityAs.Builder capBuilder = new CapabilityAs.Builder(name);
+		CapabilityAs.Builder capBuilder;// = new CapabilityAs.Builder(name);
 		
 		String type;
 		switch(name){
@@ -536,32 +529,31 @@ public class App{
 				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
 			}
 		}
+		capBuilder = CapabilityAs.getDefinitionBuilder(type, myDefinition);
 		
 		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
 		for(String propertyName:propMap.keySet()){
-			capBuilder.addProperty(new PropertyAs.Builder(propertyName,propMap.get(propertyName)).build());
+			capBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
 		}
 		
 		Map<String,Object> attrMap = ((Map<String,Object>) capMap.get("attributes"));
 		for(String attributeName:propMap.keySet()){
-			capBuilder.addAttribute(new AttributeAs.Builder(attributeName,propMap.get(attributeName)).build());
+			capBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
 		}
 		//do validation
 		return capBuilder.build();
 	}
 	
 	//TODO p.g. 261 should be able to parse extended grammar with properties
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <V> RelationshipTemplate parseRelationship(String type, Map<String, Object> property){
 		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(type,"desc");
 		for (String key:property.keySet()){
-			builder.addProperties(new PropertyAs.Builder<V>(key,(V)property.get(key)).build());
+			builder.addProperty(new PropertyAs.Builder(key).value(property.get(key)).build());
 		}
 		return builder.build();
 	}	
 	
 	//TODO p.g. 260 - 261 this should be able to parse short or extended form 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T, U, V> RequirementAs parseRequirement(String name, Map<String, Object> requirement){
 		RequirementAs.Builder reqBuilder = new RequirementAs.Builder(name);
 		for (String key:requirement.keySet()){
@@ -575,7 +567,7 @@ public class App{
 					}
 					break;
 				case "node":
-					reqBuilder.node(new NodeTemplate.Builder<>((String) requirement.get(key), "tosca.nodes.Root").build());//(parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
+					reqBuilder.node(new NodeTemplate.Builder((String) requirement.get(key), "tosca.nodes.Root").build());//(parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
 					break;
 				case "relationship":
 					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
