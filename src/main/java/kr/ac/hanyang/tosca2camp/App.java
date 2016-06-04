@@ -17,37 +17,16 @@ import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AdminEndpointCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.AttachmentCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.BindableNetworkCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ContainerCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.DatabaseEndpointCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.EndpointCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.NodeCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.OperatingSystemCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.PublicEndpointCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.capabilities.ScalableCapability;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.ApplicationContainerNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.BlockStorageNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.ComputeNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.DBMSNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.DatabaseNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.LoadBalancerNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.ObjectStorageNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.RootNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.RuntimeContainerNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.SoftwareComponentNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebApplicationNode;
-import kr.ac.hanyang.tosca2camp.datatypes.nodes.WebServerNode;
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.ConstraintTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.DataTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
-import kr.ac.hanyang.tosca2camp.toscaTypes.ListEntry;
+
 
 
 /**
@@ -236,11 +215,10 @@ public class App{
 				propBuilder.status((String)propMap.get(mapItem));
 				break;
 			case "constraints":
-				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> conList = (List<Map<String, Object>>) propMap.get(mapItem);
 				for(Map<String,Object> constraint:conList){
 					String key = constraint.keySet().iterator().next();
-					propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());	
+					propBuilder.addConstraint(new ConstraintTypeDef.Builder(key).value(constraint.get(key)).build());	
 				}
 				break;
 			case "entry_schema":
@@ -416,8 +394,7 @@ public class App{
 		}
 		return relBuilder.build();
 	}
-	
-	
+		
 	public DataTypeDef parseDataTypeDef(String name, Map<String, Object> dataMap){
 		String parentDef = (String) dataMap.get("derived_from");
 		
@@ -452,19 +429,17 @@ public class App{
 				}
 				break;
 			case "constraints":
-				List<Map<String,Object>> conDefList = (List<Map<String,Object>>)nodeMap.get(key);
-				for(Map<String, Object> reqMap:reqDefList){
-					//nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqDefMap.get(reqName)));
-					
-					String reqName = reqMap.keySet().iterator().next();
-					nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName)));
-					//propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());
+				List<Map<String,Object>> conList = (List<Map<String, Object>>) dataMap.get(key);
+				for(Map<String,Object> constraint:conList){
+					String operator = constraint.keySet().iterator().next();
+					dataDefBuilder.addConstraint(new ConstraintTypeDef.Builder(operator).value(constraint.get(operator)).build());	
 				}
 				break;	
 			default: 
 				break;
 			}
 		}
+		return dataDefBuilder.build();
 	}
 	
 	//-------------------------------------------------------------------------------
@@ -682,9 +657,6 @@ public class App{
 	}
 	
 	
-	
-	
-	
 	@SuppressWarnings("unchecked")
 	public static void main( String[] args ) throws Exception{
 		
@@ -700,6 +672,10 @@ public class App{
 		for(String fileName: app.relDefFileNames){
 			app.loadRelationship(app.FILEPATH+fileName);
 		}
+		for(String fileName: app.dTypeDefFileNames){
+			app.loadDataTypes(app.FILEPATH+fileName);
+		}
+		
 		//-----------------------------------------------
 		
 		// Parse the Yaml plan

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-import kr.ac.hanyang.tosca2camp.toscaTypes.ListEntry;
+
 
 public class PropertyDef {
 
@@ -15,7 +15,7 @@ public class PropertyDef {
 	private boolean required;
 	private String defaultVal; //if the property value is not specified then use this default value
 	private String status;
-	private List<ListEntry> constraints; //TODO this type will have to be defined
+	private List<ConstraintTypeDef> constraints; //TODO this type will have to be defined
 	private String entry_schema; 
 	
 	private String deployPath;
@@ -28,7 +28,7 @@ public class PropertyDef {
 		private boolean required = true;
 		private String defaultVal = ""; //TODO this will have to suite the type
 		private String status;
-		private List<ListEntry> constraints = new ArrayList<ListEntry>(); //TODO this type will have to be defined
+		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>(); //TODO this type will have to be defined
 		private String entry_schema; 
 		
 		public Builder(String name, String type){
@@ -57,7 +57,7 @@ public class PropertyDef {
 			return this;
 		}
 		
-		public Builder addConstraint(ListEntry constraint){
+		public Builder addConstraint(ConstraintTypeDef constraint){
 			this.constraints.add(constraint);
 			return this;
 		}
@@ -90,8 +90,8 @@ public class PropertyDef {
 				   .required(origProp.required)
 				   .defaultVal(origProp.defaultVal)
 				   .status(origProp.status);		   
-		for( ListEntry constraint:origProp.constraints){
-			copyBuilder.addConstraint(new ListEntry(constraint)); //make sure to create a copy
+		for( ConstraintTypeDef constraint:origProp.constraints){
+			copyBuilder.addConstraint(ConstraintTypeDef.clone(constraint)); //make sure to create a copy
 		}
 		return copyBuilder.entry_schema(origProp.entry_schema)
 				   .build();

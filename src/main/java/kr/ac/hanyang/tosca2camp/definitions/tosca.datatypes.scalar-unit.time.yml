@@ -1,4 +1,4 @@
-tosca.datatypes.ScalarType:  
+tosca.datatypes.scalar-unit.time:  
   derived_from: tosca.datatypes.scalar-unit
   description: Scalar datatype
   properties:
@@ -7,5 +7,5 @@ tosca.datatypes.ScalarType:
     unit:
       type: string
       constraints:
-        - valid_values:[d,h,m,s,ms,us,ns]
+        - valid_values: [d, h, m, s, ms, us, ns]
   

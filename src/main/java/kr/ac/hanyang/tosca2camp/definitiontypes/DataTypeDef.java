@@ -17,14 +17,14 @@ public class DataTypeDef {
 	private String typeName;
 	private DataTypeDef derived_from;
 	private String description; // description are treated as their own type but for now they will be string
-	private List<Map<String, Object>> constraints; 
+	private List<ConstraintTypeDef> constraints; 
 	private Map<String, PropertyDef> properties;
 	
 	public static class Builder{
 		private String typeName;
 		private DataTypeDef derived_from;
 		private String description; // description are treated as their own type but for now they will be string
-		private List<Map<String, Object>> constraints = new ArrayList<Map<String, Object>>();
+		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>();
 		private Map<String, PropertyDef> properties = new LinkedHashMap<String, PropertyDef>(); 
 		
 		public Builder(String name){
@@ -41,7 +41,7 @@ public class DataTypeDef {
 			return this;
 		}
 		
-		public Builder addConstraint(Map<String, Object> constraint){
+		public Builder addConstraint(ConstraintTypeDef constraint){
 			this.constraints.add(constraint);
 			return this;
 		}
@@ -81,7 +81,7 @@ public class DataTypeDef {
 			PropertyDef pDef = orig2Copy.properties.get(pDefName);
 			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
 		}
-		//need to be able to clone the constraints
+		//need to be able to clone the constraintstosca.constraints.min_length.yml
 //		for(Map<String, Object> constraint:orig2Copy.constraints){
 //			copyBuilder.addConstraint(RequirementDef.clone(rDef)); //make sure pDef can create a copy
 //		}
@@ -92,7 +92,7 @@ public class DataTypeDef {
 	public String getTypeName(){return typeName;}
 	public DataTypeDef getDerived_from(){return derived_from;}
 	public String getDescription(){return description;}
-	public List<Map<String, Object>> getConstraints(){return constraints;}
+	public List<ConstraintTypeDef> getConstraints(){return constraints;}
 	public Map<String, PropertyDef>  getProperties(){return properties;}
 	
 }
