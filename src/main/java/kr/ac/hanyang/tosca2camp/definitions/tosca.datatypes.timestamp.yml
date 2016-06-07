@@ -1,0 +1,6 @@
+tosca.datatypes.timestamp:  
+  description: Timestamp datatype
+  properties: 
+    value: 
+      type: timestamp
+  

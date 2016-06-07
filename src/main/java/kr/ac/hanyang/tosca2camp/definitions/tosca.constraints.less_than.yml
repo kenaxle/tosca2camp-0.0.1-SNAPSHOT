@@ -1,0 +1,3 @@
+tosca.constraints.less_than: 
+  value:
+    type: scalar

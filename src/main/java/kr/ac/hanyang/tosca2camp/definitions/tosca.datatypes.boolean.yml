@@ -1,0 +1,6 @@
+tosca.datatypes.boolean:  
+  description: Boolean datatype
+  properties: 
+    value: 
+      type: boolean
+  

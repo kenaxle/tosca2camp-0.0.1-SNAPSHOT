@@ -1,5 +1,4 @@
 tosca.datatypes.range:  
-  derived_from: tosca.datatypes.root
   description: Range datatype
   properties:
     lowerBound:

@@ -1,5 +1,4 @@
 tosca.datatypes.scalar-unit.size:  
-  derived_from: tosca.datatypes.scalar-unit
   description: Scalar datatype
   properties:
     scalar:

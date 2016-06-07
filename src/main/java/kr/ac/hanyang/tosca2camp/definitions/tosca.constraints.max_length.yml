@@ -1,0 +1,3 @@
+tosca.constraints.in_range: 
+  value:
+    type: [string, list, map]

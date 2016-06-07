@@ -1,0 +1,6 @@
+tosca.datatypes.string:  
+  description: String datatype
+  properties: 
+    value: 
+      type: string
+  
