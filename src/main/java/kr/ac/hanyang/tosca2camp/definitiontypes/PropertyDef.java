@@ -10,33 +10,38 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 public class PropertyDef {
 
 	private String name;
-	private String type;
+	private DataTypeDef type;
 	private String description; // description are treated as their own type but for now they will be string
 	private boolean required;
 	private String defaultVal; //if the property value is not specified then use this default value
 	private String status;
 	private List<ConstraintTypeDef> constraints; //TODO this type will have to be defined
-	private String entry_schema; 
+	private EntrySchemaDef entry_schema; 
 	
 	private String deployPath;
 	private Object valid;
 	
 	public static class Builder{
 		private String name;
-		private String type;
+		private DataTypeDef type;
 		private String description; // description are treated as their own type but for now they will be string
 		private boolean required = true;
 		private String defaultVal = ""; //TODO this will have to suite the type
 		private String status;
 		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>(); //TODO this type will have to be defined
-		private String entry_schema; 
+		private EntrySchemaDef entry_schema; 
 		
-		public Builder(String name, String type){
+		public Builder(String name){
 			this.name = name;
-			this.type = type;
+			//this.type = type;
 			this.defaultVal = "";
 		}
 
+		public Builder type(DataTypeDef type){
+			this.type = type;
+			return this;
+		}
+		
 		public Builder description(String description){
 			this.description = description;
 			return this;
@@ -62,7 +67,7 @@ public class PropertyDef {
 			return this;
 		}
 		
-		public Builder entry_schema(String entry_schema){
+		public Builder entry_schema(EntrySchemaDef entry_schema){
 			this.entry_schema = entry_schema;
 			return this;
 		}
@@ -85,8 +90,9 @@ public class PropertyDef {
 	}
 	
 	public static PropertyDef clone(PropertyDef origProp){
-		PropertyDef.Builder copyBuilder = new PropertyDef.Builder(origProp.name,origProp.type);
-		copyBuilder.description(origProp.description)
+		PropertyDef.Builder copyBuilder = new PropertyDef.Builder(origProp.name);
+		copyBuilder.type(origProp.type)
+				   .description(origProp.description)
 				   .required(origProp.required)
 				   .defaultVal(origProp.defaultVal)
 				   .status(origProp.status);		   
@@ -97,8 +103,9 @@ public class PropertyDef {
 				   .build();
 	}
 	
-	public Builder getBuilder(String name, String type){ 
-		Builder builder = new Builder(name,type);
+	public Builder getBuilder(String name, DataTypeDef type){ 
+		Builder builder = new Builder(name);
+		builder.type = this.type;
 		builder.description = this.description;
 		builder.required = this.required;
 		builder.defaultVal = this.defaultVal;
@@ -113,18 +120,19 @@ public class PropertyDef {
 	public String getName(){return name;}
 	
 	public String getType(){
-		switch(type){
-		case "string": return "java.lang.String";
-		case "integer": return "java.lang.Integer";
-		case "float": return "java.lang.Double";
-		case "boolean": return "java.lang.Boolean";
-		case "list": return "java.util.ArrayList";
-		case "map": return "java.util.LinkedHashMap";
-		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
-		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
-		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
-		default: return type; 		
-		}	
+//		switch(type){
+//		case "string": return "java.lang.String";
+//		case "integer": return "java.lang.Integer";
+//		case "float": return "java.lang.Double";
+//		case "boolean": return "java.lang.Boolean";
+//		case "list": return "java.util.ArrayList";
+//		case "map": return "java.util.LinkedHashMap";
+//		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
+//		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
+//		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
+//		default: return type; 		
+//		}	
+		return type.getTypeName();
 	}
 	
 	public String getDescription(){return description;}

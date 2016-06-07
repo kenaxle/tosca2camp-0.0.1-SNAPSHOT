@@ -1,6 +1,3 @@
 tosca.datatypes.float:  
   description: Float datatype
-  properties: 
-    value: 
-      type: float
   

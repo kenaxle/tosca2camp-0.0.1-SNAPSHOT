@@ -1,6 +1,2 @@
 tosca.datatypes.integer:  
   description: Integer datatype
-  properties: 
-    value: 
-      type: integer
-  

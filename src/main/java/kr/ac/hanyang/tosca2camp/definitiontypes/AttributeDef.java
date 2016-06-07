@@ -9,7 +9,7 @@ public class AttributeDef {
 	private String description; // description are treated as their own type but for now they will be string
 	private String defaultVal;  //TODO
 	private String status; 
-	private String entry_schema;
+	private EntrySchemaDef entry_schema;
 	
 	public static class Builder{
 		private String name;
@@ -17,7 +17,7 @@ public class AttributeDef {
 		private String description; // description are treated as their own type but for now they will be string
 		private String defaultVal;  //TODO
 		private String status; 
-		private String entry_schema;
+		private EntrySchemaDef entry_schema;
 		
 		public Builder(String name, String type){
 			this.name = name;
@@ -42,7 +42,7 @@ public class AttributeDef {
 			return this;
 		}
 		
-		public Builder entry_schema(String entry_schema){
+		public Builder entry_schema(EntrySchemaDef entry_schema){
 			this.entry_schema = entry_schema;
 			return this;
 		}

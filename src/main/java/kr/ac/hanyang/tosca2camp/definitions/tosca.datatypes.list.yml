@@ -1,6 +1,2 @@
 tosca.datatypes.list:  
   description: List datatype
-  properties:
-    value: 
-      type: list
-  

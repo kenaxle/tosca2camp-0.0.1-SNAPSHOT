@@ -1,6 +1,2 @@
 tosca.datatypes.map:  
   description: Map datatype
-  properties:
-    value: 
-      type: map
-  

@@ -21,6 +21,7 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.ConstraintTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.DataTypeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.EntrySchemaDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
@@ -36,6 +37,7 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
 public class App{
 	
 	private final String FILEPATH = "C:/Users/Kena/git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/definitions/";
+	private final String TYPEPREFIX = "tosca.datatypes.";
 	
 	//hardcode the names of the definition files only for testing
 	private String[] nodeDefFileNames = {"tosca.nodes.Root.yml","tosca.nodes.BlockStorage.yml","tosca.nodes.Compute.yml",
@@ -145,7 +147,7 @@ public class App{
 				}catch(Exception e){
 					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
 				}
-				nodeDefBuilder = new NodeDef.Builder(typeName);
+				nodeDefBuilder = new NodeDef.Builder(typeName); // may have to go in the try
 			}
 		}else{
 			nodeDefBuilder = new NodeDef.Builder(typeName); 
@@ -202,11 +204,48 @@ public class App{
 		return returnNode;
 	}
 	
-	public PropertyDef parsePropDef(String name, Map<String, Object> propMap){
+	
+	public EntrySchemaDef parseEntrySchema(Map<String, Object> propMap){
 		String type = (String) propMap.get("type");
-		PropertyDef.Builder propBuilder = new PropertyDef.Builder(name, type);
+		EntrySchemaDef.Builder entrySchemaBuilder = new EntrySchemaDef.Builder(type);
 		for(String mapItem:propMap.keySet()){
 			switch(mapItem){
+			case "description":
+				entrySchemaBuilder.description((String)propMap.get(mapItem));
+				break;
+			case "constraints":
+				List<Map<String,Object>> conList = (List<Map<String, Object>>) propMap.get(mapItem);
+				for(Map<String,Object> constraint:conList){
+					String key = constraint.keySet().iterator().next();
+					entrySchemaBuilder.addConstraint(new ConstraintTypeDef.Builder(key).value(constraint.get(key)).build());	
+				}
+				break;
+			}
+		}
+		return entrySchemaBuilder.build();
+	}
+	
+	
+	public PropertyDef parsePropDef(String name, Map<String, Object> propMap){
+		
+		PropertyDef.Builder propBuilder = new PropertyDef.Builder(name);
+		for(String mapItem:propMap.keySet()){
+			switch(mapItem){
+			case "type":
+				String type = (String) propMap.get("type");
+				// load the definition from the list
+				DataTypeDef dataDef = dataDefinitions.get(TYPEPREFIX+type); //TODO I may have to clone 
+				if (dataDef == null){
+					try{
+						loadDataTypes(FILEPATH+TYPEPREFIX+type+".yml");
+						dataDef = dataDefinitions.get(TYPEPREFIX+type);
+					}
+					catch(Exception e){
+						return null; // dont have the definition
+					}
+				}
+				propBuilder.type(dataDef); 
+				break;
 			case "description":
 				propBuilder.description((String)propMap.get(mapItem));
 				break;
@@ -227,7 +266,7 @@ public class App{
 				}
 				break;
 			case "entry_schema":
-				propBuilder.entry_schema((String)propMap.get(mapItem));
+				propBuilder.entry_schema(parseEntrySchema((Map<String, Object>)propMap.get(mapItem)));
 				break;
 			}
 		}
@@ -400,55 +439,34 @@ public class App{
 	}
 		
 	public DataTypeDef parseDataTypeDef(String name, Map<String, Object> dataMap){
-		String parentDef = (String) dataMap.get("derived_from");
-		
 		DataTypeDef.Builder dataDefBuilder;
 		DataTypeDef returnDef;
 		
-		//building from the parent gives us 3 options
-		// 1. the parent was already loaded so use the parent's object to build the child
-		// 2. the parent was not loaded but the definition file esists then load the parent's def file and do step 1
-		// 3. the parent does not esist so use a default datatype.
-		if (parentDef!=null){
-			DataTypeDef parent = (DataTypeDef) dataDefinitions.get(parentDef);
-			if(parent !=null){
-				returnDef = DataTypeDef.clone(parent); //copy the parent and then get a builder to add new functionality. maybe dont clone.
-				dataDefBuilder = returnDef.getBuilder(name); 
-				dataDefBuilder.derived_from(returnDef); //add the parent
-			}else{
-				//TODO try to load the parent definition
-				try{
-					loadDefinition(FILEPATH+parentDef+".yml");
-					//clone and get builder here also
-				}catch(Exception e){
-					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
+		dataDefBuilder = new DataTypeDef.Builder(name); 
+		if (dataMap != null){
+			for(String key: dataMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propDefMap = (Map<String,Object>)dataMap.get(key);
+					for(String propName:propDefMap.keySet()){
+						dataDefBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propDefMap.get(propName)));
+					}
+					break;
+				case "constraints":
+					List<Map<String,Object>> conList = (List<Map<String, Object>>) dataMap.get(key);
+					for(Map<String,Object> constraint:conList){
+						String operator = constraint.keySet().iterator().next();
+						dataDefBuilder.addConstraint(new ConstraintTypeDef.Builder(operator).value(constraint.get(operator)).build());	
+					}
+					break;	
+				default: 
+					break;
 				}
-				dataDefBuilder = new DataTypeDef.Builder(name);
-			}
-		}else{
-			dataDefBuilder = new DataTypeDef.Builder(name); 
-		}
-		for(String key: dataMap.keySet()){
-			switch(key){
-			case "properties":
-				Map<String,Object> propDefMap = (Map<String,Object>)dataMap.get(key);
-				for(String propName:propDefMap.keySet()){
-					dataDefBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propDefMap.get(propName)));
-				}
-				break;
-			case "constraints":
-				List<Map<String,Object>> conList = (List<Map<String, Object>>) dataMap.get(key);
-				for(Map<String,Object> constraint:conList){
-					String operator = constraint.keySet().iterator().next();
-					dataDefBuilder.addConstraint(new ConstraintTypeDef.Builder(operator).value(constraint.get(operator)).build());	
-				}
-				break;	
-			default: 
-				break;
 			}
 		}
 		return dataDefBuilder.build();
 	}
+	
 	
 	//-------------------------------------------------------------------------------
 	
