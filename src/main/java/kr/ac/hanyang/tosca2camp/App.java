@@ -51,8 +51,12 @@ public class App{
 	private String[] relDefFileNames = {"tosca.relationships.Root.yml","tosca.relationships.ConnectsTo.yml","tosca.relationships.DependsOn.yml",
 			 "tosca.relationships.HostedOn.yml","tosca.relationships.RoutesTo.yml","tosca.relationships.AttachesTo.yml"};
 	
-	private String[] dTypeDefFileNames = {"tosca.datatypes.root.yml","tosca.datatypes.range.yml","tosca.datatypes.scalar-unit.yml",
-			 "tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml","tosca.datatypes.scalar-unit.frequency.yml"};
+	private String[] dTypeDefFileNames = {"tosca.datatypes.boolean.yml","tosca.datatypes.credential.yml","tosca.datatypes.float.yml",
+			"tosca.datatypes.integer.yml","tosca.datatypes.list.yml","tosca.datatypes.map.yml","tosca.datatypes.network.NetworkInfo.yml",
+			"tosca.datatypes.network.PortDef.yml","tosca.datatypes.network.PortInfo.yml","tosca.datatypes.network.PortSpec.yml",
+			"tosca.datatypes.string.yml","tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml","tosca.datatypes.range.yml",
+			"tosca.datatypes.scalar-unit.yml","tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml",
+			"tosca.datatypes.scalar-unit.frequency.yml"};
 	
 	
 	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
@@ -83,7 +87,7 @@ public class App{
 	}
 	
 	
-	//load the Normative type definitions
+	//load the Normative node type definitions
 	//-------------------------------------------------------------------------------
 	@SuppressWarnings({ "unchecked" })
 	private void loadDefinition(String fileName) throws FileNotFoundException{
@@ -109,6 +113,7 @@ public class App{
 			 relDefinitions.put(defName,parseRelDef(defName,(Map<String, Object>)map.get(defName)));
 	}
 	
+	//loads the datatype definitions
 	private void loadDataTypes(String fileName) throws FileNotFoundException{
 		Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
@@ -118,7 +123,7 @@ public class App{
 	
 	
 	
-	private <T> NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
+	private NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
 		String parentDef = (String) nodeMap.get("derived_from");
 		
 		NodeDef.Builder nodeDefBuilder;
@@ -251,7 +256,6 @@ public class App{
 		return attrBuilder.build();
 	}
 	
-
 	public RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
 		String capability = (String) reqMap.get("capability");	
 		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name, capability);
@@ -401,6 +405,10 @@ public class App{
 		DataTypeDef.Builder dataDefBuilder;
 		DataTypeDef returnDef;
 		
+		//building from the parent gives us 3 options
+		// 1. the parent was already loaded so use the parent's object to build the child
+		// 2. the parent was not loaded but the definition file esists then load the parent's def file and do step 1
+		// 3. the parent does not esist so use a default datatype.
 		if (parentDef!=null){
 			DataTypeDef parent = (DataTypeDef) dataDefinitions.get(parentDef);
 			if(parent !=null){
@@ -408,7 +416,7 @@ public class App{
 				dataDefBuilder = returnDef.getBuilder(name); 
 				dataDefBuilder.derived_from(returnDef); //add the parent
 			}else{
-				//try to load the parent definition
+				//TODO try to load the parent definition
 				try{
 					loadDefinition(FILEPATH+parentDef+".yml");
 					//clone and get builder here also
@@ -583,7 +591,7 @@ public class App{
 	}
 	
 	//TODO p.g. 261 should be able to parse extended grammar with properties
-	public <V> RelationshipTemplate parseRelationship(String type, Map<String, Object> property){
+	public RelationshipTemplate parseRelationship(String type, Map<String, Object> property){
 		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(type,"desc");
 		for (String key:property.keySet()){
 			builder.addProperty(new PropertyAs.Builder(key).value(property.get(key)).build());
@@ -592,7 +600,7 @@ public class App{
 	}	
 	
 	//TODO p.g. 260 - 261 this should be able to parse short or extended form 
-	public <T, U, V> RequirementAs parseRequirement(String name, Map<String, Object> requirement){
+	public RequirementAs parseRequirement(String name, Map<String, Object> requirement){
 		RequirementAs.Builder reqBuilder = new RequirementAs.Builder(name);
 		for (String key:requirement.keySet()){
 			switch (key){
@@ -663,7 +671,7 @@ public class App{
 		// load the Normative definitions
 		//-----------------------------------------------
 		App app = new App();
-		for(String fileName: app.nodeDefFileNames){
+/*		for(String fileName: app.nodeDefFileNames){
 			app.loadDefinition(app.FILEPATH+fileName);
 		}
 		for(String fileName: app.capDefFileNames){
@@ -671,7 +679,7 @@ public class App{
 		}
 		for(String fileName: app.relDefFileNames){
 			app.loadRelationship(app.FILEPATH+fileName);
-		}
+		}*/
 		for(String fileName: app.dTypeDefFileNames){
 			app.loadDataTypes(app.FILEPATH+fileName);
 		}
