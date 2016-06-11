@@ -45,7 +45,7 @@ public class AttributeAs {
 	
 	public static AttributeAs clone(AttributeAs origAttr){
 		AttributeAs.Builder copyBuilder = new AttributeAs.Builder(origAttr.name);
-		copyBuilder.value(origAttr.getValue());
+		copyBuilder.value(origAttr.getValue()); // TODO will have to clone this object
 		return copyBuilder.build();
 	}
 	

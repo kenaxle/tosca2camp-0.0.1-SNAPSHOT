@@ -6,7 +6,7 @@ import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
 public class CapabilityDef {
-	private String name;
+	private String name; // for normative this should be the short name
 	private String type;
 	private CapabilityDef derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
@@ -25,6 +25,11 @@ public class CapabilityDef {
 		
 		public Builder(String name, String type){
 			this.name = name;
+			this.type = type;
+		}
+		
+		public Builder(String type){
+			this.name = "";
 			this.type = type;
 		}
 		
@@ -56,20 +61,29 @@ public class CapabilityDef {
 			return new CapabilityDef(this);
 		}
 	}
-		
-	public static CapabilityDef clone(CapabilityDef origCap){
-		CapabilityDef.Builder copyBuilder = new CapabilityDef.Builder(origCap.name,origCap.type);
-		copyBuilder.description(origCap.description)
-				   .derived_from(origCap.derived_from);
-		for(String pDefName:origCap.properties.keySet()){
-			PropertyDef pDef = origCap.properties.get(pDefName);
-			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
-		}
-		for(String aDefName:origCap.attributes.keySet()){
-			AttributeDef aDef = origCap.attributes.get(aDefName);
-			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
-		}
-		return copyBuilder.build();
+	
+	
+	public CapabilityDef clone(){
+		try{
+			CapabilityDef toReturn = (CapabilityDef) super.clone();
+			toReturn.derived_from = derived_from.clone();
+			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
+			for(String pDefName:properties.keySet()){
+				PropertyDef pDef = properties.get(pDefName);
+				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+			}
+			toReturn.attributes = new LinkedHashMap<String, AttributeDef>();
+			for(String aDefName:attributes.keySet()){
+				AttributeDef aDef = attributes.get(aDefName);
+				toReturn.attributes.put(aDefName,  aDef.clone()); //make sure aDef can create a copy
+			}
+			toReturn.valid_source_types = new ArrayList<String>();
+			for(String vSource: valid_source_types)
+				toReturn.valid_source_types.add(vSource);
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}		   
 	}
 	
 	
@@ -83,7 +97,7 @@ public class CapabilityDef {
 		this.valid_source_types = builder.valid_source_types;
 	}
 	
-	public Builder getBuilder(String name, String type){
+	public Builder getBuilder(){
 		Builder builder = new Builder(name,type);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
@@ -114,8 +128,8 @@ public class CapabilityDef {
 			   "type: "+type+"\n";
 	}
 
-	public boolean validate(CapabilityAs capAs){
-		return false;
-	}
+//	public boolean validate(CapabilityAs capAs){
+//		return false;
+//	}
 	
 }

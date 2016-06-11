@@ -10,11 +10,14 @@ import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
+import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate.Builder;
 
 public class NodeDef {
+	private String name; //Node Template name
 	private String typeName;
 	private NodeDef derived_from; //URI string
 	private String description; // description are treated as their own type but for now they will be string
+	private List<String> directives; //Node template item
 	private Map<String, PropertyDef> properties; 
 	private Map<String, AttributeDef> attributes;
 	private List<RequirementDef> requirements;
@@ -23,9 +26,11 @@ public class NodeDef {
 	private Map<String, ArtifactDef> artifacts;
 	
 	public static class Builder {
+		private String name;
 		private String typeName;
 		private NodeDef derived_from; //URI string
 		private String description; // description are treated as their own type but for now they will be string
+		private List<String> directives;
 		private Map<String, PropertyDef> properties = new LinkedHashMap<String, PropertyDef>(); 
 		private Map<String, AttributeDef> attributes = new LinkedHashMap<String, AttributeDef>() ;
 		private List<RequirementDef> requirements = new ArrayList<RequirementDef>();
@@ -33,11 +38,16 @@ public class NodeDef {
 		private Map<String, InterfaceDef> interfaces = new LinkedHashMap<String, InterfaceDef>();
 		private Map<String, ArtifactDef> artifacts = new LinkedHashMap<String, ArtifactDef>();
 		
+		//used to builde a type Definition
 		public Builder(String typeName){
 			this.typeName = typeName;
 		}
 		
-		public Builder() {}
+		//usede to builde a NodeTemplate
+		public Builder(String name, String typeName) {   
+			this.name = name;
+			this.typeName = typeName;
+		}
 
 		public Builder derived_from(NodeDef derived_from){
 			this.derived_from = derived_from;
@@ -48,6 +58,12 @@ public class NodeDef {
 			this.description = description;
 			return  this;
 		}
+		
+		public Builder directives(List<String> directives){
+			this.directives = directives;
+			return this;
+		}
+		
 		public Builder addProperty(PropertyDef property){
 			this.properties.put(property.getName(),property);
 			return  this;
@@ -64,7 +80,7 @@ public class NodeDef {
 		}
 		
 		public Builder addCapabilitiy(CapabilityDef capability){
-			this.capabilities.put(capability.getName(),capability);
+			this.capabilities.put(capability.getType(),capability);
 			return  this;
 		}
 		
@@ -86,9 +102,11 @@ public class NodeDef {
 	
 	
 	protected NodeDef(Builder builder){
+		this.name = builder.name;
 		this.typeName = builder.typeName;
 		this.derived_from = builder.derived_from;
 		this.description = builder.description;
+		this.directives = builder.directives;
 		this.properties = builder.properties;
 		this.attributes = builder.attributes;
 		this.requirements = builder.requirements;
@@ -96,31 +114,43 @@ public class NodeDef {
 		this.interfaces = builder.interfaces;
 		this.artifacts = builder.artifacts;
 	}
+
 	
-	public static NodeDef clone(NodeDef orig2Copy){
-		NodeDef.Builder copyBuilder = new NodeDef.Builder(orig2Copy.getTypeName());
-		copyBuilder.derived_from(orig2Copy.getDerived_from())
-				   .description(orig2Copy.getDescription());
-		for(String pDefName:orig2Copy.properties.keySet()){
-			PropertyDef pDef = orig2Copy.properties.get(pDefName);
-			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
-		}
-		for(String aDefName:orig2Copy.attributes.keySet()){
-			AttributeDef aDef = orig2Copy.attributes.get(aDefName);
-			copyBuilder.addAttribute(AttributeDef.clone(aDef)); //make sure pDef can create a copy
-		}
-		for(RequirementDef rDef:orig2Copy.requirements){
-			copyBuilder.addRequirement(RequirementDef.clone(rDef)); //make sure pDef can create a copy
-		}
-		for(String cDefName:orig2Copy.capabilities.keySet()){
-			CapabilityDef cDef = orig2Copy.capabilities.get(cDefName);
-			copyBuilder.addCapabilitiy(CapabilityDef.clone(cDef)); //make sure pDef can create a copy
-		}
-		return copyBuilder.build();		   
+	//using a static clone method because I can make use of the builder to build a 
+	//properly constructed clone
+	public NodeDef clone(){
+		
+		//NodeDef.Builder copyBuilder = new NodeDef.Builder(orig2Copy.getTypeName());
+		try{
+			NodeDef toReturn = (NodeDef) super.clone();
+			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
+			for(String pDefName:properties.keySet()){
+				PropertyDef pDef = properties.get(pDefName);
+				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+			}
+			toReturn.attributes = new LinkedHashMap<String, AttributeDef>();
+			for(String aDefName:attributes.keySet()){
+				AttributeDef aDef = attributes.get(aDefName);
+				toReturn.attributes.put(aDefName,  aDef.clone()); //make sure aDef can create a copy
+			}
+			toReturn.requirements = new ArrayList<RequirementDef>();
+			for(RequirementDef rDef:requirements){
+				toReturn.requirements.add(rDef.clone()); //make sure pDef can create a copy
+			}
+			toReturn.capabilities = new LinkedHashMap<String, CapabilityDef>();
+			for(String cDefName:capabilities.keySet()){
+				CapabilityDef cDef = capabilities.get(cDefName);
+				toReturn.capabilities.put(cDefName, cDef.clone()); //make sure pDef can create a copy
+			}
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}		   
 	}
 	
-	public Builder getBuilder(String typeName){
+	public Builder getBuilder(){
 		Builder builder = new Builder(typeName);
+		builder.name = this.name;
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
 		builder.properties = this.properties;
@@ -140,16 +170,31 @@ public class NodeDef {
     public String getDescription() {return description;}
 
 	public Map<String, PropertyDef> getProperties() {return properties;}
+	
+	//public PropertyDef getProperty(String name){return properties.get(name);}
 
 	public Map<String, AttributeDef> getAttributes() {return attributes;}
+	
+	//public AttributeDef getAttribute(String name){return attributes.get(name);}
 
 	public List<RequirementDef> getRequirements() {return requirements;}
+	
+	//public RequirementDef getRequirement(String name, CapabilityDef capDef){return requirements.get(requirements.indexOf(new RequirementDef.Builder(name,capDef).build()));}
 
 	public Map<String, CapabilityDef> getCapabilities() {return capabilities;}
+	
+	//public CapabilityDef getCapability()
 
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
 
 	public Map<String, ArtifactDef> getArtifacts() {return artifacts;}
+	
+	
+	public void setPropertyValue(String name, Object value){
+		PropertyDef toSet = properties.get(name);
+		toSet.setValue()
+	}
+	
 	
 	public String toString(){
 		String props ="";
@@ -179,35 +224,35 @@ public class NodeDef {
 			   
 	}
 
-	public boolean validate(NodeTemplate node){
-		boolean valid = true;
-		node.getType();
-		for(String pDefName:properties.keySet()){
-			PropertyDef pDef = properties.get(pDefName);
-			if(!pDef.validate((PropertyAs)node.getPropertyAs(pDef.getName())))
-				valid = false;
-		}
-		for(String aDefName:attributes.keySet()){
-			AttributeDef aDef = attributes.get(aDefName);
-			if(!aDef.validate((AttributeAs)node.getAttributeAs(aDef.getName())))
-				valid = false;
-		}
-		for(String cDefName:capabilities.keySet()){
-			CapabilityDef cDef = capabilities.get(cDefName);
-			CapabilityAs capAs = node.getCapabilityAs(cDef.getName());
-			if (capAs != null){
-				valid = cDef.validate(capAs);
-			}else
-				valid = false;
-		}
-		for(RequirementDef rDef: requirements){
-			RequirementAs reqAs = node.getRequirementAs(rDef.getCapDefName());
-			if (reqAs != null){
-				valid = rDef.validate(reqAs);
-			}else
-				valid = false;
-		}
-		return valid;
-	}
+//	public boolean validate(NodeTemplate node){
+//		boolean valid = true;
+//		node.getType();
+//		for(String pDefName:properties.keySet()){
+//			PropertyDef pDef = properties.get(pDefName);
+//			if(!pDef.validate((PropertyAs)node.getPropertyAs(pDef.getName())))
+//				valid = false;
+//		}
+//		for(String aDefName:attributes.keySet()){
+//			AttributeDef aDef = attributes.get(aDefName);
+//			if(!aDef.validate((AttributeAs)node.getAttributeAs(aDef.getName())))
+//				valid = false;
+//		}
+//		for(String cDefName:capabilities.keySet()){
+//			CapabilityDef cDef = capabilities.get(cDefName);
+//			CapabilityAs capAs = node.getCapabilityAs(cDef.getName());
+//			if (capAs != null){
+//				valid = cDef.validate(capAs);
+//			}else
+//				valid = false;
+//		}
+//		for(RequirementDef rDef: requirements){
+//			RequirementAs reqAs = node.getRequirementAs(rDef.getCapDefName());
+//			if (reqAs != null){
+//				valid = rDef.validate(reqAs);
+//			}else
+//				valid = false;
+//		}
+//		return valid;
+//	}
 	
 }

@@ -9,7 +9,7 @@ public class InterfaceDef {
 	private List<String> inputs; //TODO define the property definitions or property assignments
 	
 
-	public static class Builder <T extends Builder>{
+	public static class Builder{
 		private String name;
 		private List<String> inputs = new ArrayList(); //TODO define the property definitions or property assignments
 		
@@ -19,9 +19,9 @@ public class InterfaceDef {
 		
 		public Builder(){}
 		
-		public T addInput(String input){
+		public Builder addInput(String input){
 			this.inputs.add(input);
-			return (T) this;
+			return this;
 		}
 		
 		public InterfaceDef build(){
@@ -30,12 +30,14 @@ public class InterfaceDef {
 	}
 	
 	
-	public static InterfaceDef clone(InterfaceDef origIDef){
-		InterfaceDef.Builder copyBuilder = new InterfaceDef.Builder(origIDef.name);
-		for(String input:origIDef.inputs){
-			copyBuilder.addInput(input); 
-		}
-		return copyBuilder.build();
+	public InterfaceDef clone(){
+		try{
+			InterfaceDef toReturn = (InterfaceDef) super.clone();
+			//toReturn.inputs = new ArrayList<String>();
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}		  
 	}
 	
 	private InterfaceDef(Builder builder){
@@ -43,7 +45,7 @@ public class InterfaceDef {
 		this.inputs = builder.inputs;
 	}
 	
-	public Builder getBuilder(String name){
+	public Builder getBuilder(){
 		Builder builder = new Builder(name);
 		builder.name = this.name;
 		return builder;

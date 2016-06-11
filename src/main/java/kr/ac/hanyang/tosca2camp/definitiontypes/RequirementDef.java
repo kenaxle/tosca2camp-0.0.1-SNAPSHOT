@@ -4,32 +4,31 @@ import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 
 public class RequirementDef {
 	private String name;
-	private String capability;
-	private String nodeType; 
-	private String relationshipType;
+	private CapabilityDef capability;
+	private NodeDef nodeType; 
+	private RelationshipDef relationshipType;
 	private String occurence; // must fix
 	
 	
 	public static class Builder {
 		private String name;
-		private String capability;
-		private String nodeType; 
-		private String relationshipType;
+		private CapabilityDef capability;
+		private NodeDef nodeType; 
+		private RelationshipDef relationshipType;
 		private String occurence; // must fix
 		
-		public Builder(String name, String capability){
+		public Builder(String name, CapabilityDef capability){
 			this.name = name;
 			this.capability = capability;
 		}
 		
-		public Builder() {}
 
-		public Builder node(String node){
+		public Builder node(NodeDef node){
 			this.nodeType = node;
 			return this;
 		}
 		
-		public Builder relationship(String relationship){
+		public Builder relationship(RelationshipDef relationship){
 			this.relationshipType = relationship;
 			return this;
 		}
@@ -52,15 +51,19 @@ public class RequirementDef {
 		this.occurence = builder.occurence;
 	}
 	
-	public static RequirementDef clone(RequirementDef origReq){
-		RequirementDef.Builder copyBuilder = new RequirementDef.Builder(origReq.name,origReq.capability);
-		return copyBuilder.node(origReq.nodeType)
-				   		  .relationship(origReq.relationshipType)
-				   		  .occurence(origReq.occurence)
-				   		  .build();
+	public RequirementDef clone(){
+		try{
+			RequirementDef toReturn = (RequirementDef) super.clone();
+			toReturn.capability = capability.clone(); //TODO this should clone
+			toReturn.nodeType = nodeType.clone();
+			toReturn.relationshipType = relationshipType.clone();
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}	
 	}
 	
-	public Builder getBuilder(String name, String capability){
+	public Builder getBuilder(){
 		Builder builder = new Builder(name, capability);
 		builder.nodeType = this.nodeType;
 		builder.relationshipType = this.relationshipType;
@@ -68,9 +71,9 @@ public class RequirementDef {
 		return builder;	
 	}
 	
-	public String getCapDefName(){return capability;}
-	public String getNodeDefName(){return nodeType;}
-	public String getRelDefName(){return relationshipType;}
+	public CapabilityDef getCapDefName(){return capability;}
+	public NodeDef getNodeDefName(){return nodeType;}
+	public RelationshipDef getRelDefName(){return relationshipType;}
 	
 	
 	public boolean validate(RequirementAs rTemp){

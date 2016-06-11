@@ -143,16 +143,16 @@ public class NodeTemplate {
 			}
 		}
 		
-		for(String attrName:definition.getAttributes().keySet()){
-			AttributeDef attrDef = definition.getAttributes().get(attrName);
-			builder.addAttribute(AttributeAs.getDefinitionBuilder(attrDef).build());
-		}
+//		for(String attrName:definition.getAttributes().keySet()){
+//			AttributeDef attrDef = definition.getAttributes().get(attrName);
+//			builder.addAttribute(AttributeAs.getDefinitionBuilder(attrDef).build());
+//		}
 		
-		for(String capName:definition.getCapabilities().keySet()){
-			CapabilityDef capDef = definition.getCapabilities().get(capName);
-			String capType =  capDef.getType();
-			builder.addCapability(CapabilityAs.getDefinitionBuilder(capType, capDef).build());
-		}
+//		for(String capName:definition.getCapabilities().keySet()){
+//			CapabilityDef capDef = definition.getCapabilities().get(capName);
+//			String capType =  capDef.getType();
+//			builder.addCapability(CapabilityAs.getDefinitionBuilder(capType, capDef).build());
+//		}
 		
 //		for(RequirementDef reqDef:definition.getRequirements()){
 //			CapabilityDef capDef = definition.getCapabilities().get(capName);
@@ -208,7 +208,7 @@ public class NodeTemplate {
 		}
 		return null;
 	}
-	
+		
 	
 	
 	//TODO fix the toString

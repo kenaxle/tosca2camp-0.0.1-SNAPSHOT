@@ -5,7 +5,7 @@ tosca.nodes.SoftwareComponent:
       type: version
       required: false
     admin_credential:
-      type: tosca.datatypes.Credential
+      type: credential
       required: false
   requirements:
     - host:

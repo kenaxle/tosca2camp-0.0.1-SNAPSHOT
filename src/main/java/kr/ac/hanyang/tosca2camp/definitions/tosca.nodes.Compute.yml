@@ -8,11 +8,11 @@ tosca.nodes.Compute:
     networks:
       type: map
       entry_schema:
-        type: tosca.datatypes.network.NetworkInfo
+        type: network.NetworkInfo
     ports:
       type: map
       entry_schema:
-        type: tosca.datatypes.network.PortInfo
+        type: network.PortInfo
   requirements:
     - local_storage:
         capability: tosca.capabilities.Attachment

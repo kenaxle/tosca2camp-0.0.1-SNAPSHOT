@@ -47,8 +47,7 @@ public class PropertyAs {
 		return copyBuilder.build();
 	}
 	
-	public static PropertyAs.Builder getDefinitionBuilder(PropertyDef propDef){
-		
+	public static PropertyAs.Builder getDefinitionBuilder(PropertyDef propDef){	
 		Constructor<?> constructor;
 		try {
 			constructor = Class.forName(propDef.getType()).getConstructor(String.class);

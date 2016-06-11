@@ -1,12 +1,5 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
-
 /**
  * @author Kena Alexander
  * @since 
@@ -42,16 +35,20 @@ public class ConstraintTypeDef {
 		this.value = builder.value;
 	}
 	
-	public Builder getBuilder(String operator){ 
+	public Builder getBuilder(){ 
 		Builder builder = new Builder(operator);
 		builder.value = this.value;
 		return builder;
 	}
 	
-	public static ConstraintTypeDef clone(ConstraintTypeDef orig2Copy){
-		ConstraintTypeDef.Builder copyBuilder = new ConstraintTypeDef.Builder(orig2Copy.getOperator());
-		copyBuilder.value(orig2Copy.getValue());
-		return copyBuilder.build();		   
+	public ConstraintTypeDef clone(){
+		try{
+			ConstraintTypeDef toReturn = (ConstraintTypeDef) super.clone();
+			toReturn.value = value.clone(); //TODO this should clone
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}	
 	}
 		
 	

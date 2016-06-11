@@ -10,10 +10,11 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 public class PropertyDef {
 
 	private String name;
-	private DataTypeDef type;
+	private String type;
 	private String description; // description are treated as their own type but for now they will be string
 	private boolean required;
-	private String defaultVal; //if the property value is not specified then use this default value
+	private DataTypeDef propertyValue;
+	private DataTypeDef defaultVal; //if the property value is not specified then use this default value
 	private String status;
 	private List<ConstraintTypeDef> constraints; //TODO this type will have to be defined
 	private EntrySchemaDef entry_schema; 
@@ -23,10 +24,11 @@ public class PropertyDef {
 	
 	public static class Builder{
 		private String name;
-		private DataTypeDef type;
+		private String type;
 		private String description; // description are treated as their own type but for now they will be string
 		private boolean required = true;
-		private String defaultVal = ""; //TODO this will have to suite the type
+		private DataTypeDef propertyValue;
+		private DataTypeDef defaultVal; //TODO this will have to suite the type
 		private String status;
 		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>(); //TODO this type will have to be defined
 		private EntrySchemaDef entry_schema; 
@@ -34,10 +36,10 @@ public class PropertyDef {
 		public Builder(String name){
 			this.name = name;
 			//this.type = type;
-			this.defaultVal = "";
+			//this.defaultVal = "";
 		}
 
-		public Builder type(DataTypeDef type){
+		public Builder type(String type){
 			this.type = type;
 			return this;
 		}
@@ -52,7 +54,7 @@ public class PropertyDef {
 			return this;
 		}
 		
-		public Builder defaultVal(String defaultVal){
+		public Builder defaultVal(DataTypeDef defaultVal){
 			this.defaultVal = defaultVal;
 			return this;
 		}
@@ -73,6 +75,7 @@ public class PropertyDef {
 		}
 		
 		public PropertyDef build(){
+			// if the default value is not set then set it here.
 			return new PropertyDef(this);
 		}
 	}
@@ -83,32 +86,36 @@ public class PropertyDef {
 		this.type = builder.type;
 		this.description = builder.description;
 		this.required = builder.required;
+		this.propertyValue = builder.propertyValue;
 		this.defaultVal = builder.defaultVal;
 		this.status = builder.status;
 		this.constraints = builder.constraints;
 		this.entry_schema = builder.entry_schema;
 	}
 	
-	public static PropertyDef clone(PropertyDef origProp){
-		PropertyDef.Builder copyBuilder = new PropertyDef.Builder(origProp.name);
-		copyBuilder.type(origProp.type)
-				   .description(origProp.description)
-				   .required(origProp.required)
-				   .defaultVal(origProp.defaultVal)
-				   .status(origProp.status);		   
-		for( ConstraintTypeDef constraint:origProp.constraints){
-			copyBuilder.addConstraint(ConstraintTypeDef.clone(constraint)); //make sure to create a copy
-		}
-		return copyBuilder.entry_schema(origProp.entry_schema)
-				   .build();
+	public PropertyDef clone(){
+		try{
+			PropertyDef toReturn = (PropertyDef) super.clone();
+			toReturn.propertyValue = (DataTypeDef) propertyValue.clone();
+			toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
+			toReturn.constraints = new ArrayList<ConstraintTypeDef>();
+			for( ConstraintTypeDef constraint:constraints){
+				toReturn.constraints.add((ConstraintTypeDef) constraint.clone()); //make sure to create a copy
+			}
+			toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
+			return toReturn;
+		}catch(CloneNotSupportedException e){
+			return null;
+		}	
 	}
 	
-	public Builder getBuilder(String name, DataTypeDef type){ 
+	public Builder getBuilder(){ 
 		Builder builder = new Builder(name);
 		builder.type = this.type;
 		builder.description = this.description;
 		builder.required = this.required;
 		builder.defaultVal = this.defaultVal;
+		builder.propertyValue = this.propertyValue;
 		builder.status = this.status;
 		builder.constraints = this.constraints;
 		builder.entry_schema = this.entry_schema;
@@ -117,27 +124,11 @@ public class PropertyDef {
 	
 	
 	
-	public String getName(){return name;}
-	
-	public String getType(){
-//		switch(type){
-//		case "string": return "java.lang.String";
-//		case "integer": return "java.lang.Integer";
-//		case "float": return "java.lang.Double";
-//		case "boolean": return "java.lang.Boolean";
-//		case "list": return "java.util.ArrayList";
-//		case "map": return "java.util.LinkedHashMap";
-//		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
-//		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
-//		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
-//		default: return type; 		
-//		}	
-		return type.getTypeName();
-	}
-	
+	public String getName(){return name;}	
+	public String getType(){return type;}	
 	public String getDescription(){return description;}
 	public boolean isRequired(){return required;}
-	public String getDefaultVal(){return defaultVal;}
+	public DataTypeDef getDefaultVal(){return defaultVal;}
 	
 	@SuppressWarnings("rawtypes")
 	public boolean validate(PropertyAs property){
