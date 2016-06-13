@@ -29,9 +29,9 @@ topology_template:
       capabilities:
         host:
           properties:
-            disk_size: 10
+            disk_size: 10 GB
             num_cpus: 4
-            mem_size: 1 
+            mem_size: 1 GB
         os:
           properties:
             architecture: x86_64

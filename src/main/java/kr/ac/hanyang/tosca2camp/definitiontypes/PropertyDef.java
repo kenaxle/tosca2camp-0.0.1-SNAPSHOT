@@ -13,7 +13,7 @@ public class PropertyDef {
 	private String type;
 	private String description; // description are treated as their own type but for now they will be string
 	private boolean required;
-	private DataTypeDef propertyValue;
+	private Object propertyValue;
 	private DataTypeDef defaultVal; //if the property value is not specified then use this default value
 	private String status;
 	private List<ConstraintTypeDef> constraints; //TODO this type will have to be defined
@@ -27,7 +27,7 @@ public class PropertyDef {
 		private String type;
 		private String description; // description are treated as their own type but for now they will be string
 		private boolean required = true;
-		private DataTypeDef propertyValue;
+		private Object propertyValue;
 		private DataTypeDef defaultVal; //TODO this will have to suite the type
 		private String status;
 		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>(); //TODO this type will have to be defined
@@ -96,7 +96,7 @@ public class PropertyDef {
 	public PropertyDef clone(){
 		try{
 			PropertyDef toReturn = (PropertyDef) super.clone();
-			toReturn.propertyValue = (DataTypeDef) propertyValue.clone();
+			//toReturn.propertyValue = (Object) propertyValue.clone();
 			toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
 			toReturn.constraints = new ArrayList<ConstraintTypeDef>();
 			for( ConstraintTypeDef constraint:constraints){
@@ -129,6 +129,10 @@ public class PropertyDef {
 	public String getDescription(){return description;}
 	public boolean isRequired(){return required;}
 	public DataTypeDef getDefaultVal(){return defaultVal;}
+	
+	public void setValue(Object value){
+		propertyValue = value;
+	}
 	
 	@SuppressWarnings("rawtypes")
 	public boolean validate(PropertyAs property){

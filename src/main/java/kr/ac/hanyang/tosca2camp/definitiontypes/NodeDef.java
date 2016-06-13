@@ -192,7 +192,7 @@ public class NodeDef {
 	
 	public void setPropertyValue(String name, Object value){
 		PropertyDef toSet = properties.get(name);
-		toSet.setValue()
+		toSet.setValue(value);
 	}
 	
 	

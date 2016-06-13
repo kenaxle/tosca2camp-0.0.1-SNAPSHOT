@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Iterator;
+
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
 
 /**
@@ -92,28 +94,22 @@ public class DataTypeDef {
 		}	
 	}
 	
-	
-//	public static DataTypeDef clone(DataTypeDef orig2Copy){
-//		DataTypeDef.Builder copyBuilder = new DataTypeDef.Builder(orig2Copy.getTypeName());
-//		copyBuilder.derived_from(orig2Copy.getDerived_from())
-//				   .description(orig2Copy.getDescription());
-//		for(String pDefName:orig2Copy.properties.keySet()){
-//			PropertyDef pDef = orig2Copy.properties.get(pDefName);
-//			copyBuilder.addProperty(PropertyDef.clone(pDef)); //make sure pDef can create a copy
-//		}
-//		//need to be able to clone the constraintstosca.constraints.min_length.yml
-////		for(Map<String, Object> constraint:orig2Copy.constraints){
-////			copyBuilder.addConstraint(RequirementDef.clone(rDef)); //make sure pDef can create a copy
-////		}
-//		return copyBuilder.build();		   
-//	}
-//		
-	
 	public String getTypeName(){return typeName;}
 	public DataTypeDef getDerived_from(){return derived_from;}
 	public String getDescription(){return description;}
 	public List<ConstraintTypeDef> getConstraints(){return constraints;}
 	public Map<String, PropertyDef>  getProperties(){return properties;}
+	
+	public void setPropertyValue(String name, Object value){
+		PropertyDef toSet = properties.get(name);
+		toSet.setValue(value);
+	}
+	
+	public void setData(String str){
+		for(Iterator<String> iter = this.properties.keySet().iterator(); iter.hasNext();){
+			PropertyDef pDef = properties.get(iter.next());
+		}
+	}
 	
 	public String toString(){
 		String props = "";
