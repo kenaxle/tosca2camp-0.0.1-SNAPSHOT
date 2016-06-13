@@ -10,11 +10,11 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 public class PropertyDef {
 
 	private String name;
-	private String type;
+	private DataTypeDef type;
 	private String description; // description are treated as their own type but for now they will be string
 	private boolean required;
 	private Object propertyValue;
-	private DataTypeDef defaultVal; //if the property value is not specified then use this default value
+	private Object defaultVal; //if the property value is not specified then use this default value
 	private String status;
 	private List<ConstraintTypeDef> constraints; //TODO this type will have to be defined
 	private EntrySchemaDef entry_schema; 
@@ -24,11 +24,11 @@ public class PropertyDef {
 	
 	public static class Builder{
 		private String name;
-		private String type;
+		private DataTypeDef type;
 		private String description; // description are treated as their own type but for now they will be string
 		private boolean required = true;
 		private Object propertyValue;
-		private DataTypeDef defaultVal; //TODO this will have to suite the type
+		private Object defaultVal; //TODO this will have to suite the type
 		private String status;
 		private List<ConstraintTypeDef> constraints = new ArrayList<ConstraintTypeDef>(); //TODO this type will have to be defined
 		private EntrySchemaDef entry_schema; 
@@ -39,7 +39,7 @@ public class PropertyDef {
 			//this.defaultVal = "";
 		}
 
-		public Builder type(String type){
+		public Builder type(DataTypeDef type){
 			this.type = type;
 			return this;
 		}
@@ -54,7 +54,7 @@ public class PropertyDef {
 			return this;
 		}
 		
-		public Builder defaultVal(DataTypeDef defaultVal){
+		public Builder defaultVal(Object defaultVal){
 			this.defaultVal = defaultVal;
 			return this;
 		}
@@ -97,7 +97,7 @@ public class PropertyDef {
 		try{
 			PropertyDef toReturn = (PropertyDef) super.clone();
 			//toReturn.propertyValue = (Object) propertyValue.clone();
-			toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
+			//toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
 			toReturn.constraints = new ArrayList<ConstraintTypeDef>();
 			for( ConstraintTypeDef constraint:constraints){
 				toReturn.constraints.add((ConstraintTypeDef) constraint.clone()); //make sure to create a copy
@@ -125,10 +125,10 @@ public class PropertyDef {
 	
 	
 	public String getName(){return name;}	
-	public String getType(){return type;}	
+	public DataTypeDef getType(){return type;}	
 	public String getDescription(){return description;}
 	public boolean isRequired(){return required;}
-	public DataTypeDef getDefaultVal(){return defaultVal;}
+	public Object getDefaultVal(){return defaultVal;}
 	
 	public void setValue(Object value){
 		propertyValue = value;

@@ -1,10 +1,2 @@
 tosca.datatypes.range:  
   description: Range datatype
-  properties:
-    lowerBound:
-      type: integer
-    upperBound:
-      type: integer
-    isUnbounded:
-      type: boolean
-  

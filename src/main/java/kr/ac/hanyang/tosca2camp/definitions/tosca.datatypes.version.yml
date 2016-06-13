@@ -1,13 +1,3 @@
 tosca.datatypes.version:  
   description: version datatype
-  properties: 
-    major_version: 
-      type: integer
-    minor_version: 
-      type: integer
-    fix_version: 
-      type: integer
-    qualifier: 
-      type: string
-    build_version: 
-      type: integer              
+          

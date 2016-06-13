@@ -1,8 +1,2 @@
 tosca.datatypes.scalar-unit:  
   description: Scalar datatype
-  properties:
-    scalar:
-      type: integer
-    unit:
-      type: string
-  

@@ -17,12 +17,11 @@ public class RequirementDef {
 		private RelationshipDef relationshipType;
 		private String occurence; // must fix
 		
-		public Builder(String name, CapabilityDef capability){
+		public Builder(String name){
 			this.name = name;
-			this.capability = capability;
+			//this.capability = capability;
 		}
 		
-
 		public Builder node(NodeDef node){
 			this.nodeType = node;
 			return this;
@@ -32,6 +31,12 @@ public class RequirementDef {
 			this.relationshipType = relationship;
 			return this;
 		}
+		
+		public Builder capability (CapabilityDef capability){
+			this.capability = capability;
+			return this;
+		}
+			
 		
 		public Builder occurence(String occurence){
 			this.occurence = occurence;
@@ -64,7 +69,7 @@ public class RequirementDef {
 	}
 	
 	public Builder getBuilder(){
-		Builder builder = new Builder(name, capability);
+		Builder builder = new Builder(name);
 		builder.nodeType = this.nodeType;
 		builder.relationshipType = this.relationshipType;
 		builder.occurence = this.occurence;

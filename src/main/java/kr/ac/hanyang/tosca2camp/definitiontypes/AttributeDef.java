@@ -9,8 +9,8 @@ public class AttributeDef {
 	private String name;
 	private String type;
 	private String description; // description are treated as their own type but for now they will be string
-	private DataTypeDef propertyValue;
-	private DataTypeDef defaultVal;  //TODO
+	private Object propertyValue;
+	private Object defaultVal;  //TODO
 	private String status; 
 	private EntrySchemaDef entry_schema;
 	
@@ -18,8 +18,8 @@ public class AttributeDef {
 		private String name;
 		private String type;
 		private String description; // description are treated as their own type but for now they will be string
-		private DataTypeDef propertyValue;
-		private DataTypeDef defaultVal;  //TODO
+		private Object propertyValue;
+		private Object defaultVal;  //TODO
 		private String status; 
 		private EntrySchemaDef entry_schema;
 		
@@ -39,7 +39,7 @@ public class AttributeDef {
 			return this;
 		}
 		
-		public Builder defaultVal(DataTypeDef defaultVal){
+		public Builder defaultVal(Object defaultVal){
 			this.defaultVal = defaultVal;
 			return this;
 		}
@@ -62,8 +62,8 @@ public class AttributeDef {
 	public AttributeDef clone(){
 		try{
 			AttributeDef toReturn = (AttributeDef) super.clone();
-			toReturn.propertyValue = (DataTypeDef) propertyValue.clone();
-			toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
+			//toReturn.propertyValue = (DataTypeDef) propertyValue.clone();
+			//toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
 			toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
@@ -104,7 +104,7 @@ public class AttributeDef {
 	public String getName(){return name;}
 	public String getType(){return this.type;}	
 	public String getDescription(){return description;}
-	public DataTypeDef getDefaultVal(){return defaultVal;}
+	public Object getDefaultVal(){return defaultVal;}
 	
 
 //	public boolean validate(AttributeAs attribute){

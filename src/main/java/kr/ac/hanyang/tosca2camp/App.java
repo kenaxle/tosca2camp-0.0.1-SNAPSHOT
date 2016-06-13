@@ -56,12 +56,12 @@ public class App{
 	private String[] relDefFileNames = {"tosca.relationships.Root.yml","tosca.relationships.ConnectsTo.yml","tosca.relationships.DependsOn.yml",
 			 "tosca.relationships.HostedOn.yml","tosca.relationships.RoutesTo.yml","tosca.relationships.AttachesTo.yml"};
 	
-	private String[] dTypeDefFileNames = {"tosca.datatypes.boolean.yml","tosca.datatypes.credential.yml","tosca.datatypes.float.yml",
-			"tosca.datatypes.integer.yml","tosca.datatypes.list.yml","tosca.datatypes.map.yml","tosca.datatypes.network.NetworkInfo.yml",
-			"tosca.datatypes.network.PortDef.yml","tosca.datatypes.network.PortInfo.yml","tosca.datatypes.network.PortSpec.yml",
-			"tosca.datatypes.string.yml","tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml","tosca.datatypes.range.yml",
-			"tosca.datatypes.scalar-unit.yml","tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml",
-			"tosca.datatypes.scalar-unit.frequency.yml"};
+	private String[] dTypeDefFileNames = {"tosca.datatypes.credential.yml","tosca.datatypes.boolean.yml","tosca.datatypes.float.yml",
+			"tosca.datatypes.integer.yml","tosca.datatypes.list.yml","tosca.datatypes.map.yml",
+			"tosca.datatypes.network.NetworkInfo.yml","tosca.datatypes.network.PortInfo.yml","tosca.datatypes.network.PortSpec.yml",
+			"tosca.datatypes.network.PortDef.yml","tosca.datatypes.range.yml","tosca.datatypes.scalar-unit.frequency.yml",
+			"tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml","tosca.datatypes.string.yml",
+			"tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml",};
 	
 	
 	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
@@ -116,8 +116,8 @@ public class App{
 	private void loadRelationship(String fileName) throws FileNotFoundException{
 		Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
-		for(String defName:map.keySet())			
-			 relDefinitions.put(defName,parseRelDef(defName,(Map<String, Object>)map.get(defName)));
+		for(String defTypeName:map.keySet())			
+			 relDefinitions.put(defTypeName,parseRelDef(defTypeName,(Map<String, Object>)map.get(defTypeName)));
 	}
 	
 	//loads the datatype definitions
@@ -133,6 +133,23 @@ public class App{
 	private NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
 		String parentDef = (String) nodeMap.get("derived_from");
 		
+		NodeDef thisNode = (NodeDef) nodeDefinitions.get(typeName);
+		if(thisNode !=null){
+			return thisNode.clone(); //copy the node
+			//nodeDefBuilder = returnNode.getBuilder(typeName); 
+			//nodeDefBuilder.derived_from(returnNode); //add the parent
+		}else{
+			//try to load the parent definition
+			try{
+				loadDefinition(FILEPATH+typeName+".yml");
+				//clone and get builder here also
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				System.out.println("The definition "+FILEPATH+parentDef+".yml does not exist. \n Will build incomplete def");
+			}
+		}
+		
+		
 		NodeDef.Builder nodeDefBuilder;
 		NodeDef returnNode;
 		// if not null then copy the nodeDef
@@ -141,8 +158,8 @@ public class App{
 		if (parentDef!=null){
 			NodeDef parent = (NodeDef) nodeDefinitions.get(parentDef);
 			if(parent !=null){
-				returnNode = NodeDef.clone(parent); //copy the parent and then get a builder to add new functionality. maybe dont clone.
-				nodeDefBuilder = returnNode.getBuilder(typeName); 
+				returnNode = parent.clone(); //copy the parent and then get a builder to add new functionality. maybe dont clone.
+				nodeDefBuilder = returnNode.getBuilder(); 
 				nodeDefBuilder.derived_from(returnNode); //add the parent
 			}else{
 				//try to load the parent definition
@@ -268,7 +285,7 @@ public class App{
 				propBuilder.required((boolean)propMap.get(mapItem));
 				break;
 			case "default_value":
-				propBuilder.defaultVal((String)propMap.get(mapItem));
+				propBuilder.defaultVal((String)propMap.get(mapItem)); //TODO change to actual type
 				break;
 			case "status":
 				propBuilder.status((String)propMap.get(mapItem));
@@ -290,7 +307,7 @@ public class App{
 	
 	public AttributeDef parseAttrDef(String name, Map<String, Object> attrMap){
 		String type = (String) attrMap.get("type");
-		AttributeDef.Builder attrBuilder = new AttributeDef.Builder(name, type);
+		AttributeDef.Builder attrBuilder = new AttributeDef.Builder(name);
 		for(String mapItem:attrMap.keySet()){
 			switch(mapItem){
 			case "description":
@@ -311,15 +328,21 @@ public class App{
 	}
 	
 	public RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
-		String capability = (String) reqMap.get("capability");	
-		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name, capability);
+		//String capability = (String) reqMap.get("capability");	
+		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name);
 		for(String mapItem:reqMap.keySet()){
 			switch(mapItem){
 			case "node":
-				reqBuilder.node((String)reqMap.get(mapItem));
+				NodeDef nDef = parseNodeDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
+				reqBuilder.node(nDef);
 				break;
 			case "relationship":
-				reqBuilder.relationship((String)reqMap.get(mapItem));
+				RelationshipDef rDef = parseRelDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
+				reqBuilder.relationship(rDef);
+				break;
+			case "capability":
+				CapabilityDef cDef = parseCapDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
+				reqBuilder.capability(cDef);
 				break;
 			case "occurence":
 				reqBuilder.occurence((String)reqMap.get(mapItem));
@@ -331,13 +354,27 @@ public class App{
 	
 	@SuppressWarnings({ "unchecked", "rawtypes"})
 	public CapabilityDef parseCapDef(String name, Map<String, Object> capMap){
-		String type = (String) capMap.get("type");
+		String type = (String) capMap.get("type");		
 		//capability is normative
 		if (type == null) type = name; 
-//		if (Arrays.asList(capDefFileNames).contains(name))
-//			type =  name.substring(name.lastIndexOf(".") + 1);
-//		else
-//			type = (String) capMap.get("type");
+
+		CapabilityDef thisCap = (CapabilityDef) capDefinitions.get(type);
+		if(thisCap !=null){
+			return thisCap.clone(); //copy the node
+			//nodeDefBuilder = returnNode.getBuilder(typeName); 
+			//nodeDefBuilder.derived_from(returnNode); //add the parent
+		}else{
+			//try to load the parent definition
+			try{
+				loadDefinition(FILEPATH+type+".yml");
+				//clone and get builder here also
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				System.out.println("The definition "+FILEPATH+type+".yml does not exist. \n Will build incomplete def");
+			}
+		}
+		
+		
 		String parentDef = (String) capMap.get("derived_from");
 		
 		CapabilityDef.Builder capBuilder;
@@ -348,8 +385,8 @@ public class App{
 		if (parentDef!=null){
 			CapabilityDef parent = (CapabilityDef) capDefinitions.get(parentDef);
 			if(parent !=null){
-				returnCapability = CapabilityDef.clone(parent); //copy the parent and then get a builder to add new functionality
-				capBuilder = returnCapability.getBuilder(name,type); 
+				returnCapability = parent.clone(); //copy the parent and then get a builder to add new functionality
+				capBuilder = returnCapability.getBuilder(); 
 			}else{
 				//try to load the parent definition
 				try{
@@ -394,9 +431,27 @@ public class App{
 		return capBuilder.build();
 	}
 	
-	public RelationshipDef parseRelDef(String name, Map<String, Object> relMap){
-		String parentDef = (String) relMap.get("derived_from");
+	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
 		
+		
+		RelationshipDef thisNode = (RelationshipDef) relDefinitions.get(typeName);
+		if(thisNode !=null){
+			return thisNode.clone(); //copy the node
+			//nodeDefBuilder = returnNode.getBuilder(typeName); 
+			//nodeDefBuilder.derived_from(returnNode); //add the parent
+		}else{
+			//try to load the parent definition
+			try{
+				loadDefinition(FILEPATH+typeName+".yml");
+				//clone and get builder here also
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				System.out.println("The definition "+FILEPATH+typeName+".yml does not exist. \n Will build incomplete def");
+			}
+		}
+		
+		
+		String parentDef = (String) relMap.get("derived_from");
 		RelationshipDef.Builder relBuilder;
 		RelationshipDef returnRel;
 		// if not null then copy the nodeDef
@@ -405,8 +460,8 @@ public class App{
 		if (parentDef!=null){
 			RelationshipDef parent = (RelationshipDef) relDefinitions.get(parentDef);
 			if(parent !=null){
-				returnRel = RelationshipDef.clone(parent); //copy the parent and then get a builder to add new functionality
-				relBuilder = returnRel.getBuilder(name); 
+				returnRel = parent.clone(); //copy the parent and then get a builder to add new functionality
+				relBuilder = returnRel.getBuilder(); 
 			}else{
 				//try to load the parent definition
 				try{
@@ -414,10 +469,10 @@ public class App{
 				}catch(Exception e){
 					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
 				}
-				relBuilder = new RelationshipDef.Builder(name);
+				relBuilder = new RelationshipDef.Builder(typeName);
 			}
 		}else{
-			relBuilder = new RelationshipDef.Builder(name); 
+			relBuilder = new RelationshipDef.Builder(typeName); 
 		}
 		
 		for(String mapItem:relMap.keySet()){
@@ -532,7 +587,7 @@ public class App{
 		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
 		if (propMap != null){
 			for(String propertyName:propMap.keySet()){
-				PropertyBuilder propBuilder = myDefinition.geP
+				PropertyBuilder propBuilder = myDefinition.getP
 				nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
 			}
 		}
