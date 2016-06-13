@@ -140,14 +140,14 @@ public class App{
 			//nodeDefBuilder.derived_from(returnNode); //add the parent
 		}else{
 			//try to load the parent definition
-			try{
-				loadDefinition(FILEPATH+typeName+".yml");
-				//clone and get builder here also
-			}catch(Exception e){
-				System.out.println(e.getMessage());
-				System.out.println("The definition "+FILEPATH+parentDef+".yml does not exist. \n Will build incomplete def");
-			}
-		}
+//			try{
+//				loadDefinition(FILEPATH+typeName+".yml");
+//				//clone and get builder here also
+//			}catch(Exception e){
+//				System.out.println(e.getMessage());
+//				System.out.println("The definition "+FILEPATH+parentDef+".yml does not exist. \n Will build incomplete def");
+//			}
+//		}
 		
 		
 		NodeDef.Builder nodeDefBuilder;
@@ -227,6 +227,7 @@ public class App{
 		//nodeDefinitions.put(name,rNode);
 		return returnNode;
 	}
+}
 	
 	public EntrySchemaDef parseEntrySchema(Map<String, Object> propMap){
 		String type = (String) propMap.get("type");
@@ -587,7 +588,8 @@ public class App{
 		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
 		if (propMap != null){
 			for(String propertyName:propMap.keySet()){
-				PropertyBuilder propBuilder = myDefinition.getP
+				//PropertyBuilder propBuilder = myDefinition.getP
+				myDefinition.
 				nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
 			}
 		}
@@ -791,9 +793,9 @@ public class App{
 		
 		// Parse the Yaml plan
 		//-----------------------------------------------
-	    Yaml yaml = new Yaml();
-		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-		app.parseTosca(map);
+//	    Yaml yaml = new Yaml();
+//		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
+//		app.parseTosca(map);
 	    //Collection<String> col = new TreeSet<String>();
 //			for(String key:map.keySet()){
 //				
