@@ -1,14 +1,10 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 
 
-public class EntrySchemaDef {
+public class EntrySchemaDef implements Cloneable{
 
 	private DataTypeDef type;
 	private String description; // description are treated as their own type but for now they will be string
@@ -46,10 +42,10 @@ public class EntrySchemaDef {
 		this.constraints = builder.constraints;
 	}
 	
-	public EntrySchemaDef clone(){
+	public Object clone(){
 		try{
 			EntrySchemaDef toReturn = (EntrySchemaDef) super.clone();
-			toReturn.type = type.clone();
+			toReturn.type = (DataTypeDef)type.clone();
 			toReturn.constraints = new ArrayList<ConstraintTypeDef>();
 			for( ConstraintTypeDef constraint:constraints){
 				toReturn.constraints.add((ConstraintTypeDef) constraint.clone()); //make sure to create a copy

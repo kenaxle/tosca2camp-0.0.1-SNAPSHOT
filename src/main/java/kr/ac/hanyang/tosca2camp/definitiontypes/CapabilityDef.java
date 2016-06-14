@@ -2,10 +2,12 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.*;
 
+import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
 import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
+import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
-public class CapabilityDef {
+public class CapabilityDef implements Cloneable{
 	private String name; // for normative this should be the short name
 	private String type;
 	private CapabilityDef derived_from; //URI string
@@ -63,19 +65,19 @@ public class CapabilityDef {
 	}
 	
 	
-	public CapabilityDef clone(){
+	public Object clone(){
 		try{
 			CapabilityDef toReturn = (CapabilityDef) super.clone();
-			toReturn.derived_from = derived_from.clone();
+			if (derived_from != null) toReturn.derived_from = (CapabilityDef)derived_from.clone();
 			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
 			for(String pDefName:properties.keySet()){
 				PropertyDef pDef = properties.get(pDefName);
-				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+				toReturn.properties.put(pDefName,  (PropertyDef)pDef.clone()); //make sure pDef can create a copy
 			}
 			toReturn.attributes = new LinkedHashMap<String, AttributeDef>();
 			for(String aDefName:attributes.keySet()){
 				AttributeDef aDef = attributes.get(aDefName);
-				toReturn.attributes.put(aDefName,  aDef.clone()); //make sure aDef can create a copy
+				toReturn.attributes.put(aDefName,  (AttributeDef)aDef.clone()); //make sure aDef can create a copy
 			}
 			toReturn.valid_source_types = new ArrayList<String>();
 			for(String vSource: valid_source_types)
@@ -122,6 +124,26 @@ public class CapabilityDef {
 	public Map<String, AttributeDef> getAttributes() {return attributes;}
 
 	public List<String> getValid_source_types() {return valid_source_types;}
+	
+	public PropertyDef getProperty(String propName){
+		return properties.get(propName);
+	}
+	
+	public CapabilityDef parseCapTemplate(Map<String, Object>capMap){
+		//CapabilityDef myDefinition = (CapabilityDef) this.clone();
+		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
+		for(String propertyName:propMap.keySet()){
+			//parse the property
+			this.getProperty(propertyName).parsePropTemplate(propMap);
+		}
+		
+//		Map<String,Object> attrMap = ((Map<String,Object>) capMap.get("attributes"));
+//		for(String attributeName:propMap.keySet()){
+//			//parse the attribute
+//		}
+//		//do validation
+		return this;
+	}
 	
 	public String toString(){
 		return "name: "+name+"\n"+

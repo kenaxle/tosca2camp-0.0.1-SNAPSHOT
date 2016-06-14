@@ -12,7 +12,7 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate.Builder;
 
-public class NodeDef {
+public class NodeDef implements Cloneable{
 	private String name; //Node Template name
 	private String typeName;
 	private NodeDef derived_from; //URI string
@@ -118,29 +118,28 @@ public class NodeDef {
 	
 	//using a static clone method because I can make use of the builder to build a 
 	//properly constructed clone
-	public NodeDef clone(){
-		
-		//NodeDef.Builder copyBuilder = new NodeDef.Builder(orig2Copy.getTypeName());
+	@Override
+	public Object clone(){
 		try{
 			NodeDef toReturn = (NodeDef) super.clone();
 			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
 			for(String pDefName:properties.keySet()){
 				PropertyDef pDef = properties.get(pDefName);
-				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+				toReturn.properties.put(pDefName,  (PropertyDef)pDef.clone()); //make sure pDef can create a copy
 			}
 			toReturn.attributes = new LinkedHashMap<String, AttributeDef>();
 			for(String aDefName:attributes.keySet()){
 				AttributeDef aDef = attributes.get(aDefName);
-				toReturn.attributes.put(aDefName,  aDef.clone()); //make sure aDef can create a copy
+				toReturn.attributes.put(aDefName,  (AttributeDef)aDef.clone()); //make sure aDef can create a copy
 			}
 			toReturn.requirements = new ArrayList<RequirementDef>();
 			for(RequirementDef rDef:requirements){
-				toReturn.requirements.add(rDef.clone()); //make sure pDef can create a copy
+				toReturn.requirements.add((RequirementDef)rDef.clone()); //make sure pDef can create a copy
 			}
 			toReturn.capabilities = new LinkedHashMap<String, CapabilityDef>();
 			for(String cDefName:capabilities.keySet()){
 				CapabilityDef cDef = capabilities.get(cDefName);
-				toReturn.capabilities.put(cDefName, cDef.clone()); //make sure pDef can create a copy
+				toReturn.capabilities.put(cDefName, (CapabilityDef)cDef.clone()); //make sure pDef can create a copy
 			}
 			return toReturn;
 		}catch(CloneNotSupportedException e){
@@ -183,7 +182,9 @@ public class NodeDef {
 
 	public Map<String, CapabilityDef> getCapabilities() {return capabilities;}
 	
-	//public CapabilityDef getCapability()
+	public CapabilityDef getCapability(String type){
+		return capabilities.get(type);
+	}
 
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}
 
@@ -194,6 +195,46 @@ public class NodeDef {
 		PropertyDef toSet = properties.get(name);
 		toSet.setValue(value);
 	}
+	
+	public NodeDef parseNodeTemplate(Map<String, Object>nodeMap){
+		//NodeDef myDefinition = (NodeDef) this.clone();
+		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
+		if (propMap != null){
+			for(String propertyName:propMap.keySet()){
+				//PropertyBuilder propBuilder = myDefinition.getP
+				Object value = propMap.get(propertyName);
+				this.setPropertyValue(propertyName, value);
+				//nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
+			}
+		}
+		
+//		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
+//		if (attrMap != null){
+//			for(String attributeName:propMap.keySet()){
+//				Object value = propMap.get(attributeName);
+//				myDefinition.setPropertyValue(attributeName, value);
+//				//nodeBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
+//			}
+//		}
+		
+		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
+		if (capMap != null){
+			for(String capName:capMap.keySet()){
+				this.getCapability(capName).parseCapTemplate(capMap);
+				//nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
+			}
+		}
+		
+		List<Map<String,Object>> reqList = ((List<Map<String,Object>>) nodeMap.get("requirements"));
+		if (reqList != null){
+			for(Map<String,Object> reqMap:reqList){ 
+				String reqName = reqMap.keySet().iterator().next();
+				//nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
+			}
+		}
+		return this;
+	}
+	
 	
 	
 	public String toString(){

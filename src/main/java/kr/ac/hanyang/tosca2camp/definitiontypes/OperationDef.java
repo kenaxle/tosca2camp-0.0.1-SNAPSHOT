@@ -3,7 +3,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OperationDef {
+public class OperationDef implements Cloneable{
 
 	private String name;
 	private String description; // description are treated as their own type but for now they will be string

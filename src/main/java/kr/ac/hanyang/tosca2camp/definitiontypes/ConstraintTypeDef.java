@@ -5,7 +5,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
  * @since 
  */
 
-public class ConstraintTypeDef {
+public class ConstraintTypeDef implements Cloneable{
 
 	private String operator;
 	private Object value; 
@@ -41,10 +41,10 @@ public class ConstraintTypeDef {
 		return builder;
 	}
 	
-	public ConstraintTypeDef clone(){
+	public Object clone(){
 		try{
 			ConstraintTypeDef toReturn = (ConstraintTypeDef) super.clone();
-			toReturn.value = value.clone(); //TODO this should clone
+			//toReturn.value = value.clone(); //TODO this should clone
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;

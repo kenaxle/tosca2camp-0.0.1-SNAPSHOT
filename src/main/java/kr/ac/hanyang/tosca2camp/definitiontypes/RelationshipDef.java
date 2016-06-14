@@ -10,7 +10,7 @@ import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef.Builder;
 
-public class RelationshipDef {
+public class RelationshipDef implements Cloneable{
 	private String name;
 	private String type;
 	private RelationshipDef derived_from; //URI string
@@ -88,24 +88,24 @@ public class RelationshipDef {
 	}
 	
 	
-	public RelationshipDef clone(){
+	public Object clone(){
 		try{
 			RelationshipDef toReturn = (RelationshipDef) super.clone();
-			toReturn.derived_from = derived_from.clone();
-			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
+			if(derived_from != null) toReturn.derived_from = (RelationshipDef)derived_from.clone();
+			if(properties != null)toReturn.properties = new LinkedHashMap<String, PropertyDef>();
 			for(String pDefName:properties.keySet()){
 				PropertyDef pDef = properties.get(pDefName);
-				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+				toReturn.properties.put(pDefName,  (PropertyDef)pDef.clone()); //make sure pDef can create a copy
 			}
 			toReturn.attributes = new LinkedHashMap<String, AttributeDef>();
 			for(String aDefName:attributes.keySet()){
 				AttributeDef aDef = attributes.get(aDefName);
-				toReturn.attributes.put(aDefName,  aDef.clone()); //make sure aDef can create a copy
+				toReturn.attributes.put(aDefName,  (AttributeDef)aDef.clone()); //make sure aDef can create a copy
 			}
 			toReturn.interfaces = new LinkedHashMap<String, InterfaceDef>();
 			for(String iDefName:interfaces.keySet()){
 				InterfaceDef iDef = interfaces.get(iDefName);
-				toReturn.interfaces.put(iDefName,  iDef.clone()); //make sure aDef can create a copy
+				toReturn.interfaces.put(iDefName,  (InterfaceDef)iDef.clone()); //make sure aDef can create a copy
 			}
 			toReturn.valid_target_types = new ArrayList<String>();
 			for(String vSource: valid_target_types)

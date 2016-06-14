@@ -4,7 +4,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
  * @author Kena
  *
  */
-public class RepositoryDef {
+public class RepositoryDef implements Cloneable{
 
 	private String name;
 	private String url;

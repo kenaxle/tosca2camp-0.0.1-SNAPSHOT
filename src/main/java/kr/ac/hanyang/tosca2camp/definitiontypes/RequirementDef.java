@@ -2,7 +2,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 
-public class RequirementDef {
+public class RequirementDef implements Cloneable{
 	private String name;
 	private CapabilityDef capability;
 	private NodeDef nodeType; 
@@ -56,12 +56,12 @@ public class RequirementDef {
 		this.occurence = builder.occurence;
 	}
 	
-	public RequirementDef clone(){
+	public Object clone(){
 		try{
 			RequirementDef toReturn = (RequirementDef) super.clone();
-			toReturn.capability = capability.clone(); //TODO this should clone
-			toReturn.nodeType = nodeType.clone();
-			toReturn.relationshipType = relationshipType.clone();
+			if (capability != null) toReturn.capability = (CapabilityDef)capability.clone(); //TODO this should clone
+			if (nodeType != null) toReturn.nodeType = (NodeDef)nodeType.clone();
+			if (relationshipType != null) toReturn.relationshipType = (RelationshipDef)relationshipType.clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;

@@ -5,7 +5,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
  * @since 
  */
 
-public class ArtifactDef {
+public class ArtifactDef implements Cloneable{
 
 	private String name;
 	private String type;

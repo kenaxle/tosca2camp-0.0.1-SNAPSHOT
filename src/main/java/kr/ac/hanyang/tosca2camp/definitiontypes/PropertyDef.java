@@ -7,7 +7,7 @@ import java.util.Map;
 import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 
 
-public class PropertyDef {
+public class PropertyDef implements Cloneable{
 
 	private String name;
 	private DataTypeDef type;
@@ -93,7 +93,7 @@ public class PropertyDef {
 		this.entry_schema = builder.entry_schema;
 	}
 	
-	public PropertyDef clone(){
+	public Object clone(){
 		try{
 			PropertyDef toReturn = (PropertyDef) super.clone();
 			//toReturn.propertyValue = (Object) propertyValue.clone();
@@ -102,7 +102,7 @@ public class PropertyDef {
 			for( ConstraintTypeDef constraint:constraints){
 				toReturn.constraints.add((ConstraintTypeDef) constraint.clone()); //make sure to create a copy
 			}
-			toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
+			if(entry_schema != null) toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;
@@ -132,6 +132,12 @@ public class PropertyDef {
 	
 	public void setValue(Object value){
 		propertyValue = value;
+	}
+	
+	public PropertyDef parsePropTemplate(Map<String, Object>propMap){
+		String propName = propMap.keySet().iterator().next();
+		propertyValue = propMap.get(propName);
+		return this;
 	}
 	
 	@SuppressWarnings("rawtypes")

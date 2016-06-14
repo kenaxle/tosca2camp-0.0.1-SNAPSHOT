@@ -3,7 +3,7 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InterfaceDef {
+public class InterfaceDef implements Cloneable{
 
 	private String name;
 	private List<String> inputs; //TODO define the property definitions or property assignments
@@ -30,7 +30,7 @@ public class InterfaceDef {
 	}
 	
 	
-	public InterfaceDef clone(){
+	public Object clone(){
 		try{
 			InterfaceDef toReturn = (InterfaceDef) super.clone();
 			//toReturn.inputs = new ArrayList<String>();

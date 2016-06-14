@@ -7,14 +7,12 @@ import java.util.Map;
 
 import java.util.Iterator;
 
-import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef.Builder;
-
 /**
  * @author Kena Alexander
  * @since 
  */
 
-public class DataTypeDef {
+public class DataTypeDef implements Cloneable{
 
 	private String typeName;
 	private DataTypeDef derived_from;
@@ -75,7 +73,7 @@ public class DataTypeDef {
 		return builder;
 	}
 	
-	public DataTypeDef clone(){
+	public Object clone(){
 		try{
 			DataTypeDef toReturn = (DataTypeDef) super.clone();
 			toReturn.derived_from = (DataTypeDef) derived_from.clone();
@@ -86,7 +84,7 @@ public class DataTypeDef {
 			toReturn.properties = new LinkedHashMap<String, PropertyDef>();
 			for(String pDefName:properties.keySet()){
 				PropertyDef pDef = properties.get(pDefName);
-				toReturn.properties.put(pDefName,  pDef.clone()); //make sure pDef can create a copy
+				toReturn.properties.put(pDefName,  (PropertyDef)pDef.clone()); //make sure pDef can create a copy
 			}
 			return toReturn;
 		}catch(CloneNotSupportedException e){

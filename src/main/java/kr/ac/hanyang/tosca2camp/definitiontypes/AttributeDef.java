@@ -1,10 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
-import java.util.ArrayList;
-
-import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-
-public class AttributeDef {
+public class AttributeDef implements Cloneable{
 
 	private String name;
 	private String type;
@@ -59,12 +55,12 @@ public class AttributeDef {
 		}
 	}
 	
-	public AttributeDef clone(){
+	public Object clone(){
 		try{
 			AttributeDef toReturn = (AttributeDef) super.clone();
 			//toReturn.propertyValue = (DataTypeDef) propertyValue.clone();
 			//toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
-			toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
+			if (entry_schema != null) toReturn.entry_schema = (EntrySchemaDef) entry_schema.clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;
