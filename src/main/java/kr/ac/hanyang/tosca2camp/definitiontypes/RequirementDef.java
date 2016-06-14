@@ -1,6 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
-import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
+import java.util.Map;
 
 public class RequirementDef implements Cloneable{
 	private String name;
@@ -79,12 +79,17 @@ public class RequirementDef implements Cloneable{
 	public CapabilityDef getCapDefName(){return capability;}
 	public NodeDef getNodeDefName(){return nodeType;}
 	public RelationshipDef getRelDefName(){return relationshipType;}
+	public RelationshipDef parseRelationshipDef(Map<String, Object>relMap){
+		if (relationshipType != null)
+			return relationshipType.parseRelationshipTemplate(relMap);
+		return null;
+	}
 	
-	
-	public boolean validate(RequirementAs rTemp){
-		return (capability.equals(rTemp.getCapability().getType())&&
-				nodeType.equals(rTemp.getNode().getType())&&
-				relationshipType.equals(rTemp.getRelationship().getType()));	
+	public boolean equals(Object obj){
+		if(obj == null) return false;
+		if(getClass() != obj.getClass()) return false;
+		RequirementDef rDef = (RequirementDef) obj;
+		return name.equals(rDef.name);
 	}
 	
 	public String toString(){

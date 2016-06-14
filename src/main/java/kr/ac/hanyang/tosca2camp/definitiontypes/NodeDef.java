@@ -1,16 +1,10 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
-import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
-import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate.Builder;
 
 public class NodeDef implements Cloneable{
 	private String name; //Node Template name
@@ -178,8 +172,11 @@ public class NodeDef implements Cloneable{
 
 	public List<RequirementDef> getRequirements() {return requirements;}
 	
-	//public RequirementDef getRequirement(String name, CapabilityDef capDef){return requirements.get(requirements.indexOf(new RequirementDef.Builder(name,capDef).build()));}
-
+	public RequirementDef getRequirement(String reqName){
+		int index = requirements.indexOf(new RequirementDef.Builder(reqName).build());
+		return requirements.get(index);
+	}
+	
 	public Map<String, CapabilityDef> getCapabilities() {return capabilities;}
 	
 	public CapabilityDef getCapability(String name){
@@ -197,14 +194,11 @@ public class NodeDef implements Cloneable{
 	}
 	
 	public NodeDef parseNodeTemplate(Map<String, Object>nodeMap){
-		//NodeDef myDefinition = (NodeDef) this.clone();
 		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
 		if (propMap != null){
 			for(String propertyName:propMap.keySet()){
-				//PropertyBuilder propBuilder = myDefinition.getP
 				Object value = propMap.get(propertyName);
 				this.setPropertyValue(propertyName, value);
-				//nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
 			}
 		}
 		
@@ -221,7 +215,6 @@ public class NodeDef implements Cloneable{
 		if (capMap != null){
 			for(String capName:capMap.keySet()){
 				this.getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
-				//nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
 			}
 		}
 		
@@ -229,8 +222,8 @@ public class NodeDef implements Cloneable{
 		if (reqList != null){
 			for(Map<String,Object> reqMap:reqList){ 
 				String reqName = reqMap.keySet().iterator().next();
-				//TODO fix the requirements parser.
-				//nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
+				Map<String, Object> relMap = (Map<String, Object>)((Map<String, Object>)reqMap.get(reqName)).get("relationship");
+				this.getRequirement(reqName).parseRelationshipDef(relMap);
 			}
 		}
 		return this;

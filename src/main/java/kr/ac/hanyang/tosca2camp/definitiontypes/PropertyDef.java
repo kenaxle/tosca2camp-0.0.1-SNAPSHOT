@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-
 
 public class PropertyDef implements Cloneable{
 
@@ -134,19 +132,6 @@ public class PropertyDef implements Cloneable{
 		propertyValue = value;
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public boolean validate(PropertyAs property){
-		boolean valid = false;
-		if (property != null){
-			if (name.equals(property.getName())){
-				//the type is valid
-				if (type.equals(property.getValue().getClass().getName())){
-					valid = true;
-				}
-			}
-		}
-		return valid;
-	}
 	
 	public String toString(){
 		return "name: "+name+"\n"+

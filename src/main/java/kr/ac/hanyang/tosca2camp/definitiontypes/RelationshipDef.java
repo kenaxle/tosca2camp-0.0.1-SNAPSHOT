@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef.Builder;
 
 public class RelationshipDef implements Cloneable{
@@ -37,6 +33,11 @@ public class RelationshipDef implements Cloneable{
 		public Builder(String name, String type) {
 			this.name = name;
 			this.type = type;
+		}
+		
+		public Builder name(String name){
+			this.name = name;
+			return this;
 		}
 
 		public Builder derived_from(RelationshipDef derived_from){
@@ -74,8 +75,7 @@ public class RelationshipDef implements Cloneable{
 		}
 	}
 	
-	
-	
+
 	private RelationshipDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -131,20 +131,21 @@ public class RelationshipDef implements Cloneable{
 	public String getName(){return name;}
 	public String getType(){return type;}
 
-//	public boolean validate(RelationshipTemplate rTemp){
-//		// (type.equals(rTemp.getType()));
-//		for (String propItemName:properties.keySet()){
-//			PropertyDef propItem = properties.get(propItemName);
-//			if (!propItem.validate((PropertyAs)rTemp.getPropertyAs(propItem.getType())))
-//				return false;
-//		}
-//		for (String attrItemName:attributes.keySet()){
-//			AttributeDef attrItem = attributes.get(attrItemName);
-//			if (!attrItem.validate((AttributeAs)rTemp.getPropertyAs(attrItem.getType())))
-//				return false;
-//		}
-//		return true;
-//	}
+	public void setPropertyValue(String name, Object value){
+		PropertyDef toSet = properties.get(name);
+		toSet.setPropertyValue(value);
+	}
+	
+	public RelationshipDef parseRelationshipTemplate(Map<String, Object>relMap){
+		Map<String,Object> propMap = ((Map<String,Object>) relMap.get("properties"));
+		if (propMap != null){
+			for(String propertyName:propMap.keySet()){
+				Object value = propMap.get(propertyName);
+				this.setPropertyValue(propertyName, value);
+			}
+		}
+		return this;
+	}
 	
 	public String toString(){
 		String props ="";

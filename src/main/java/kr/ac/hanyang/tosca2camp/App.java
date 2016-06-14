@@ -7,11 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
-
-import kr.ac.hanyang.tosca2camp.assignments.NodeTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
-import kr.ac.hanyang.tosca2camp.assignments.RelationshipTemplate;
-import kr.ac.hanyang.tosca2camp.assignments.RequirementAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.ConstraintTypeDef;
@@ -412,25 +407,14 @@ public class App{
 }
 	
 	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
-		
-		if (relMap == null) return new RelationshipDef.Builder(typeName).build();
-		
+
 		RelationshipDef thisNode = (RelationshipDef) relDefinitions.get(typeName);
 		if(thisNode !=null){
 			return (RelationshipDef) thisNode.clone(); //copy the node
-			//nodeDefBuilder = returnNode.getBuilder(typeName); 
-			//nodeDefBuilder.derived_from(returnNode); //add the parent
 		}else{
-//			//try to load the parent definition
-//			try{
-//				loadDefinition(FILEPATH+typeName+".yml");
-//				//clone and get builder here also
-//			}catch(Exception e){
-//				System.out.println(e.getMessage());
-//				System.out.println("The definition "+FILEPATH+typeName+".yml does not exist. \n Will build incomplete def");
-//			}
-//		}
 		
+		if (relMap == null) 
+			return new RelationshipDef.Builder(typeName).build();
 		
 		String parentDef = (String) relMap.get("derived_from");
 		RelationshipDef.Builder relBuilder;
@@ -454,42 +438,41 @@ public class App{
 			}
 		}else{
 			relBuilder = new RelationshipDef.Builder(typeName); 
-		}
-		
-		for(String mapItem:relMap.keySet()){
-			switch(mapItem){
-			case "description":
-				relBuilder.description((String)relMap.get(mapItem));
-				break;
-//			case "derived_from":
-//				relBuilder.derived_from((String)relMap.get(mapItem));
-//				break;
-			case "properties":
-				Map<String, Object> propMap = (Map<String, Object>) relMap.get(mapItem);
-				for(String propName:propMap.keySet()){
-					relBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propMap.get(propName)));	
+		}	
+			for(String mapItem:relMap.keySet()){
+				switch(mapItem){
+				case "description":
+					relBuilder.description((String)relMap.get(mapItem));
+					break;
+	//			case "derived_from":
+	//				relBuilder.derived_from((String)relMap.get(mapItem));
+	//				break;
+				case "properties":
+					Map<String, Object> propMap = (Map<String, Object>) relMap.get(mapItem);
+					for(String propName:propMap.keySet()){
+						relBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propMap.get(propName)));	
+					}
+					break;
+				case "attributes":
+					Map<String, Object> attrMap = (Map<String, Object>) relMap.get(mapItem);
+					for(String attrName:attrMap.keySet()){
+						relBuilder.addAttribute(parseAttrDef(attrName,(Map<String, Object>)attrMap.get(attrName)));	
+					}
+					break;
+				case "valid_target_types":
+					List<String> sourcesList = (List<String>) relMap.get(mapItem);
+					for(String attrName:sourcesList){
+						relBuilder.addValid_target_types(attrName);	
+					}
+					break;
+				case "interfaces":
+				    // handle this case here
+					break;
 				}
-				break;
-			case "attributes":
-				Map<String, Object> attrMap = (Map<String, Object>) relMap.get(mapItem);
-				for(String attrName:attrMap.keySet()){
-					relBuilder.addAttribute(parseAttrDef(attrName,(Map<String, Object>)attrMap.get(attrName)));	
-				}
-				break;
-			case "valid_target_types":
-				List<String> sourcesList = (List<String>) relMap.get(mapItem);
-				for(String attrName:sourcesList){
-					relBuilder.addValid_target_types(attrName);	
-				}
-				break;
-			case "interfaces":
-			    // handle this case here
-				break;
 			}
+			return relBuilder.build();
 		}
-		return relBuilder.build();
 	}
-}
 		
 	public DataTypeDef parseDataTypeDef(String name, Map<String, Object> dataMap){
 		DataTypeDef.Builder dataDefBuilder;
@@ -568,65 +551,25 @@ public class App{
 	
 	
 	
-	public boolean loadRelationship(String name, Map<String,Object>relMap){
-		boolean valid;
-		String type = (String) relMap.get("type");
-		RelationshipDef myDefinition = (RelationshipDef) relDefinitions.get(type);
-		if(myDefinition == null){
-			//try to load the definition
-			try{
-				loadRelationship(FILEPATH+type+".yml");
-				myDefinition = (RelationshipDef) relDefinitions.get(type);
-			}catch(Exception e){
-				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
-				return false;
-			}
-		}
-		RelationshipTemplate relTemplate = parseRelationship(type,(Map<String, Object>) relMap.get("properties"));
-		return true;
-	}
+//	public boolean loadRelationship(String name, Map<String,Object>relMap){
+//		boolean valid;
+//		String type = (String) relMap.get("type");
+//		RelationshipDef myDefinition = (RelationshipDef) relDefinitions.get(type);
+//		if(myDefinition == null){
+//			//try to load the definition
+//			try{
+//				loadRelationship(FILEPATH+type+".yml");
+//				myDefinition = (RelationshipDef) relDefinitions.get(type);
+//			}catch(Exception e){
+//				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
+//				return false;
+//			}
+//		}
+//		RelationshipTemplate relTemplate = parseRelationship(type,(Map<String, Object>) relMap.get("properties"));
+//		return true;
+//	}
 	
-
-	
-	//TODO p.g. 261 should be able to parse extended grammar with properties
-	public RelationshipTemplate parseRelationship(String type, Map<String, Object> property){
-		RelationshipTemplate.Builder builder = new RelationshipTemplate.Builder(type,"desc");
-		for (String key:property.keySet()){
-			builder.addProperty(new PropertyAs.Builder(key).value(property.get(key)).build());
-		}
-		return builder.build();
-	}	
-	
-	//TODO p.g. 260 - 261 this should be able to parse short or extended form 
-	public RequirementAs parseRequirement(String name, Map<String, Object> requirement){
-		RequirementAs.Builder reqBuilder = new RequirementAs.Builder(name);
-		for (String key:requirement.keySet()){
-			switch (key){
-				case "capability":
-					Map<String, Object> capMap = (Map<String, Object>) requirement.get(key);
-					for(String key2:capMap.keySet()){
-						String capType = (String) capMap.get(key2); // get the type of capability
-						Map<String, Object> capProperties = (Map<String, Object>) capMap.get("properties");
-						//reqBuilder.capability(parseCapability(capType, capProperties));
-					}
-					break;
-				case "node":
-					reqBuilder.node(new NodeTemplate.Builder((String) requirement.get(key), "tosca.nodes.Root").build());//(parseNode((String) requirement.get(key), null)); //create an empty node with the name. this will be a root node
-					break;
-				case "relationship":
-					Map<String, Object> relationshipMap = (Map<String, Object>) requirement.get(key);
-					String relType = (String) relationshipMap.get("type"); // get the type of relationship
-					Map<String, Object> relProperties = (Map<String, Object>) relationshipMap.get("properties");
-					reqBuilder.relationship(parseRelationship(relType, relProperties));
-					break;
-				
-				default:
-					break;
-			}
-		}
-		return reqBuilder.build();
-	}
-	
+		
 	//==================================================================================
 	
 	public void parseTosca(Map<String, Object> toscaMap){
@@ -677,20 +620,16 @@ public class App{
 		for(String fileName: app.capDefFileNames){
 			app.loadCapability(app.FILEPATH+fileName);
 		}
-		//load the nodetypes
-		for(String fileName: app.nodeDefFileNames){
-			app.loadDefinition(app.FILEPATH+fileName);
-		}
 		//load the relationship types
 		for(String fileName: app.relDefFileNames){
 			app.loadRelationship(app.FILEPATH+fileName);
 		}
+		//load the nodetypes
+		for(String fileName: app.nodeDefFileNames){
+			app.loadDefinition(app.FILEPATH+fileName);
+		}
 		
-		
-//		for(String defName: app.relDefinitions.keySet()){
-//			System.out.println(app.relDefinitions.get(defName));
-//		}
-//		
+
 		//-----------------------------------------------
 		
 		// Parse the Yaml plan
@@ -698,7 +637,10 @@ public class App{
 	    Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
 		app.parseTosca(map);
-	    
+		
+		for(String defName: app.nodeTemplates.keySet()){
+			System.out.println(app.nodeTemplates.get(defName));
+		}
 
 	}
 }

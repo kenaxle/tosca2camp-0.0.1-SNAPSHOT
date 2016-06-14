@@ -1,10 +1,6 @@
 package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.*;
-
-import kr.ac.hanyang.tosca2camp.assignments.AttributeAs;
-import kr.ac.hanyang.tosca2camp.assignments.CapabilityAs;
-import kr.ac.hanyang.tosca2camp.assignments.PropertyAs;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef.Builder;
 
 public class CapabilityDef implements Cloneable{
