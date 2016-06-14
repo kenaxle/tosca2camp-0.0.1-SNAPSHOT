@@ -35,7 +35,7 @@ public class ConstraintTypeDef implements Cloneable{
 		this.value = builder.value;
 	}
 	
-	public Builder getBuilder(){ 
+	public Builder getBuilder(String operator){ 
 		Builder builder = new Builder(operator);
 		builder.value = this.value;
 		return builder;

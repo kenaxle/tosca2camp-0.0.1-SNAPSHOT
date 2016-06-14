@@ -64,7 +64,7 @@ public class DataTypeDef implements Cloneable{
 		this.properties = builder.properties;
 	}
 	
-	public Builder getBuilder(){ 
+	public Builder getBuilder(String typeName){ 
 		Builder builder = new Builder(typeName);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;

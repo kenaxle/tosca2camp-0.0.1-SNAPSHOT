@@ -117,7 +117,7 @@ public class RelationshipDef implements Cloneable{
 	}
 	
 	
-	public Builder getBuilder(){
+	public Builder getBuilder(String type){
 		Builder builder = new Builder(type);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;

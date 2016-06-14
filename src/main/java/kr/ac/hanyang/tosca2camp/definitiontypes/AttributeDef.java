@@ -87,7 +87,7 @@ public class AttributeDef implements Cloneable{
 		this.entry_schema = builder.entry_schema;
 	}
 	
-	public Builder getBuilder(){ 
+	public Builder getBuilder(String name){ 
 		Builder builder = new Builder(name);
 		builder.type = type;
 		builder.description = this.description;

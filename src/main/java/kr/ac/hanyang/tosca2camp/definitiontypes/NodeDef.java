@@ -80,7 +80,7 @@ public class NodeDef implements Cloneable{
 		}
 		
 		public Builder addCapabilitiy(CapabilityDef capability){
-			this.capabilities.put(capability.getType(),capability);
+			this.capabilities.put(capability.getName(),capability);
 			return  this;
 		}
 		
@@ -147,7 +147,7 @@ public class NodeDef implements Cloneable{
 		}		   
 	}
 	
-	public Builder getBuilder(){
+	public Builder getBuilder(String typeName){
 		Builder builder = new Builder(typeName);
 		builder.name = this.name;
 		builder.derived_from = this.derived_from;
@@ -182,8 +182,8 @@ public class NodeDef implements Cloneable{
 
 	public Map<String, CapabilityDef> getCapabilities() {return capabilities;}
 	
-	public CapabilityDef getCapability(String type){
-		return capabilities.get(type);
+	public CapabilityDef getCapability(String name){
+		return capabilities.get(name);
 	}
 
 	public Map<String, InterfaceDef> getInterfaces() {return interfaces;}

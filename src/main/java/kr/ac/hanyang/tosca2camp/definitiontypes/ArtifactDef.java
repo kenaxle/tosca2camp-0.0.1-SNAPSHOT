@@ -60,7 +60,7 @@ public class ArtifactDef implements Cloneable{
 		this.deployPath = builder.deployPath;
 	}
 	
-	public Builder getBuilder(){ 
+	public Builder getBuilder(String name, String type){ 
 		Builder builder = new Builder(name,type);
 		builder.description = this.description;
 		builder.implementation = this.implementation;

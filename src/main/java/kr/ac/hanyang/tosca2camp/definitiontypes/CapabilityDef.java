@@ -99,7 +99,7 @@ public class CapabilityDef implements Cloneable{
 		this.valid_source_types = builder.valid_source_types;
 	}
 	
-	public Builder getBuilder(){
+	public Builder getBuilder(String name, String type){
 		Builder builder = new Builder(name,type);
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
