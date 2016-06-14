@@ -127,6 +127,9 @@ public class RelationshipDef implements Cloneable{
 		builder.valid_target_types = this.valid_target_types;
 		return builder;
 	}
+	
+	public String getName(){return name;}
+	public String getType(){return type;}
 
 //	public boolean validate(RelationshipTemplate rTemp){
 //		// (type.equals(rTemp.getType()));
@@ -144,7 +147,15 @@ public class RelationshipDef implements Cloneable{
 //	}
 	
 	public String toString(){
-		return "type: "+type+"\n";
+		String props ="";
+		
+		for(String propName:properties.keySet()){
+			PropertyDef prop = properties.get(propName);
+			props+=prop;
+		}
+		return  "name: "+name+"\n"+
+				"type: "+type+"\n"+
+				"properties: \n"+props+"\n";
 	}
 }
 

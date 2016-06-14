@@ -193,7 +193,7 @@ public class NodeDef implements Cloneable{
 	
 	public void setPropertyValue(String name, Object value){
 		PropertyDef toSet = properties.get(name);
-		toSet.setValue(value);
+		toSet.setPropertyValue(value);
 	}
 	
 	public NodeDef parseNodeTemplate(Map<String, Object>nodeMap){
@@ -220,7 +220,7 @@ public class NodeDef implements Cloneable{
 		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
 		if (capMap != null){
 			for(String capName:capMap.keySet()){
-				this.getCapability(capName).parseCapTemplate(capMap);
+				this.getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
 				//nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
 			}
 		}
@@ -229,6 +229,7 @@ public class NodeDef implements Cloneable{
 		if (reqList != null){
 			for(Map<String,Object> reqMap:reqList){ 
 				String reqName = reqMap.keySet().iterator().next();
+				//TODO fix the requirements parser.
 				//nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
 			}
 		}
@@ -257,43 +258,12 @@ public class NodeDef implements Cloneable{
 		for(RequirementDef req:requirements)
 			reqs+=req;
 		return "TypeName: "+typeName+"\n"+
-			   "Description: "+description+"\n"+
-			   "properties: \n"+props+"\n"+
+			   //"Description: "+description+"\n"+
 			   "attributes: \n"+attrs+"\n"+
+			   "properties: \n"+props+"\n"+
 			   "capabilities: \n"+caps+"\n"+
 			   "requirements: \n"+reqs+"\n";
 			   
 	}
-
-//	public boolean validate(NodeTemplate node){
-//		boolean valid = true;
-//		node.getType();
-//		for(String pDefName:properties.keySet()){
-//			PropertyDef pDef = properties.get(pDefName);
-//			if(!pDef.validate((PropertyAs)node.getPropertyAs(pDef.getName())))
-//				valid = false;
-//		}
-//		for(String aDefName:attributes.keySet()){
-//			AttributeDef aDef = attributes.get(aDefName);
-//			if(!aDef.validate((AttributeAs)node.getAttributeAs(aDef.getName())))
-//				valid = false;
-//		}
-//		for(String cDefName:capabilities.keySet()){
-//			CapabilityDef cDef = capabilities.get(cDefName);
-//			CapabilityAs capAs = node.getCapabilityAs(cDef.getName());
-//			if (capAs != null){
-//				valid = cDef.validate(capAs);
-//			}else
-//				valid = false;
-//		}
-//		for(RequirementDef rDef: requirements){
-//			RequirementAs reqAs = node.getRequirementAs(rDef.getCapDefName());
-//			if (reqAs != null){
-//				valid = rDef.validate(reqAs);
-//			}else
-//				valid = false;
-//		}
-//		return valid;
-//	}
 	
 }

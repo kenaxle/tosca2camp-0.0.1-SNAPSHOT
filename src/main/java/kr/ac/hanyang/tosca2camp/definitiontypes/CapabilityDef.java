@@ -35,6 +35,11 @@ public class CapabilityDef implements Cloneable{
 			this.type = type;
 		}
 		
+		public Builder name(String name){
+			this.name = name;
+			return this;
+		}
+		
 		public Builder derived_from(CapabilityDef derived_from){
 			this.derived_from = derived_from;
 			return this;
@@ -99,8 +104,9 @@ public class CapabilityDef implements Cloneable{
 		this.valid_source_types = builder.valid_source_types;
 	}
 	
-	public Builder getBuilder(String name, String type){
-		Builder builder = new Builder(name,type);
+	public Builder getBuilder(String type){
+		Builder builder = new Builder(type);
+		builder.name = this.name;
 		builder.derived_from = this.derived_from;
 		builder.description = this.description;
 		builder.properties = this.properties;
@@ -134,7 +140,7 @@ public class CapabilityDef implements Cloneable{
 		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
 		for(String propertyName:propMap.keySet()){
 			//parse the property
-			this.getProperty(propertyName).parsePropTemplate(propMap);
+			this.getProperty(propertyName).setPropertyValue(propMap.get(propertyName));
 		}
 		
 //		Map<String,Object> attrMap = ((Map<String,Object>) capMap.get("attributes"));
@@ -146,8 +152,15 @@ public class CapabilityDef implements Cloneable{
 	}
 	
 	public String toString(){
+		String propString = "";
+		
+		for(String propName:properties.keySet()){
+			PropertyDef prop = properties.get(propName);
+			propString+=prop;
+		}
 		return "name: "+name+"\n"+
-			   "type: "+type+"\n";
+			   "type: "+type+"\n"/*+
+			   "properties: \n"+propString+"\n"*/;
 	}
 
 //	public boolean validate(CapabilityAs capAs){

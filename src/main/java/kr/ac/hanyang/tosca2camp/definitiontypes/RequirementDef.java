@@ -88,8 +88,14 @@ public class RequirementDef implements Cloneable{
 	}
 	
 	public String toString(){
+		String nodeString = "";
+		String capString = "";
+		if(nodeType != null) nodeString = nodeType.getTypeName();
+		if(capability != null) capString = capability.getName();
 		return "name: "+name+"\n"+
-			   "capability: "+capability+"\n";
+			   "node: "+nodeString+"\n"+
+			   "capability: "+capString+"\n"+
+			   "relationship: "+relationshipType.getType()+"\n";
 	}
 
 }

@@ -130,14 +130,8 @@ public class PropertyDef implements Cloneable{
 	public boolean isRequired(){return required;}
 	public Object getDefaultVal(){return defaultVal;}
 	
-	public void setValue(Object value){
+	public void setPropertyValue(Object value){
 		propertyValue = value;
-	}
-	
-	public PropertyDef parsePropTemplate(Map<String, Object>propMap){
-		String propName = propMap.keySet().iterator().next();
-		propertyValue = propMap.get(propName);
-		return this;
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -156,7 +150,11 @@ public class PropertyDef implements Cloneable{
 	
 	public String toString(){
 		return "name: "+name+"\n"+
-			   "type: "+type+"\n";
+			   "type: "+type.getTypeName()+"\n"+
+			   /*"required: "+required+"\n"+*/
+			   "property value: "+propertyValue+"\n"
+			   /*"default value: "+name+"\n"+
+			   "status: "+type+"\n"*/;
 	}
 	
 }

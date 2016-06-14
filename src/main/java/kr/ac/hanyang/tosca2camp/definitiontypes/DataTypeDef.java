@@ -100,7 +100,7 @@ public class DataTypeDef implements Cloneable{
 	
 	public void setPropertyValue(String name, Object value){
 		PropertyDef toSet = properties.get(name);
-		toSet.setValue(value);
+		toSet.setPropertyValue(value);
 	}
 	
 	public void setData(String str){
@@ -113,12 +113,12 @@ public class DataTypeDef implements Cloneable{
 		String props = "";
 		String consts = "";
 		for(String prop: properties.keySet())
-			props+=properties.get(prop);
-		for(ConstraintTypeDef constr: constraints)
-			consts+=constr;	
-		return "Name: "+typeName+"\n"+
-				"properties: \n"+props+"\n"+
-				"constraints: \n"+consts+"\n";			
+			props+=properties.get(prop).getName()+"\n";
+//		for(ConstraintTypeDef constr: constraints)
+//			consts+=constr;	
+		return "type name: "+typeName+"\n"/*+
+				"properties: \n"+props+"\n"
+				"constraints: \n"+consts+"\n"*/;			
 	}
 	
 }
