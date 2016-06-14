@@ -131,18 +131,25 @@ public class App{
 	
 	
 	private NodeDef parseNodeDef(String typeName, Map<String, Object>nodeMap){
+		String parentDef = (String) nodeMap.get("derived_from");
 		
-		if (nodeMap == null) 
-			return new NodeDef.Builder(typeName).build();
-
 		NodeDef thisNode = (NodeDef) nodeDefinitions.get(typeName);
 		if(thisNode !=null){
 			return (NodeDef) thisNode.clone(); //copy the node
 			//nodeDefBuilder = returnNode.getBuilder(typeName); 
 			//nodeDefBuilder.derived_from(returnNode); //add the parent
 		}else{
-
-		String parentDef = (String) nodeMap.get("derived_from");
+			//try to load the parent definition
+//			try{
+//				loadDefinition(FILEPATH+typeName+".yml");
+//				//clone and get builder here also
+//			}catch(Exception e){
+//				System.out.println(e.getMessage());
+//				System.out.println("The definition "+FILEPATH+parentDef+".yml does not exist. \n Will build incomplete def");
+//			}
+//		}
+		
+		
 		NodeDef.Builder nodeDefBuilder;
 		NodeDef returnNode;
 		// if not null then copy the nodeDef
@@ -348,19 +355,26 @@ public class App{
 	
 	@SuppressWarnings({ "unchecked", "rawtypes"})
 	public CapabilityDef parseCapDef(String name, Map<String, Object> capMap){
-		String type;
-		if (capMap == null) {
-			type = name;
-			return new CapabilityDef.Builder(name, type).build();
-		}
-		type = (String) capMap.get("type");		
+		String type = (String) capMap.get("type");		
 		//capability is normative
 		if (type == null) type = name; 
 
 		CapabilityDef thisCap = (CapabilityDef) capDefinitions.get(type);
 		if(thisCap !=null){
-			return (CapabilityDef) thisCap.clone(); //copy the node
-		}else{		
+			return thisCap.clone(); //copy the node
+			//nodeDefBuilder = returnNode.getBuilder(typeName); 
+			//nodeDefBuilder.derived_from(returnNode); //add the parent
+		}else{
+			//try to load the parent definition
+			try{
+				loadDefinition(FILEPATH+type+".yml");
+				//clone and get builder here also
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				System.out.println("The definition "+FILEPATH+type+".yml does not exist. \n Will build incomplete def");
+			}
+		}
+		
 		
 		String parentDef = (String) capMap.get("derived_from");
 		
@@ -372,7 +386,7 @@ public class App{
 		if (parentDef!=null){
 			CapabilityDef parent = (CapabilityDef) capDefinitions.get(parentDef);
 			if(parent !=null){
-				returnCapability = (CapabilityDef) parent.clone(); //copy the parent and then get a builder to add new functionality
+				returnCapability = parent.clone(); //copy the parent and then get a builder to add new functionality
 				capBuilder = returnCapability.getBuilder(); 
 			}else{
 				//try to load the parent definition
@@ -417,27 +431,25 @@ public class App{
 		}
 		return capBuilder.build();
 	}
-}
 	
 	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
 		
-		if (relMap == null) return new RelationshipDef.Builder(typeName).build();
 		
 		RelationshipDef thisNode = (RelationshipDef) relDefinitions.get(typeName);
 		if(thisNode !=null){
-			return (RelationshipDef) thisNode.clone(); //copy the node
+			return thisNode.clone(); //copy the node
 			//nodeDefBuilder = returnNode.getBuilder(typeName); 
 			//nodeDefBuilder.derived_from(returnNode); //add the parent
 		}else{
-//			//try to load the parent definition
-//			try{
-//				loadDefinition(FILEPATH+typeName+".yml");
-//				//clone and get builder here also
-//			}catch(Exception e){
-//				System.out.println(e.getMessage());
-//				System.out.println("The definition "+FILEPATH+typeName+".yml does not exist. \n Will build incomplete def");
-//			}
-//		}
+			//try to load the parent definition
+			try{
+				loadDefinition(FILEPATH+typeName+".yml");
+				//clone and get builder here also
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				System.out.println("The definition "+FILEPATH+typeName+".yml does not exist. \n Will build incomplete def");
+			}
+		}
 		
 		
 		String parentDef = (String) relMap.get("derived_from");
@@ -449,7 +461,7 @@ public class App{
 		if (parentDef!=null){
 			RelationshipDef parent = (RelationshipDef) relDefinitions.get(parentDef);
 			if(parent !=null){
-				returnRel = (RelationshipDef) parent.clone(); //copy the parent and then get a builder to add new functionality
+				returnRel = parent.clone(); //copy the parent and then get a builder to add new functionality
 				relBuilder = returnRel.getBuilder(); 
 			}else{
 				//try to load the parent definition
@@ -497,7 +509,6 @@ public class App{
 		}
 		return relBuilder.build();
 	}
-}
 		
 	public DataTypeDef parseDataTypeDef(String name, Map<String, Object> dataMap){
 		DataTypeDef.Builder dataDefBuilder;
@@ -531,12 +542,11 @@ public class App{
 	
 	//-------------------------------------------------------------------------------
 	
-	//-------------------------- Template Parsers--------------------------------------
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public NodeDef parseNode(String name, Map<String, Object>nodeMap){
+	public <V> NodeTemplate parseNode(String name, Map<String, Object>nodeMap){
 		String type = (String) nodeMap.get("type");
-		//Builder nodeBuilder; // = new NodeTemplate.Builder(name, type);
+		Builder nodeBuilder; // = new NodeTemplate.Builder(name, type);
 		String typeName = "";
 		
 		switch(type){
@@ -558,59 +568,54 @@ public class App{
 		}
 		
 		//try to get the definition or try to load it if its normative		
-		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
-		if(nodeDefinition == null){
+		NodeDef myDefinition = (NodeDef) nodeDefinitions.get(typeName);
+		if(myDefinition == null){
 			//try to load the definition
 			try{
 				loadDefinition(FILEPATH+typeName+".yml");
-				nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
+				myDefinition = (NodeDef) nodeDefinitions.get(typeName);
 			}catch(Exception e){
 				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
 				return null;
 			}
 		}
 		
-		NodeDef myDefinition = (NodeDef) nodeDefinition.clone();
-		//nodeBuilder = myDefinition.getBuilder();//new NodeTemplate.Builder(name, typeName);
+		nodeBuilder = myDefinition.getBuilder();//new NodeTemplate.Builder(name, typeName);
 		//nodeBuilder = NodeTemplate.getDefinitionBuilder(name, typeName, myDefinition); //need to preserve the hierarchy
 		//nodeBuilder.description((String) nodeMap.get("description"));
 		
 		//nodeBuilder.directives(directives); TODO
-//		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
-//		if (propMap != null){
-//			for(String propertyName:propMap.keySet()){
-//				//PropertyBuilder propBuilder = myDefinition.getP
-//				Object value = propMap.get(propertyName);
-//				myDefinition.setPropertyValue(propertyName, value);
-//				//nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
-//			}
-//		}
-//		
-////		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
-////		if (attrMap != null){
-////			for(String attributeName:propMap.keySet()){
-////				Object value = propMap.get(attributeName);
-////				myDefinition.setPropertyValue(attributeName, value);
-////				//nodeBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
-////			}
-////		}
-//		
-//		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
-//		if (capMap != null){
-//			for(String capName:capMap.keySet()){
-//				myDefinition.getCapability(capName).setPropertyValue(typeName, value);;
-//				//nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
-//			}
-//		}
-//		
-//		List<Map<String,Object>> reqList = ((List<Map<String,Object>>) nodeMap.get("requirements"));
-//		if (reqList != null){
-//			for(Map<String,Object> reqMap:reqList){ 
-//				String reqName = reqMap.keySet().iterator().next();
-//				//nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
-//			}
-//		}
-//		return myDefinition;
+		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
+		if (propMap != null){
+			for(String propertyName:propMap.keySet()){
+				//PropertyBuilder propBuilder = myDefinition.getP
+				myDefinition.
+				nodeBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
+			}
+		}
+		
+		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
+		if (attrMap != null){
+			for(String attributeName:propMap.keySet()){
+				nodeBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
+			}
+		}
+		
+		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
+		if (capMap != null){
+			for(String capName:capMap.keySet()){
+				nodeBuilder.addCapability(parseCapability(capName,(Map<String, Object>)capMap.get(capName)));
+			}
+		}
+		
+		List<Map<String,Object>> reqList = ((List<Map<String,Object>>) nodeMap.get("requirements"));
+		if (reqList != null){
+			for(Map<String,Object> reqMap:reqList){ 
+				String reqName = reqMap.keySet().iterator().next();
+				nodeBuilder.addRequirement(parseRequirement(reqName,(Map<String, Object>)reqMap.get(reqName)));
+			}
+		}
+		return nodeBuilder.build();
 	}
 	
 	public boolean loadRelationship(String name, Map<String,Object>relMap){
@@ -665,20 +670,20 @@ public class App{
 			}
 		}
 		
-//		capBuilder = new CapabilityAs.Builder(type);
-//		//capBuilder = CapabilityAs.getDefinitionBuilder(type, myDefinition);
-//		
-//		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
-//		for(String propertyName:propMap.keySet()){
-//			capBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
-//		}
-//		
-//		Map<String,Object> attrMap = ((Map<String,Object>) capMap.get("attributes"));
-//		for(String attributeName:propMap.keySet()){
-//			capBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
-//		}
-//		//do validation
-//		return capBuilder.build();
+		capBuilder = new CapabilityAs.Builder(type);
+		//capBuilder = CapabilityAs.getDefinitionBuilder(type, myDefinition);
+		
+		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
+		for(String propertyName:propMap.keySet()){
+			capBuilder.addProperty(new PropertyAs.Builder(propertyName).value(propMap.get(propertyName)).build());
+		}
+		
+		Map<String,Object> attrMap = ((Map<String,Object>) capMap.get("attributes"));
+		for(String attributeName:propMap.keySet()){
+			capBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
+		}
+		//do validation
+		return capBuilder.build();
 	}
 	
 	//TODO p.g. 261 should be able to parse extended grammar with properties
@@ -720,7 +725,6 @@ public class App{
 		return reqBuilder.build();
 	}
 	
-	//==================================================================================
 	
 	public void parseTosca(Map<String, Object> toscaMap){
 		for (String key:toscaMap.keySet()){
@@ -739,7 +743,7 @@ public class App{
 					case "node_templates":
 						Map<String, Object> nodeTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
 						for(String nodeTemplate:nodeTemplateMap.keySet()){
-							parseNode(nodeTemplate,(Map<String,Object>)nodeTemplateMap.get(nodeTemplate));
+							System.out.println(parseNode(nodeTemplate,(Map<String,Object>)nodeTemplateMap.get(nodeTemplate)));
 							//Map<String, Object> propObj = (Map<String, Object>) capObj.get(key2);
 						}
 						break;
@@ -789,11 +793,10 @@ public class App{
 		
 		// Parse the Yaml plan
 		//-----------------------------------------------
-	    Yaml yaml = new Yaml();
-		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-		app.parseTosca(map);
-	    
-		//Collection<String> col = new TreeSet<String>();
+//	    Yaml yaml = new Yaml();
+//		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
+//		app.parseTosca(map);
+	    //Collection<String> col = new TreeSet<String>();
 //			for(String key:map.keySet()){
 //				
 //				switch (key){
