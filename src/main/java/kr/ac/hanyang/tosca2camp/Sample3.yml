@@ -1,10 +1,9 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
  
-description: 
-  TOSCA simple profile with server and attached block storage using the normative AttachesTo Relationship Type.
- 
+description: TOSCA simple profile with server and attached block storage using a named Relationship Template for the storage attachment.
+
 topology_template:
- 
+
   inputs:
     cpus:
       type: integer
@@ -37,20 +36,24 @@ topology_template:
             architecture: x86_64
             type: linux 
             distribution: fedora 
-            version: "18.0"
+            version: 18.0
       requirements:
         - local_storage:
             node: my_storage
-            relationship:
-              type: AttachesTo
-              properties:
-                location: ./Storage/Location
- 
+            relationship: storage_attachment
+              
     my_storage:
       type: BlockStorage
       properties:
-        size: "50 GB"
-        snapshot_id: BS084412-StorageID
+        size: 50 GB
+        
+  relationship_templates: 
+    storage_attachment: 
+      type: AttachesTo
+      properties:
+        location: ./Storage/Location
+    
+outputs:       
  
   outputs:
     private_ip:

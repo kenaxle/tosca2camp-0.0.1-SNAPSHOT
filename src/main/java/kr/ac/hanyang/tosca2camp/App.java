@@ -6,7 +6,13 @@ import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Tag;
+
+import kr.ac.hanyang.tosca2camp.datatypes.Range;
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.ConstraintTypeDef;
@@ -16,7 +22,8 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
-
+import kr.ac.hanyang.tosca2camp.datatypes.RangeConstructor;
+import kr.ac.hanyang.tosca2camp.datatypes.RangeRepresenter;
 
 
 /**
@@ -78,8 +85,8 @@ public class App{
 	}
 	
 	
-	//load the Normative node type definitions
-	//-------------------------------------------------------------------------------
+
+	//---------------------Type Definition Parsers---------------------------------
 	@SuppressWarnings({ "unchecked" })
 	private void loadDefinition(String fileName) throws FileNotFoundException{
 			Yaml yaml = new Yaml();
@@ -106,7 +113,6 @@ public class App{
 			 relDefinitions.put(defTypeName,parseRelDef(defTypeName,(Map<String, Object>)map.get(defTypeName)));
 	}
 	
-	//loads the datatype definitions
 	private void loadDataTypes(String fileName) throws FileNotFoundException{
 		Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
@@ -502,8 +508,7 @@ public class App{
 		}
 		return dataDefBuilder.build();
 	}
-	
-	
+		
 	//-------------------------------------------------------------------------------
 	
 	//-------------------------- Template Parsers--------------------------------------
@@ -511,7 +516,6 @@ public class App{
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void parseNodeTemplate(String name, Map<String, Object>nodeMap){
 		String type = (String) nodeMap.get("type");
-		//Builder nodeBuilder; // = new NodeTemplate.Builder(name, type);
 		String typeName = "";
 		
 		switch(type){
@@ -546,33 +550,85 @@ public class App{
 		}
 		
 		NodeDef myDefinition = (NodeDef) nodeDefinition.clone();
-		nodeTemplates.put(name, myDefinition.parseNodeTemplate(nodeMap));
+		
+		for(String key: nodeMap.keySet()){
+			switch(key){
+			case "properties":
+				Map<String,Object> propMap = (Map<String,Object>)nodeMap.get(key);
+				if (propMap != null){
+					for(String propertyName:propMap.keySet()){
+						Object value = propMap.get(propertyName);
+						myDefinition.setPropertyValue(propertyName, value);
+					}
+				}
+				break;
+			case "requirements":
+				List<Map<String,Object>> reqList = (List<Map<String,Object>>)nodeMap.get(key);
+				if (reqList != null){
+					for(Map<String, Object> reqMap:reqList){
+						String reqName = reqMap.keySet().iterator().next();
+						RequirementDef toParse = myDefinition.getRequirement(reqName);
+						if (toParse == null){
+							NodeDef.Builder myDefBuilder = myDefinition.getBuilder(typeName);
+							myDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName))).build(); 
+						}
+						Object relItem = ((Map<String, Object>)reqMap.get(reqName)).get("relationship");
+						myDefinition.getRequirement(reqName).parseRelationshipDef(relItem);
+					}
+				}
+				break;
+			case "capabilities":
+				Map<String,Object> capMap = (Map<String,Object>)nodeMap.get(key);
+				if (capMap != null){
+					for(String capName:capMap.keySet()){
+						myDefinition.getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
+					}
+				}
+				break;
+			
+			default:
+				break;
+			}
+		}		
+	
+		nodeTemplates.put(name, myDefinition);
 	}
 	
 	
-	
-//	public boolean loadRelationship(String name, Map<String,Object>relMap){
-//		boolean valid;
-//		String type = (String) relMap.get("type");
-//		RelationshipDef myDefinition = (RelationshipDef) relDefinitions.get(type);
-//		if(myDefinition == null){
-//			//try to load the definition
-//			try{
-//				loadRelationship(FILEPATH+type+".yml");
-//				myDefinition = (RelationshipDef) relDefinitions.get(type);
-//			}catch(Exception e){
-//				System.out.println("The definition "+FILEPATH+type+" does not exist. \n Will build incomplete def");
-//				return false;
-//			}
-//		}
-//		RelationshipTemplate relTemplate = parseRelationship(type,(Map<String, Object>) relMap.get("properties"));
-//		return true;
-//	}
-	
+	public void parseRelTemplate(String name, Map<String,Object>relMap){
+		String type = (String) relMap.get("type");
+		String typeName = "";
 		
-	//==================================================================================
+		switch(type){
+		case "Root": typeName = "tosca.relationships.Root"; break;
+		case "HostedOn": typeName = "tosca.relationships.HostedOn"; break;
+		case "DependsOn": typeName = "tosca.relationships.DependsOn"; break;
+		case "ConnectsTo": typeName = "tosca.relationships.ConnectsTo"; break;
+		case "AttachesTo": typeName = "tosca.relationships.AttachesTo"; break;
+		case "RoutesTo": typeName = "tosca.relationships.RoutesTo"; break;
+		default: if(!type.isEmpty())
+					typeName = type;//test if the type is not empty then its long type
+		break; //use the empty string
+		}
+		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+		if(relDefinition == null){
+			//try to load the definition
+			try{
+				loadRelationship(FILEPATH+typeName+".yml");
+				relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+			}catch(Exception e){
+				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
+				return;
+			}
+		}
+		
+		RelationshipDef myRelDefinition = (RelationshipDef) relDefinition.clone();
+		myRelDefinition.parseRelationshipTemplate(relMap);
+		relTemplates.put(name, myRelDefinition);
+	}
 	
-	public void parseTosca(Map<String, Object> toscaMap){
+	
+	public void parseServiceTemplate(Map<String, Object> toscaMap){
 		for (String key:toscaMap.keySet()){
 			switch (key){
 			case "tosca_definitions_version":
@@ -592,6 +648,12 @@ public class App{
 							parseNodeTemplate(nodeTemplate,(Map<String,Object>)nodeTemplateMap.get(nodeTemplate));
 						}
 						break;
+					case "relationship_templates":
+						Map<String, Object> relTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
+						for(String relTemplate:relTemplateMap.keySet()){
+							parseRelTemplate(relTemplate,(Map<String,Object>)relTemplateMap.get(relTemplate));
+						}
+						break;
 					case "outputs":	break;
 					default:
 						break;
@@ -605,12 +667,12 @@ public class App{
 		}
 	}
 	
-	
+	//==================================================================================
 	@SuppressWarnings("unchecked")
 	public static void main( String[] args ) throws Exception{
 		
-		// load the Normative definitions
-		//-----------------------------------------------
+//		// load the Normative definitions
+//		//-----------------------------------------------
 		App app = new App();
 		// load the datatypes
 		for(String fileName: app.dTypeDefFileNames){
@@ -636,11 +698,20 @@ public class App{
 		//-----------------------------------------------
 	    Yaml yaml = new Yaml();
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
-		app.parseTosca(map);
 		
+		app.parseServiceTemplate(map);
+	
 		for(String defName: app.nodeTemplates.keySet()){
 			System.out.println(app.nodeTemplates.get(defName));
+		}
+		for(String defName: app.relTemplates.keySet()){
+			System.out.println(app.relTemplates.get(defName));
 		}
 
 	}
 }
+
+//Yaml yaml = new Yaml(new RangeConstructor(),new RangeRepresenter(), new DumperOptions());
+//	    yaml.addImplicitResolver(new Tag("!range"), Pattern.compile("^\\[ * (\\d+) *, *(\\d+) *\\]$"), "[");
+//		Map<String, Range> map = (Map<String,Range>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample.yml")));
+//		System.out.println(map.get("tosca_definitions_version"));		

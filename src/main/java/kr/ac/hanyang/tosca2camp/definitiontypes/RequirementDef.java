@@ -79,9 +79,13 @@ public class RequirementDef implements Cloneable{
 	public CapabilityDef getCapDefName(){return capability;}
 	public NodeDef getNodeDefName(){return nodeType;}
 	public RelationshipDef getRelDefName(){return relationshipType;}
-	public RelationshipDef parseRelationshipDef(Map<String, Object>relMap){
-		if (relationshipType != null)
-			return relationshipType.parseRelationshipTemplate(relMap);
+	
+	public RelationshipDef parseRelationshipDef(Object toParse){
+		if(toParse instanceof Map){ 
+			Map<String, Object> relMap = (Map<String, Object>) toParse;
+			if (relationshipType != null)
+				return relationshipType.parseRelationshipTemplate(relMap);
+		}
 		return null;
 	}
 	

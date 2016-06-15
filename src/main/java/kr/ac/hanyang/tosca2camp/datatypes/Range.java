@@ -45,47 +45,13 @@ public class Range {
 	}
 	
 	public String toString(){
-		return lower_bound+"."+upper_bound;
+		return lower_bound+", "+upper_bound;
 	}
 	
 }
 
-class RangeRepresenter extends Representer {
-    public RangeRepresenter() {
-        this.representers.put(Range.class, new RepresentVersion());
-    }
 
-    private class RepresentVersion implements Represent {
-        public Node representData(Object data) {
-        	Range range = (Range) data;
-            String value = "[ "+range.getUpper_bound()+", "+range.getLower_bound()+" ]";
-            return representScalar(new Tag("!range"), value);
-        }
-    }
-    
-    class RangeConstructor extends Constructor {
-        public RangeConstructor() {
-            this.yamlConstructors.put(new Tag("!range"), new ConstructRange());
-        }
 
-        private class ConstructRange extends AbstractConstruct {
-            public Object construct(Node node) {
-                String val = (String) constructScalar((ScalarNode) node);
-                Pattern versionPattern = Pattern.compile("^\\[ * (\\d+) *, *(\\d+) *\\]$");
-                Matcher matcher = versionPattern.matcher(val);
-
-                try{
-                	Integer upper = Integer.parseInt(matcher.group(1));
-                	Integer lower = Integer.parseInt(matcher.group(2));
-                	return new Range(upper,lower);
-                }
-                catch(NullPointerException e){
-                	System.out.println("Upper lower is null");
-                	return null;
-                }
-            }
-        }
-    }
     
     
-}
+

@@ -172,9 +172,13 @@ public class NodeDef implements Cloneable{
 
 	public List<RequirementDef> getRequirements() {return requirements;}
 	
+	//might be a custom requirement then I cater for the default not being found
 	public RequirementDef getRequirement(String reqName){
-		int index = requirements.indexOf(new RequirementDef.Builder(reqName).build());
-		return requirements.get(index);
+		RequirementDef toFind = new RequirementDef.Builder(reqName).build();
+		int index = requirements.indexOf(toFind);
+		if (index > 0)
+			return requirements.get(index);
+		return null;
 	}
 	
 	public Map<String, CapabilityDef> getCapabilities() {return capabilities;}
@@ -192,43 +196,6 @@ public class NodeDef implements Cloneable{
 		PropertyDef toSet = properties.get(name);
 		toSet.setPropertyValue(value);
 	}
-	
-	public NodeDef parseNodeTemplate(Map<String, Object>nodeMap){
-		Map<String,Object> propMap = ((Map<String,Object>) nodeMap.get("properties"));
-		if (propMap != null){
-			for(String propertyName:propMap.keySet()){
-				Object value = propMap.get(propertyName);
-				this.setPropertyValue(propertyName, value);
-			}
-		}
-		
-//		Map<String,Object> attrMap = ((Map<String,Object>) nodeMap.get("attributes"));
-//		if (attrMap != null){
-//			for(String attributeName:propMap.keySet()){
-//				Object value = propMap.get(attributeName);
-//				myDefinition.setPropertyValue(attributeName, value);
-//				//nodeBuilder.addAttribute(new AttributeAs.Builder(attributeName).value(propMap.get(attributeName)).build());
-//			}
-//		}
-		
-		Map<String,Object> capMap = ((Map<String,Object>) nodeMap.get("capabilities"));
-		if (capMap != null){
-			for(String capName:capMap.keySet()){
-				this.getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
-			}
-		}
-		
-		List<Map<String,Object>> reqList = ((List<Map<String,Object>>) nodeMap.get("requirements"));
-		if (reqList != null){
-			for(Map<String,Object> reqMap:reqList){ 
-				String reqName = reqMap.keySet().iterator().next();
-				Map<String, Object> relMap = (Map<String, Object>)((Map<String, Object>)reqMap.get(reqName)).get("relationship");
-				this.getRequirement(reqName).parseRelationshipDef(relMap);
-			}
-		}
-		return this;
-	}
-	
 	
 	
 	public String toString(){

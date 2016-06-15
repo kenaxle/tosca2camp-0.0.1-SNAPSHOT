@@ -63,37 +63,7 @@ public class EntrySchemaDef implements Cloneable{
 		return builder;
 	}
 	
-	public DataTypeDef getType(){
-//		switch(type){
-//		case "string": return "java.lang.String";
-//		case "integer": return "java.lang.Integer";
-//		case "float": return "java.lang.Double";
-//		case "boolean": return "java.lang.Boolean";
-//		case "list": return "java.util.ArrayList";
-//		case "map": return "java.util.LinkedHashMap";
-//		case "scalar-unit.size": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarSize";
-//		case "scalar-unit.time": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarTime";
-//		case "scalar-unit.frequency": return "kr.ac.hanyang.tosca2camp.toscaTypes.ScalarFrequency";
-//		default: return type; 		
-//		}	
-		return this.type;
-	}
-	
 	public String getDescription(){return description;}
-
-	
-//	public boolean validate(PropertyAs property){
-//		boolean valid = false;
-//		if (property != null){
-//			if (name.equals(property.getName())){
-//				//the type is valid
-//				if (type.equals(property.getValue().getClass().getName())){
-//					valid = true;
-//				}
-//			}
-//		}
-//		return valid;
-//	}
 	
 	public String toString(){
 		return "type: "+type+"\n";

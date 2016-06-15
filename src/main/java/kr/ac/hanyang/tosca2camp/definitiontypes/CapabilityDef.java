@@ -132,10 +132,9 @@ public class CapabilityDef implements Cloneable{
 	}
 	
 	public CapabilityDef parseCapTemplate(Map<String, Object>capMap){
-		//CapabilityDef myDefinition = (CapabilityDef) this.clone();
+
 		Map<String,Object> propMap = ((Map<String,Object>) capMap.get("properties"));
 		for(String propertyName:propMap.keySet()){
-			//parse the property
 			this.getProperty(propertyName).setPropertyValue(propMap.get(propertyName));
 		}
 		
@@ -143,7 +142,7 @@ public class CapabilityDef implements Cloneable{
 //		for(String attributeName:propMap.keySet()){
 //			//parse the attribute
 //		}
-//		//do validation
+
 		return this;
 	}
 	
@@ -159,8 +158,4 @@ public class CapabilityDef implements Cloneable{
 			   "properties: \n"+propString+"\n"*/;
 	}
 
-//	public boolean validate(CapabilityAs capAs){
-//		return false;
-//	}
-	
 }

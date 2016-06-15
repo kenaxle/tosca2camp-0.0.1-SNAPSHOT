@@ -21,8 +21,6 @@ public class AttributeDef implements Cloneable{
 		
 		public Builder(String name){
 			this.name = name;
-			//this.type = new DataTypeDef.Builder(type).build();
-			//this.defaultVal = "";
 		}
 		
 		public Builder type(String type) {
@@ -67,17 +65,6 @@ public class AttributeDef implements Cloneable{
 		}	
 	}
 	
-	
-//	public static AttributeDef clone(AttributeDef origAttr){
-//		AttributeDef.Builder copyBuilder = new AttributeDef.Builder(origAttr.name, origAttr.type.getTypeName());
-//		if (origAttr.entry_schema != null)
-//			copyBuilder.entry_schema(EntrySchemaDef.clone(origAttr.entry_schema));
-//		return copyBuilder.description(origAttr.description)
-//				   		  .defaultVal(origAttr.defaultVal)
-//				   		  .status(origAttr.status)
-//				   		  .build();
-//	}
-	
 	private AttributeDef(Builder builder){
 		this.name = builder.name;
 		this.type = builder.type;
@@ -102,19 +89,6 @@ public class AttributeDef implements Cloneable{
 	public String getDescription(){return description;}
 	public Object getDefaultVal(){return defaultVal;}
 	
-
-//	public boolean validate(AttributeAs attribute){
-//		boolean valid = false;
-//		if (attribute != null){
-//			if (name.equals(attribute.getName())){
-//				//the type is valid
-//				if (type.equals(attribute.getValue().getClass().getName())){
-//					valid = true;
-//				}
-//			}
-//		}
-//		return valid;
-//	}	
 	
 	public String toString(){
 		return "name: "+name+"\n"+

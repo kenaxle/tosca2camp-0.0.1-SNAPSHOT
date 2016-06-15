@@ -95,7 +95,7 @@ public class PropertyDef implements Cloneable{
 		try{
 			PropertyDef toReturn = (PropertyDef) super.clone();
 			//toReturn.propertyValue = (Object) propertyValue.clone();
-			//toReturn.defaultVal = (DataTypeDef) defaultVal.clone();
+			//toReturn.defaultVal = (DataTypeDef) defaultVal.clone(); TODO
 			toReturn.constraints = new ArrayList<ConstraintTypeDef>();
 			for( ConstraintTypeDef constraint:constraints){
 				toReturn.constraints.add((ConstraintTypeDef) constraint.clone()); //make sure to create a copy
