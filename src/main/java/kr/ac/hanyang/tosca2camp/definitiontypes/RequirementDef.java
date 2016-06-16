@@ -2,19 +2,19 @@ package kr.ac.hanyang.tosca2camp.definitiontypes;
 
 import java.util.Map;
 
-public class RequirementDef implements Cloneable{
+public class RequirementDef<T> implements Cloneable{
 	private String name;
-	private CapabilityDef capability;
-	private NodeDef nodeType; 
-	private RelationshipDef relationshipType;
+	private T capability;
+	private T nodeType; 
+	private T relationshipType;
 	private String occurence; // must fix
 	
 	
 	public static class Builder {
 		private String name;
-		private CapabilityDef capability;
-		private NodeDef nodeType; 
-		private RelationshipDef relationshipType;
+		private String capability;
+		private String nodeType; 
+		private String relationshipType;
 		private String occurence; // must fix
 		
 		public Builder(String name){
@@ -22,17 +22,17 @@ public class RequirementDef implements Cloneable{
 			//this.capability = capability;
 		}
 		
-		public Builder node(NodeDef node){
+		public Builder node(String node){
 			this.nodeType = node;
 			return this;
 		}
 		
-		public Builder relationship(RelationshipDef relationship){
+		public Builder relationship(String relationship){
 			this.relationshipType = relationship;
 			return this;
 		}
 		
-		public Builder capability (CapabilityDef capability){
+		public Builder capability (String capability){
 			this.capability = capability;
 			return this;
 		}
@@ -50,18 +50,18 @@ public class RequirementDef implements Cloneable{
 	
 	private RequirementDef(Builder builder){
 		this.name = builder.name;
-		this.capability = builder.capability;
-		this.nodeType = builder.nodeType;
-		this.relationshipType = builder.relationshipType;
+		this.capability = (T) builder.capability;
+		this.nodeType = (T) builder.nodeType;
+		this.relationshipType = (T) builder.relationshipType;
 		this.occurence = builder.occurence;
 	}
 	
 	public Object clone(){
 		try{
 			RequirementDef toReturn = (RequirementDef) super.clone();
-			if (capability != null) toReturn.capability = (CapabilityDef)capability.clone(); //TODO this should clone
-			if (nodeType != null) toReturn.nodeType = (NodeDef)nodeType.clone();
-			if (relationshipType != null) toReturn.relationshipType = (RelationshipDef)relationshipType.clone();
+			if (capability != null && (capability instanceof CapabilityDef)) toReturn.capability = ((CapabilityDef)capability).clone(); //TODO this should clone
+			if (nodeType != null && (nodeType instanceof NodeDef)) toReturn.nodeType = ((NodeDef)nodeType).clone();
+			if (relationshipType != null && (relationshipType instanceof RelationshipDef)) toReturn.relationshipType = ((RelationshipDef)relationshipType).clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;
@@ -70,21 +70,22 @@ public class RequirementDef implements Cloneable{
 	
 	public Builder getBuilder(){
 		Builder builder = new Builder(name);
-		builder.nodeType = this.nodeType;
-		builder.relationshipType = this.relationshipType;
+		builder.nodeType = (String) this.nodeType;
+		builder.capability = (String) this.capability;
+		builder.relationshipType = (String) this.relationshipType;
 		builder.occurence = this.occurence;
 		return builder;	
 	}
 	
-	public CapabilityDef getCapDefName(){return capability;}
-	public NodeDef getNodeDefName(){return nodeType;}
-	public RelationshipDef getRelDefName(){return relationshipType;}
+	public CapabilityDef getCapDefName(){return (CapabilityDef) capability;}
+	public NodeDef getNodeDefName(){return (NodeDef) nodeType;}
+	public RelationshipDef getRelDefName(){return (RelationshipDef) relationshipType;}
 	
 	public RelationshipDef parseRelationshipDef(Object toParse){
 		if(toParse instanceof Map){ 
 			Map<String, Object> relMap = (Map<String, Object>) toParse;
-			if (relationshipType != null)
-				return relationshipType.parseRelationshipTemplate(relMap);
+			if (relationshipType != null && (relationshipType instanceof RelationshipDef))
+				return ((RelationshipDef) relationshipType).parseRelationshipTemplate(relMap);
 		}
 		return null;
 	}
@@ -99,12 +100,23 @@ public class RequirementDef implements Cloneable{
 	public String toString(){
 		String nodeString = "";
 		String capString = "";
-		if(nodeType != null) nodeString = nodeType.getTypeName();
-		if(capability != null) capString = capability.getName();
+		String relString = "";
+		if(nodeType != null && (nodeType instanceof NodeDef)) 
+			nodeString = ((NodeDef) nodeType).getTypeName();
+		else 
+			nodeString = (String) nodeType;
+		if(capability != null && (capability instanceof CapabilityDef))
+			capString = ((CapabilityDef) capability).getName();
+		else 
+			capString = (String) capability;
+		if(relationshipType != null && (relationshipType instanceof RelationshipDef))
+			relString = ((RelationshipDef) relationshipType).getName();
+		else 
+			relString = (String) capability;
 		return "name: "+name+"\n"+
 			   "node: "+nodeString+"\n"+
 			   "capability: "+capString+"\n"+
-			   "relationship: "+relationshipType.getType()+"\n";
+			   "relationship: "+relString+"\n";
 	}
 
 }

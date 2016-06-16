@@ -62,9 +62,11 @@ public class App{
 	private Map<String, RelationshipDef> relDefinitions = new LinkedHashMap<String, RelationshipDef>();
 	private Map<String, DataTypeDef> dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
 	
+	//need a list for inputs
+	private Map<String ,RelationshipDef> customRelDefinitions = new LinkedHashMap<String, RelationshipDef>();
 	private Map<String, NodeDef> nodeTemplates = new LinkedHashMap<String, NodeDef>();
 	private Map<String, RelationshipDef> relTemplates = new LinkedHashMap<String, RelationshipDef>();
-	
+	//need a list for outputs
 	
 	private String normalizeType(String shortType){
 		switch(shortType){
@@ -175,18 +177,14 @@ public class App{
 				break;
 			case "requirements":
 				List<Map<String,Object>> reqDefList = (List<Map<String,Object>>)nodeMap.get(key);
-				for(Map<String, Object> reqMap:reqDefList){
-					//nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqDefMap.get(reqName)));
-					
+				for(Map<String, Object> reqMap:reqDefList){					
 					String reqName = reqMap.keySet().iterator().next();
 					nodeDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName)));
-					//propBuilder.addConstraint(new ListEntry.Builder<>(key,constraint.get(key)).build());
 				}
 				break;
 			case "capabilities":
 				Map<String,Object> capDefMap = (Map<String,Object>)nodeMap.get(key);
 				for(String capName:capDefMap.keySet()){
-					//CapabilityDef capDef = parseCapDef(capName,(Map<String, Object>)capDefMap.get(capName));
 					nodeDefBuilder.addCapabilitiy(parseCapDef(capName,(Map<String, Object>)capDefMap.get(capName)));
 				}
 				break;
@@ -207,7 +205,6 @@ public class App{
 			}
 		}		
 		returnNode = nodeDefBuilder.build();
-		//nodeDefinitions.put(name,rNode);
 		return returnNode;
 	}
 }
@@ -312,21 +309,17 @@ public class App{
 	}
 	
 	public RequirementDef parseReqDef(String name, Map<String, Object> reqMap){
-		//String capability = (String) reqMap.get("capability");	
 		RequirementDef.Builder reqBuilder = new RequirementDef.Builder(name);
 		for(String mapItem:reqMap.keySet()){
 			switch(mapItem){
-			case "node":
-				NodeDef nDef = parseNodeDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
-				reqBuilder.node(nDef);
+			case "node":		
+				reqBuilder.node((String)reqMap.get(mapItem));
 				break;
-			case "relationship":
-				RelationshipDef rDef = parseRelDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
-				reqBuilder.relationship(rDef);
+			case "relationship":		
+				reqBuilder.relationship((String)reqMap.get(mapItem));
 				break;
-			case "capability":
-				CapabilityDef cDef = parseCapDef((String) reqMap.get(mapItem),null); //try to get the node if it is loaded			
-				reqBuilder.capability(cDef);
+			case "capability":			
+				reqBuilder.capability((String)reqMap.get(mapItem));
 				break;
 			case "occurence":
 				reqBuilder.occurence((String)reqMap.get(mapItem));
@@ -539,18 +532,19 @@ public class App{
 		//try to get the definition or try to load it if its normative		
 		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
 		if(nodeDefinition == null){
-			//try to load the definition
+			//maybe the definition was not loaded.
+			//try to load the definition.
 			try{
 				loadDefinition(FILEPATH+typeName+".yml");
 				nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
 			}catch(Exception e){
-				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
+				System.out.println("The definition "+FILEPATH+typeName+" does not exist. Unable to parse the node ");
 				return;
 			}
 		}
 		
 		NodeDef myDefinition = (NodeDef) nodeDefinition.clone();
-		
+		//clone the definition because we need to add real values.
 		for(String key: nodeMap.keySet()){
 			switch(key){
 			case "properties":
@@ -562,21 +556,6 @@ public class App{
 					}
 				}
 				break;
-			case "requirements":
-				List<Map<String,Object>> reqList = (List<Map<String,Object>>)nodeMap.get(key);
-				if (reqList != null){
-					for(Map<String, Object> reqMap:reqList){
-						String reqName = reqMap.keySet().iterator().next();
-						RequirementDef toParse = myDefinition.getRequirement(reqName);
-						if (toParse == null){
-							NodeDef.Builder myDefBuilder = myDefinition.getBuilder(typeName);
-							myDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName))).build(); 
-						}
-						Object relItem = ((Map<String, Object>)reqMap.get(reqName)).get("relationship");
-						myDefinition.getRequirement(reqName).parseRelationshipDef(relItem);
-					}
-				}
-				break;
 			case "capabilities":
 				Map<String,Object> capMap = (Map<String,Object>)nodeMap.get(key);
 				if (capMap != null){
@@ -585,12 +564,26 @@ public class App{
 					}
 				}
 				break;
-			
+			case "requirements":
+				List<Map<String,Object>> reqList = (List<Map<String,Object>>)nodeMap.get(key);
+				if (reqList != null){
+					for(Map<String, Object> reqMap:reqList){
+						String reqName = reqMap.keySet().iterator().next();
+						RequirementDef toParse = myDefinition.getRequirement(reqName);
+						if (toParse == null){
+							//using a custom requirement so simply add the requirement
+							NodeDef.Builder myDefBuilder = myDefinition.getBuilder(typeName);
+							myDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName))).build(); 
+						}
+						Object relItem = ((Map<String, Object>)reqMap.get(reqName)).get("relationship");
+						myDefinition.getRequirement(reqName).parseRelationshipDef(relItem);
+					}
+				}
+				break;			
 			default:
 				break;
 			}
 		}		
-	
 		nodeTemplates.put(name, myDefinition);
 	}
 	
@@ -610,21 +603,27 @@ public class App{
 					typeName = type;//test if the type is not empty then its long type
 		break; //use the empty string
 		}
-		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+		RelationshipDef relDefinition = (RelationshipDef) customRelDefinitions.get(typeName);
 		if(relDefinition == null){
-			//try to load the definition
-			try{
-				loadRelationship(FILEPATH+typeName+".yml");
-				relDefinition = (RelationshipDef) relDefinitions.get(typeName);
-			}catch(Exception e){
-				System.out.println("The definition "+FILEPATH+typeName+" does not exist. \n Will build incomplete def");
-				return;
+			relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+			if(relDefinition == null){
+				//try to load the definition
+				try{
+					loadRelationship(FILEPATH+typeName+".yml");
+					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+				}catch(Exception e){
+					System.out.println("The relationship definition "+typeName+" does not exist.");
+					//this is a custom relationship and need to parse it
+					//relDefinition = p
+					return;
+				}
 			}
 		}
-		
 		RelationshipDef myRelDefinition = (RelationshipDef) relDefinition.clone();
 		myRelDefinition.parseRelationshipTemplate(relMap);
+		myRelDefinition = myRelDefinition.getBuilder(typeName).name(name).build();
 		relTemplates.put(name, myRelDefinition);
+		
 	}
 	
 	
@@ -636,6 +635,13 @@ public class App{
 				break;
 			case "description":
 				
+				break;
+			case "relationship_types":
+				//load custom relationship types
+				Map<String, Object> relTypesMap = (Map<String,Object>) toscaMap.get(key);
+				for (String relTypeName:relTypesMap.keySet()){
+					customRelDefinitions.put(relTypeName,parseRelDef(relTypeName,(Map<String,Object>) relTypesMap.get(relTypeName)));
+				}
 				break;
 			case "topology_template":
 				Map<String, Object> topologyTemplateMap = (Map<String,Object>) toscaMap.get(key);
@@ -697,7 +703,7 @@ public class App{
 		// Parse the Yaml plan
 		//-----------------------------------------------
 	    Yaml yaml = new Yaml();
-		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml")));
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample2.yml")));
 		
 		app.parseServiceTemplate(map);
 	
