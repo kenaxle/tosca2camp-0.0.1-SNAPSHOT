@@ -31,3 +31,4 @@ tosca.nodes.Compute:
       type: tosca.capabilities.Scalable
     binding:
       type: tosca.capabilities.network.Bindable
+      

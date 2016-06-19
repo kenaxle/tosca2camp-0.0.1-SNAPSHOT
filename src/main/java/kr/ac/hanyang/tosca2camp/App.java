@@ -68,21 +68,71 @@ public class App{
 	private Map<String, RelationshipDef> relTemplates = new LinkedHashMap<String, RelationshipDef>();
 	//need a list for outputs
 	
-	private String normalizeType(String shortType){
-		switch(shortType){
-		case "Root": return "tosca.nodes.Root"; 
-		case "Compute": return "tosca.nodes.Compute";
-		case "SoftwareComponent": return "tosca.nodes.SoftwareComponent"; 
-		case "WebServer": return "tosca.nodes.WebServer";
-		case "WebApplication": return "tosca.nodes.WebApplication"; 
-		case "DBMS": return "tosca.nodes.DBMS";
-		case "Database": return "tosca.nodes.Database"; 
-		case "ObjectStorage": return "tosca.nodes.ObjectStorage"; 
-		case "BlockStorage": return "tosca.nodes.BlockStorage";
-		case "Container.Runtime": return "tosca.nodes.Container.Runtime"; 
-		case "Container.Application": return "tosca.nodes.Container.Application";
-		case "LoadBalancer": return "tosca.nodes.LoadBalancer";
-		default: return shortType;//test if the type is not empty then its long type
+	private String normalizeTypeName(String shortTypeName, String type){
+		switch(type){
+		case "node":
+			switch(shortTypeName){
+			case "Root": return "tosca.nodes.Root"; 
+			case "Compute": return "tosca.nodes.Compute";
+			case "SoftwareComponent": return "tosca.nodes.SoftwareComponent"; 
+			case "WebServer": return "tosca.nodes.WebServer";
+			case "WebApplication": return "tosca.nodes.WebApplication"; 
+			case "DBMS": return "tosca.nodes.DBMS";
+			case "Database": return "tosca.nodes.Database"; 
+			case "ObjectStorage": return "tosca.nodes.ObjectStorage"; 
+			case "BlockStorage": return "tosca.nodes.BlockStorage";
+			case "Container.Runtime": return "tosca.nodes.Container.Runtime"; 
+			case "Container.Application": return "tosca.nodes.Container.Application";
+			case "LoadBalancer": return "tosca.nodes.LoadBalancer";
+			default: return shortTypeName;//test if the type is not empty then its long type
+			}
+		case "capability":
+			switch(shortTypeName){
+			case "Attachment": return "tosca.capabilities.Attachment"; 
+			case "Bindable": return "tosca.capabilities.Bindable";
+			case "Container": return "tosca.capabilities.Container"; 
+			case "Endpoint.Admin": return "tosca.capabilities.Endpoint.Admin";
+			case "Endpoint.Database": return "tosca.capabilities.Endpoint.Database"; 
+			case "Endpoint.Public": return "tosca.capabilities.Endpoint.Public";
+			case "Endpoint": return "tosca.capabilities.Endpoint"; 
+			case "Node": return "tosca.capabilities.Node"; 
+			case "OperatingSystem": return "tosca.capabilities.OperatingSystem";
+			case "Root": return "tosca.capabilities.Root"; 
+			case "Scalable": return "tosca.capabilities.Scalable";
+			default: return shortTypeName;//test if the type is not empty then its long type
+			}
+		case "relationship":
+			switch(shortTypeName){
+			case "Root": return "tosca.relationships.Root"; 
+			case "HostedOn": return "tosca.relationships.HostedOn"; 
+			case "DependsOn": return "tosca.relationships.DependsOn"; 
+			case "ConnectsTo": return "tosca.relationships.ConnectsTo"; 
+			case "AttachesTo": return "tosca.relationships.AttachesTo"; 
+			case "RoutesTo": return "tosca.relationships.RoutesTo"; 
+			default: return shortTypeName;//test if the type is not empty then its long type
+			}
+		case "datatype":
+			switch(shortTypeName){
+			case "boolean": return "tosca.datatypes.boolean"; 
+			case "credential": return "tosca.datatypes.credential";
+			case "float": return "tosca.datatypes.float"; 
+			case "integer": return "tosca.datatypes.integer"; 
+			case "list": return "tosca.datatypes.list"; 
+			case "map": return "tosca.datatypes.map"; 
+			case "network.NetworkInfo": return "tosca.datatypes.network.NetworkInfo"; 
+			case "network.PortDef": return "tosca.datatypes.network.PortDef"; 
+			case "network.PortSpec": return "tosca.datatypes.network.PortSpec"; 
+			case "range": return "tosca.datatypes.range";  
+			case "scalar-unit.frequency": return "tosca.datatypes.scalar-unit.frequency"; 
+			case "scalar-unit.size": return "tosca.datatypes.scalar-unit.size"; 
+			case "scalar-unit.time": return "tosca.datatypes.scalar-unit.time"; 
+			case "scalar-unit": return "tosca.datatypes.scalar-unit"; 
+			case "string": return "tosca.datatypes.string"; 
+			case "timestamp": return "tosca.datatypes.timestamp"; 
+			case "version": return "tosca.datatypes.version"; 
+			default: return shortTypeName;//test if the type is not empty then its long type
+			}
+		default: return shortTypeName;
 		}
 	}
 	
@@ -149,11 +199,11 @@ public class App{
 			}else{
 				//try to load the parent definition
 				try{
-					loadDefinition(FILEPATH+parentDef+".yml");
+					loadDefinition(FILEPATH+normalizeTypeName(parentDef,"node")+".yml");
 					//clone and get builder here also
 				}catch(Exception e){
 					System.out.println(e.getMessage());
-					System.out.println("The definition "+FILEPATH+parentDef+".yml does not exist. \n Will build incomplete def");
+					System.out.println("The definition "+FILEPATH+normalizeTypeName(parentDef,"node")+".yml does not exist. \n Will build incomplete def");
 				}
 				nodeDefBuilder = new NodeDef.Builder(typeName); // may have to go in the try
 			}
@@ -247,11 +297,11 @@ public class App{
 			case "type":
 				String type = (String) propMap.get("type");
 				// load the definition from the list
-				DataTypeDef dataDef = dataDefinitions.get(TYPEPREFIX+type); //TODO I may have to clone 
+				DataTypeDef dataDef = dataDefinitions.get(normalizeTypeName(type,"datatype")); //TODO I may have to clone 
 				if (dataDef == null){
 					try{
-						loadDataTypes(FILEPATH+TYPEPREFIX+type+".yml");
-						dataDef = dataDefinitions.get(TYPEPREFIX+type);
+						loadDataTypes(FILEPATH+normalizeTypeName(type,"datatype")+".yml");
+						dataDef = dataDefinitions.get(normalizeTypeName(type,"datatype"));
 					}
 					catch(Exception e){
 						return null; // dont have the definition
@@ -405,6 +455,26 @@ public class App{
 	}
 }
 	
+	public RelationshipDef getRelationshipDef(String typeName){
+		RelationshipDef relDefinition = (RelationshipDef) customRelDefinitions.get(typeName);
+		if(relDefinition == null){
+			relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+			if(relDefinition == null){
+				//try to load the definition
+				try{
+					loadRelationship(normalizeTypeName+".yml");
+					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+				}catch(Exception e){
+					System.out.println("The relationship definition "+typeName+" does not exist.");
+					//this is a custom relationship and need to parse it
+					//relDefinition = p
+					return;
+				}
+			}
+		}
+	}
+	
+	
 	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
 
 		RelationshipDef thisNode = (RelationshipDef) relDefinitions.get(typeName);
@@ -429,9 +499,9 @@ public class App{
 			}else{
 				//try to load the parent definition
 				try{
-					loadDefinition(FILEPATH+parentDef+".yml");
+					loadDefinition(FILEPATH+normalizeTypeName(parentDef,"relationship")+".yml");
 				}catch(Exception e){
-					System.out.println("The definition "+FILEPATH+parentDef+" does not exist. \n Will build incomplete def");
+					System.out.println("The definition "+FILEPATH+normalizeTypeName(parentDef,"relationship")+" does not exist. \n Will build incomplete def");
 				}
 				relBuilder = new RelationshipDef.Builder(typeName);
 			}
@@ -443,9 +513,6 @@ public class App{
 				case "description":
 					relBuilder.description((String)relMap.get(mapItem));
 					break;
-	//			case "derived_from":
-	//				relBuilder.derived_from((String)relMap.get(mapItem));
-	//				break;
 				case "properties":
 					Map<String, Object> propMap = (Map<String, Object>) relMap.get(mapItem);
 					for(String propName:propMap.keySet()){
@@ -509,25 +576,7 @@ public class App{
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void parseNodeTemplate(String name, Map<String, Object>nodeMap){
 		String type = (String) nodeMap.get("type");
-		String typeName = "";
-		
-		switch(type){
-		case "Root": typeName = "tosca.nodes.Root"; break;
-		case "Compute": typeName = "tosca.nodes.Compute"; break;
-		case "SoftwareComponent": typeName = "tosca.nodes.SoftwareComponent"; break;
-		case "WebServer": typeName = "tosca.nodes.WebServer"; break;
-		case "WebApplication": typeName = "tosca.nodes.WebApplication"; break;
-		case "DBMS": typeName = "tosca.nodes.DBMS"; break;
-		case "Database": typeName = "tosca.nodes.Database"; break;
-		case "ObjectStorage": typeName = "tosca.nodes.ObjectStorage"; break;
-		case "BlockStorage": typeName = "tosca.nodes.BlockStorage"; break;
-		case "Container.Runtime": typeName = "tosca.nodes.Container.Runtime"; break;
-		case "Container.Application": typeName = "tosca.nodes.Container.Application"; break;
-		case "LoadBalancer": typeName = "tosca.nodes.LoadBalancer"; break;
-		default: if(!type.isEmpty())
-					typeName = type;//test if the type is not empty then its long type
-		break; //use the empty string
-		}
+		String typeName = normalizeTypeName(type,"node");
 		
 		//try to get the definition or try to load it if its normative		
 		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
@@ -576,33 +625,26 @@ public class App{
 							myDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName))).build(); 
 						}
 						Object relItem = ((Map<String, Object>)reqMap.get(reqName)).get("relationship");
-						myDefinition.getRequirement(reqName).parseRelationshipDef(relItem);
+						RequirementDef reqDef = myDefinition.getRequirement(reqName);//.parseRelationshipDef(relItem);
+						if (reqDef.getRelDefTypeName() instanceof String){
+							RelationshipDef relDef = parseRelDef((String) reqDef.getRelDefTypeName())
+						}
 					}
 				}
 				break;			
 			default:
 				break;
 			}
-		}		
+		}
+		myDefinition = myDefinition.getBuilder(typeName).name(name).build();
 		nodeTemplates.put(name, myDefinition);
 	}
 	
 	
 	public void parseRelTemplate(String name, Map<String,Object>relMap){
 		String type = (String) relMap.get("type");
-		String typeName = "";
-		
-		switch(type){
-		case "Root": typeName = "tosca.relationships.Root"; break;
-		case "HostedOn": typeName = "tosca.relationships.HostedOn"; break;
-		case "DependsOn": typeName = "tosca.relationships.DependsOn"; break;
-		case "ConnectsTo": typeName = "tosca.relationships.ConnectsTo"; break;
-		case "AttachesTo": typeName = "tosca.relationships.AttachesTo"; break;
-		case "RoutesTo": typeName = "tosca.relationships.RoutesTo"; break;
-		default: if(!type.isEmpty())
-					typeName = type;//test if the type is not empty then its long type
-		break; //use the empty string
-		}
+		String typeName = normalizeTypeName(type,"relationship");
+
 		RelationshipDef relDefinition = (RelationshipDef) customRelDefinitions.get(typeName);
 		if(relDefinition == null){
 			relDefinition = (RelationshipDef) relDefinitions.get(typeName);
@@ -703,13 +745,19 @@ public class App{
 		// Parse the Yaml plan
 		//-----------------------------------------------
 	    Yaml yaml = new Yaml();
-		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample2.yml")));
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample4.yml")));
 		
 		app.parseServiceTemplate(map);
-	
+		System.out.println("---------------------Relationship Types----------------------------");
+		
+		for(String defName: app.customRelDefinitions.keySet()){
+			System.out.println(app.customRelDefinitions.get(defName));
+		}
+		System.out.println("-----------------------Node Templates------------------------------");
 		for(String defName: app.nodeTemplates.keySet()){
 			System.out.println(app.nodeTemplates.get(defName));
 		}
+		System.out.println("-------------------Relationship Templates--------------------------");
 		for(String defName: app.relTemplates.keySet()){
 			System.out.println(app.relTemplates.get(defName));
 		}

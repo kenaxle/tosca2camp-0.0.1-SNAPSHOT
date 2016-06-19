@@ -77,17 +77,22 @@ public class RequirementDef<T> implements Cloneable{
 		return builder;	
 	}
 	
-	public CapabilityDef getCapDefName(){return (CapabilityDef) capability;}
-	public NodeDef getNodeDefName(){return (NodeDef) nodeType;}
-	public RelationshipDef getRelDefName(){return (RelationshipDef) relationshipType;}
+	public T getCapDefTypeName(){return (T) capability;}
+	public T getNodeDefTypeName(){return (T) nodeType;}
+	public T getRelDefTypeName(){return (T) relationshipType;}
 	
-	public RelationshipDef parseRelationshipDef(Object toParse){
+	public void parseRelationshipDef(Object toParse){
 		if(toParse instanceof Map){ 
 			Map<String, Object> relMap = (Map<String, Object>) toParse;
-			if (relationshipType != null && (relationshipType instanceof RelationshipDef))
-				return ((RelationshipDef) relationshipType).parseRelationshipTemplate(relMap);
+			//if (relationshipType != null)
+				if (relationshipType instanceof RelationshipDef)
+					this.relationshipType = (T) ((RelationshipDef) relationshipType).parseRelationshipTemplate(relMap);
+				else{
+					RelationshipDef rDefinition = new RelationshipDef.Builder((String)relationshipType).build();
+				}
+				//return 
 		}
-		return null;
+		//return null;
 	}
 	
 	public boolean equals(Object obj){

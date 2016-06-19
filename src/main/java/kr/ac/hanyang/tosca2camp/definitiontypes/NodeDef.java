@@ -42,6 +42,11 @@ public class NodeDef implements Cloneable{
 			this.name = name;
 			this.typeName = typeName;
 		}
+		
+		public Builder name(String name){
+			this.name = name;
+			return  this;
+		}
 
 		public Builder derived_from(NodeDef derived_from){
 			this.derived_from = derived_from;
@@ -217,7 +222,8 @@ public class NodeDef implements Cloneable{
 		}
 		for(RequirementDef req:requirements)
 			reqs+=req;
-		return "TypeName: "+typeName+"\n"+
+		return  "name: "+name+"\n"+
+				"type: "+typeName+"\n"+
 			   //"Description: "+description+"\n"+
 			   "attributes: \n"+attrs+"\n"+
 			   "properties: \n"+props+"\n"+
