@@ -1,5 +1,5 @@
 package kr.ac.hanyang.tosca2camp;
-rpackage kr.ac.hanyang.tosca2camp;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,17 +58,12 @@ public class AppContext{
 			"tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml",};
 	
 	
-	private Map<String, NodeDef> nodeDefinitions = new LinkedHashMap<String, NodeDef>();
-	private Map<String, CapabilityDef> capDefinitions = new LinkedHashMap<String, CapabilityDef>(); 
-	private Map<String, RelationshipDef> relDefinitions = new LinkedHashMap<String, RelationshipDef>();
-	private Map<String, DataTypeDef> dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
+	private Map<String, NodeDef> nodeDefinitions;
+	private Map<String, CapabilityDef> capDefinitions; 
+	private Map<String, RelationshipDef> relDefinitions;
+	private Map<String, DataTypeDef> dataDefinitions;
 	
-	//need a list for inputs
-	private Map<String ,RelationshipDef> customRelDefinitions = new LinkedHashMap<String, RelationshipDef>();
-	private Map<String, NodeDef> nodeTemplates = new LinkedHashMap<String, NodeDef>();
-	private Map<String, RelationshipDef> relTemplates = new LinkedHashMap<String, RelationshipDef>();
-	//need a list for outputs
-	
+
 	private String normalizeTypeName(String shortTypeName, String type){
 		switch(type){
 		case "node":
@@ -135,6 +130,42 @@ public class AppContext{
 			}
 		default: return shortTypeName;
 		}
+	}
+	
+	
+	public AppContext(){
+		nodeDefinitions = new LinkedHashMap<String, NodeDef>();
+		capDefinitions = new LinkedHashMap<String, CapabilityDef>(); 
+		relDefinitions = new LinkedHashMap<String, RelationshipDef>();
+		dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
+	}
+	
+	public static AppContext newAppContext(){
+		
+		try{
+			AppContext app = new AppContext();
+			// load the datatypes
+			for(String fileName: app.dTypeDefFileNames){
+				app.loadDataTypes(app.FILEPATH+fileName);
+			}
+			//load the capability types
+			for(String fileName: app.capDefFileNames){
+				app.loadCapability(app.FILEPATH+fileName);
+			}
+			//load the relationship types
+			for(String fileName: app.relDefFileNames){
+				app.loadRelationship(app.FILEPATH+fileName);
+			}
+			//load the nodetypes
+			for(String fileName: app.nodeDefFileNames){
+				app.loadDefinition(app.FILEPATH+fileName);
+			}
+			return app;
+		}catch(Exception e){
+			System.out.println(e);
+			return null;
+		}
+			
 	}
 	
 	
@@ -456,24 +487,7 @@ public class AppContext{
 	}
 }
 	
-	public RelationshipDef getRelationshipDef(String typeName){
-		RelationshipDef relDefinition = (RelationshipDef) customRelDefinitions.get(typeName);
-		if(relDefinition == null){
-			relDefinition = (RelationshipDef) relDefinitions.get(typeName);
-			if(relDefinition == null){
-				//try to load the definition
-				try{
-					loadRelationship(normalizeTypeName+".yml");
-					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
-				}catch(Exception e){
-					System.out.println("The relationship definition "+typeName+" does not exist.");
-					//this is a custom relationship and need to parse it
-					//relDefinition = p
-					return;
-				}
-			}
-		}
-	}
+	
 	
 	
 	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
@@ -569,204 +583,55 @@ public class AppContext{
 		}
 		return dataDefBuilder.build();
 	}
-}	
-		
-	//-------------------------------------------------------------------------------
 	
-//	//-------------------------- Template Parsers--------------------------------------
-//	
-//	@SuppressWarnings({ "unchecked", "rawtypes" })
-//	public void parseNodeTemplate(String name, Map<String, Object>nodeMap){
-//		String type = (String) nodeMap.get("type");
-//		String typeName = normalizeTypeName(type,"node");
-//		
-//		//try to get the definition or try to load it if its normative		
-//		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
-//		if(nodeDefinition == null){
-//			//maybe the definition was not loaded.
-//			//try to load the definition.
-//			try{
-//				loadDefinition(FILEPATH+typeName+".yml");
-//				nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
-//			}catch(Exception e){
-//				System.out.println("The definition "+FILEPATH+typeName+" does not exist. Unable to parse the node ");
-//				return;
-//			}
-//		}
-//		
-//		NodeDef myDefinition = (NodeDef) nodeDefinition.clone();
-//		//clone the definition because we need to add real values.
-//		for(String key: nodeMap.keySet()){
-//			switch(key){
-//			case "properties":
-//				Map<String,Object> propMap = (Map<String,Object>)nodeMap.get(key);
-//				if (propMap != null){
-//					for(String propertyName:propMap.keySet()){
-//						Object value = propMap.get(propertyName);
-//						myDefinition.setPropertyValue(propertyName, value);
-//					}
-//				}
-//				break;
-//			case "capabilities":
-//				Map<String,Object> capMap = (Map<String,Object>)nodeMap.get(key);
-//				if (capMap != null){
-//					for(String capName:capMap.keySet()){
-//						myDefinition.getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
-//					}
-//				}
-//				break;
-//			case "requirements":
-//				List<Map<String,Object>> reqList = (List<Map<String,Object>>)nodeMap.get(key);
-//				if (reqList != null){
-//					for(Map<String, Object> reqMap:reqList){
-//						String reqName = reqMap.keySet().iterator().next();
-//						RequirementDef toParse = myDefinition.getRequirement(reqName);
-//						if (toParse == null){
-//							//using a custom requirement so simply add the requirement
-//							NodeDef.Builder myDefBuilder = myDefinition.getBuilder(typeName);
-//							myDefBuilder.addRequirement(parseReqDef(reqName,(Map<String, Object>)reqMap.get(reqName))).build(); 
-//						}
-//						Object relItem = ((Map<String, Object>)reqMap.get(reqName)).get("relationship");
-//						RequirementDef reqDef = myDefinition.getRequirement(reqName);//.parseRelationshipDef(relItem);
-//						if (reqDef.getRelDefTypeName() instanceof String){
-//							RelationshipDef relDef = parseRelDef((String) reqDef.getRelDefTypeName())
-//						}
-//					}
-//				}
-//				break;			
-//			default:
-//				break;
-//			}
-//		}
-//		myDefinition = myDefinition.getBuilder(typeName).name(name).build();
-//		nodeTemplates.put(name, myDefinition);
-//	}
-//	
-//	
-//	public void parseRelTemplate(String name, Map<String,Object>relMap){
-//		String type = (String) relMap.get("type");
-//		String typeName = normalizeTypeName(type,"relationship");
-//
-//		RelationshipDef relDefinition = (RelationshipDef) customRelDefinitions.get(typeName);
-//		if(relDefinition == null){
-//			relDefinition = (RelationshipDef) relDefinitions.get(typeName);
-//			if(relDefinition == null){
-//				//try to load the definition
-//				try{
-//					loadRelationship(FILEPATH+typeName+".yml");
-//					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
-//				}catch(Exception e){
-//					System.out.println("The relationship definition "+typeName+" does not exist.");
-//					//this is a custom relationship and need to parse it
-//					//relDefinition = p
-//					return;
-//				}
-//			}
-//		}
-//		RelationshipDef myRelDefinition = (RelationshipDef) relDefinition.clone();
-//		myRelDefinition.parseRelationshipTemplate(relMap);
-//		myRelDefinition = myRelDefinition.getBuilder(typeName).name(name).build();
-//		relTemplates.put(name, myRelDefinition);
-//		
-//	}
-//	
-//	
-//	public void parseServiceTemplate(Map<String, Object> toscaMap){
-//		for (String key:toscaMap.keySet()){
-//			switch (key){
-//			case "tosca_definitions_version":
-//					
-//				break;
-//			case "description":
-//				
-//				break;
-//			case "relationship_types":
-//				//load custom relationship types
-//				Map<String, Object> relTypesMap = (Map<String,Object>) toscaMap.get(key);
-//				for (String relTypeName:relTypesMap.keySet()){
-//					customRelDefinitions.put(relTypeName,parseRelDef(relTypeName,(Map<String,Object>) relTypesMap.get(relTypeName)));
-//				}
-//				break;
-//			case "topology_template":
-//				Map<String, Object> topologyTemplateMap = (Map<String,Object>) toscaMap.get(key);
-//				for (String topologyItem:topologyTemplateMap.keySet()){
-//					switch (topologyItem){
-//					case "inputs":break;
-//					case "node_templates":
-//						Map<String, Object> nodeTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
-//						for(String nodeTemplate:nodeTemplateMap.keySet()){
-//							parseNodeTemplate(nodeTemplate,(Map<String,Object>)nodeTemplateMap.get(nodeTemplate));
-//						}
-//						break;
-//					case "relationship_templates":
-//						Map<String, Object> relTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
-//						for(String relTemplate:relTemplateMap.keySet()){
-//							parseRelTemplate(relTemplate,(Map<String,Object>)relTemplateMap.get(relTemplate));
-//						}
-//						break;
-//					case "outputs":	break;
-//					default:
-//						break;
-//					}
-//				}
-//				break;
-//			default:
-//				break;
-//		
-//			}
-//		}
-//	}
 	
-	//==================================================================================
-//	@SuppressWarnings("unchecked")
-//	public static void main( String[] args ) throws Exception{
-//		
-////		// load the Normative definitions
-////		//-----------------------------------------------
-//		App app = new App();
-//		// load the datatypes
-//		for(String fileName: app.dTypeDefFileNames){
-//			app.loadDataTypes(app.FILEPATH+fileName);
-//		}
-//		//load the capability types
-//		for(String fileName: app.capDefFileNames){
-//			app.loadCapability(app.FILEPATH+fileName);
-//		}
-//		//load the relationship types
-//		for(String fileName: app.relDefFileNames){
-//			app.loadRelationship(app.FILEPATH+fileName);
-//		}
-//		//load the nodetypes
-//		for(String fileName: app.nodeDefFileNames){
-//			app.loadDefinition(app.FILEPATH+fileName);
-//		}
-//		
-//
-//		//-----------------------------------------------
-//		
-//		// Parse the Yaml plan
-//		//-----------------------------------------------
-//	    Yaml yaml = new Yaml();
-//		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample4.yml")));
-//		
-//		app.parseServiceTemplate(map);
-//		System.out.println("---------------------Relationship Types----------------------------");
-//		
-//		for(String defName: app.customRelDefinitions.keySet()){
-//			System.out.println(app.customRelDefinitions.get(defName));
-//		}
-//		System.out.println("-----------------------Node Templates------------------------------");
-//		for(String defName: app.nodeTemplates.keySet()){
-//			System.out.println(app.nodeTemplates.get(defName));
-//		}
-//		System.out.println("-------------------Relationship Templates--------------------------");
-//		for(String defName: app.relTemplates.keySet()){
-//			System.out.println(app.relTemplates.get(defName));
-//		}
-//
-//	}
-//}
+	public NodeDef getNodeDef(String typeName){
+		return null;
+	}
+	
+	public RelationshipDef getRelationshipDef(String typeName){
+		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+			if(relDefinition == null){
+				//try to load the definition
+				try{
+					loadRelationship(normalizeTypeName(typeName,"relationship")+".yml");
+					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+				}catch(Exception e){
+					System.out.println("The relationship definition "+typeName+" does not exist.");
+					return null;
+				}
+			}
+		return relDefinition;
+	}
+	
+	
+	public CapabilityDef getCapabilityDef(String typeName){
+		return null;
+	}
+	
+	public DataTypeDef getDataTypeDef(String typeName){
+		return null;
+	}
+	
+	public Map<String, NodeDef> getNodeDefs(){
+		return nodeDefinitions;
+	}
+	
+	public Map<String, RelationshipDef> getRelationshipDefs(){
+		return relDefinitions;
+	}
+	
+	public Map<String, CapabilityDef> getCapabilityDefs(){
+		return capDefinitions;
+	}
+	
+	public Map<String, DataTypeDef> getDatatypeDefs(){
+		return dataDefinitions;
+	}
 
+
+
+}
 //Yaml yaml = new Yaml(new RangeConstructor(),new RangeRepresenter(), new DumperOptions());
 //	    yaml.addImplicitResolver(new Tag("!range"), Pattern.compile("^\\[ * (\\d+) *, *(\\d+) *\\]$"), "[");
 //		Map<String, Range> map = (Map<String,Range>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample.yml")));

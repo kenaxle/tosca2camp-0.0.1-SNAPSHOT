@@ -12,10 +12,24 @@ public class ServiceTemplate {
 
 	
 		//need a list for inputs
-		private Map<String ,RelationshipDef> customRelDefinitions = new LinkedHashMap<String, RelationshipDef>();
-		private Map<String, NodeDef> nodeTemplates = new LinkedHashMap<String, NodeDef>();
-		private Map<String, RelationshipDef> relTemplates = new LinkedHashMap<String, RelationshipDef>();
+		private Map<String ,RelationshipDef> customRelDefinitions;
+		private Map<String, NodeDef> nodeTemplates;
+		private Map<String, RelationshipDef> relTemplates;
 		//need a list for outputs
+		
+		
+		public ServiceTemplate() {
+			customRelDefinitions = new LinkedHashMap<String, RelationshipDef>();
+			nodeTemplates = new LinkedHashMap<String, NodeDef>();
+			relTemplates = new LinkedHashMap<String, RelationshipDef>();
+		}
+		
+		
+		public static ServiceTemplate getServiceTemplate(Map<String, Object> map){
+			ServiceTemplate template = new ServiceTemplate();
+			template.parseServiceTemplate(map);
+			return template;
+		}
 		
 		
 		//-------------------------- Template Parsers--------------------------------------
