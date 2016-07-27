@@ -10,11 +10,11 @@ public class RequirementDef<T> implements Cloneable{
 	private String occurence; // must fix
 	
 	
-	public static class Builder {
+	public static class Builder<T> {
 		private String name;
-		private String capability;
-		private String nodeType; 
-		private String relationshipType;
+		private T capability;
+		private T nodeType; 
+		private T relationshipType;
 		private String occurence; // must fix
 		
 		public Builder(String name){
@@ -22,33 +22,33 @@ public class RequirementDef<T> implements Cloneable{
 			//this.capability = capability;
 		}
 		
-		public Builder node(String node){
+		public Builder<T> node(T node){
 			this.nodeType = node;
 			return this;
 		}
 		
-		public Builder relationship(String relationship){
+		public Builder<T> relationship(T relationship){
 			this.relationshipType = relationship;
 			return this;
 		}
 		
-		public Builder capability (String capability){
+		public Builder<T> capability (T capability){
 			this.capability = capability;
 			return this;
 		}
 			
 		
-		public Builder occurence(String occurence){
+		public Builder<T> occurence(String occurence){
 			this.occurence = occurence;
 			return this;
 		}
 		
-		public RequirementDef build(){
-			return new RequirementDef(this);
+		public RequirementDef<?> build(){
+			return new RequirementDef<Object>(this);
 		}
 	}
 	
-	private RequirementDef(Builder builder){
+	private RequirementDef(Builder<?> builder){
 		this.name = builder.name;
 		this.capability = (T) builder.capability;
 		this.nodeType = (T) builder.nodeType;
@@ -58,18 +58,19 @@ public class RequirementDef<T> implements Cloneable{
 	
 	public Object clone(){
 		try{
-			RequirementDef toReturn = (RequirementDef) super.clone();
-			if (capability != null && (capability instanceof CapabilityDef)) toReturn.capability = ((CapabilityDef)capability).clone(); //TODO this should clone
-			if (nodeType != null && (nodeType instanceof NodeDef)) toReturn.nodeType = ((NodeDef)nodeType).clone();
-			if (relationshipType != null && (relationshipType instanceof RelationshipDef)) toReturn.relationshipType = ((RelationshipDef)relationshipType).clone();
+			@SuppressWarnings("unchecked")
+			RequirementDef<Cloneable> toReturn = (RequirementDef<Cloneable>) super.clone();
+			if (capability != null && (capability instanceof CapabilityDef)) toReturn.capability = (Cloneable) ((CapabilityDef)capability).clone(); //TODO this should clone
+			if (nodeType != null && (nodeType instanceof NodeDef)) toReturn.nodeType = (Cloneable) ((NodeDef)nodeType).clone();
+			if (relationshipType != null && (relationshipType instanceof RelationshipDef)) toReturn.relationshipType = (Cloneable) ((RelationshipDef)relationshipType).clone();
 			return toReturn;
 		}catch(CloneNotSupportedException e){
 			return null;
 		}	
 	}
 	
-	public Builder getBuilder(){
-		Builder builder = new Builder(name);
+	public Builder<String> getBuilder(){
+		Builder<String> builder = new Builder<String>(name);
 		builder.nodeType = (String) this.nodeType;
 		builder.capability = (String) this.capability;
 		builder.relationshipType = (String) this.relationshipType;
@@ -98,7 +99,7 @@ public class RequirementDef<T> implements Cloneable{
 	public boolean equals(Object obj){
 		if(obj == null) return false;
 		if(getClass() != obj.getClass()) return false;
-		RequirementDef rDef = (RequirementDef) obj;
+		RequirementDef<?> rDef = (RequirementDef<?>) obj;
 		return name.equals(rDef.name);
 	}
 	
