@@ -584,13 +584,23 @@ public class AppContext{
 		return dataDefBuilder.build();
 	}
 	
-	//FIXME urgent need of fixing
 	public NodeDef getNodeDef(String typeName){
-		return null;
+		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(normalizeTypeName(typeName,"node"));
+		if(nodeDefinition == null){
+			//try to load the definition
+			try{
+				loadDefinition(normalizeTypeName(typeName,"node")+".yml");
+				nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
+			}catch(Exception e){
+				System.out.println("The Node definition "+typeName+" does not exist.");
+				return null;
+			}
+		}
+		return nodeDefinition;
 	}
 	
 	public RelationshipDef getRelationshipDef(String typeName){
-		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(typeName);
+		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(normalizeTypeName(typeName,"relationship"));
 			if(relDefinition == null){
 				//try to load the definition
 				try{
@@ -606,11 +616,33 @@ public class AppContext{
 	
 	
 	public CapabilityDef getCapabilityDef(String typeName){
-		return null;
+		CapabilityDef capDefinition = (CapabilityDef) capDefinitions.get(normalizeTypeName(typeName,"capability"));
+		if(capDefinition == null){
+			//try to load the definition
+			try{
+				loadCapability(normalizeTypeName(typeName,"capability")+".yml");
+				capDefinition = (CapabilityDef) capDefinitions.get(typeName);
+			}catch(Exception e){
+				System.out.println("The capability definition "+typeName+" does not exist.");
+				return null;
+			}
+		}
+		return capDefinition;
 	}
 	
 	public DataTypeDef getDataTypeDef(String typeName){
-		return null;
+		DataTypeDef dataDefinition = (DataTypeDef) dataDefinitions.get(normalizeTypeName(typeName,"data"));
+		if(dataDefinition == null){
+			//try to load the definition
+			try{
+				loadCapability(normalizeTypeName(typeName,"data")+".yml");
+				dataDefinition = (DataTypeDef) dataDefinitions.get(typeName);
+			}catch(Exception e){
+				System.out.println("The data definition "+typeName+" does not exist.");
+				return null;
+			}
+		}
+		return dataDefinition;
 	}
 	
 	public Map<String, NodeDef> getNodeDefs(){
