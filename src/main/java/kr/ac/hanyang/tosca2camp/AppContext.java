@@ -584,7 +584,7 @@ public class AppContext{
 		return dataDefBuilder.build();
 	}
 	
-	
+	//FIXME urgent need of fixing
 	public NodeDef getNodeDef(String typeName){
 		return null;
 	}

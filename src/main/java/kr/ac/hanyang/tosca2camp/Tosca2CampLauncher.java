@@ -10,15 +10,21 @@ public class Tosca2CampLauncher {
 	@SuppressWarnings("unchecked")
 	public static void main( String[] args ) throws Exception{
 		
-		AppContext platform = AppContext.newAppContext();
-		System.out.println(platform.getNodeDefs());
-
+		AppContext appContext = AppContext.newAppContext();
+		File yamlFile = new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample1.yml");
+		ServiceTemplate st = ServiceTemplate.getServiceTemplate(yamlFile, appContext);
+		System.out.println(st.toString());
+		
+		//System.out.println(platform.getNodeDefs());
+        //Yaml yaml = new Yaml();
+       // Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream();
+        
 		//-----------------------------------------------
 		
 		// Parse the Yaml plan
 		//-----------------------------------------------
-//	    Yaml yaml = new Yaml();
-//		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample4.yml")));
+//	    
+//		
 //		
 //		app.parseServiceTemplate(map);
 //		System.out.println("---------------------Relationship Types----------------------------");
