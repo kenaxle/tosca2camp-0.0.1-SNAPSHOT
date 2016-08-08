@@ -10,6 +10,13 @@ relationship_types:
         type: string
         default: /default_location
 
+policy_types:
+  MyPlacementPolicy:
+    derived_from: tosca.policies.Placement
+    targets:
+    - type: tosca.nodes.BlockStorage
+    
+
 topology_template:
 
   inputs:

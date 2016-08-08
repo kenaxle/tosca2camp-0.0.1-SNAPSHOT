@@ -20,6 +20,7 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.ConstraintTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.DataTypeDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.EntrySchemaDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.PolicyDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.PropertyDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
@@ -55,13 +56,15 @@ public class AppContext{
 			"tosca.datatypes.network.NetworkInfo.yml","tosca.datatypes.network.PortInfo.yml","tosca.datatypes.network.PortSpec.yml",
 			"tosca.datatypes.network.PortDef.yml","tosca.datatypes.range.yml","tosca.datatypes.scalar-unit.frequency.yml",
 			"tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml","tosca.datatypes.string.yml",
-			"tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml",};
+			"tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml"};
+	private String[] pTypeDefFileNames = {"tosca.policies.root.yml","tosca.policies.placement.yml"};
 	
 	
 	private Map<String, NodeDef> nodeDefinitions;
 	private Map<String, CapabilityDef> capDefinitions; 
 	private Map<String, RelationshipDef> relDefinitions;
 	private Map<String, DataTypeDef> dataDefinitions;
+	private Map<String, PolicyDef> policyDefinitions;
 	
 
 	private String normalizeTypeName(String shortTypeName, String type){
@@ -128,6 +131,12 @@ public class AppContext{
 			case "version": return "tosca.datatypes.version"; 
 			default: return shortTypeName;//test if the type is not empty then its long type
 			}
+		case "policy":
+			switch(shortTypeName){
+			case "root": return "tosca.policies.root"; 
+			case "placement": return "tosca.policies.placement";
+			default: return shortTypeName;//test if the type is not empty then its long type
+			}
 		default: return shortTypeName;
 		}
 	}
@@ -138,6 +147,7 @@ public class AppContext{
 		capDefinitions = new LinkedHashMap<String, CapabilityDef>(); 
 		relDefinitions = new LinkedHashMap<String, RelationshipDef>();
 		dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
+		policyDefinitions = new LinkedHashMap<String, PolicyDef>();
 	}
 	
 	public static AppContext newAppContext(){
@@ -159,6 +169,10 @@ public class AppContext{
 			//load the nodetypes
 			for(String fileName: app.nodeDefFileNames){
 				app.loadDefinition(app.FILEPATH+fileName);
+			}
+			//load policytypes
+			for(String fileName: app.pTypeDefFileNames){
+				app.loadPolicy(app.FILEPATH+fileName);
 			}
 			return app;
 		}catch(Exception e){
@@ -202,6 +216,13 @@ public class AppContext{
 		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
 		for(String defName:map.keySet())			
 			 dataDefinitions.put(defName,parseDataTypeDef(defName,(Map<String, Object>)map.get(defName)));
+	}
+	
+	private void loadPolicy(String fileName) throws FileNotFoundException{
+		Yaml yaml = new Yaml();
+		Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(new File(fileName)));
+		for(String defName:map.keySet())			
+			 policyDefinitions.put(defName,parsePolicyTypeDef(defName,(Map<String, Object>)map.get(defName)));
 	}
 	
 	
@@ -488,8 +509,6 @@ public class AppContext{
 }
 	
 	
-	
-	
 	public RelationshipDef parseRelDef(String typeName, Map<String, Object> relMap){
 
 		RelationshipDef thisNode = (RelationshipDef) relDefinitions.get(typeName);
@@ -582,6 +601,33 @@ public class AppContext{
 			}
 		}
 		return dataDefBuilder.build();
+	}
+	
+	public PolicyDef parsePolicyTypeDef(String name, Map<String, Object> dataMap){
+		PolicyDef.Builder policyDefBuilder;
+		PolicyDef returnDef;
+		policyDefBuilder = new PolicyDef.Builder(name); 
+		if (dataMap != null){
+			for(String key: dataMap.keySet()){
+				switch(key){
+				case "properties":
+					Map<String,Object> propDefMap = (Map<String,Object>)dataMap.get(key);
+					for(String propName:propDefMap.keySet()){
+						policyDefBuilder.addProperty(parsePropDef(propName,(Map<String, Object>)propDefMap.get(propName)));
+					}
+					break;
+				case "targets":
+					List<String> tList = (List<String>) dataMap.get(key);
+					for(String target:tList){
+						policyDefBuilder.addTargets(target);	
+					}
+					break;	
+				default: 
+					break;
+				}
+			}
+		}
+		return policyDefBuilder.build();
 	}
 	
 	public NodeDef getNodeDef(String typeName){

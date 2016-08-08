@@ -1,0 +1,3 @@
+tosca.policies.Root:
+  description: tosca root policy
+  version: 1.0

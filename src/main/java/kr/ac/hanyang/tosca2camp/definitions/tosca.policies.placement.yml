@@ -1,0 +1,10 @@
+tosca.policies.Placement:
+  description: tosca Placement policy
+  derived_from: tosca.policies.Root
+  version: 1.0
+  properties:
+    location:
+      type: string
+      required: true;
+  targets:
+  - type: tosca.nodes.Compute
