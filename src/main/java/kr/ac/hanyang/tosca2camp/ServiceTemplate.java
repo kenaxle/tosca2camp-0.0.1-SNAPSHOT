@@ -2,6 +2,7 @@ package kr.ac.hanyang.tosca2camp;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.NodeDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.PolicyDef;
+import kr.ac.hanyang.tosca2camp.definitiontypes.PolicyDef.Builder;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
 
@@ -16,7 +19,8 @@ public class ServiceTemplate {
 
 	
 		//need a list for inputs
-		private Map<String ,RelationshipDef> customRelDefinitions;
+		private Map<String, RelationshipDef> customRelDefinitions;
+		private Map<String, PolicyDef> customPolicies;
 		private Map<String, NodeDef> nodeTemplates;
 		private Map<String, RelationshipDef> relTemplates;
 		private AppContext appContext;
@@ -25,6 +29,7 @@ public class ServiceTemplate {
 		
 		public ServiceTemplate(AppContext appContext) {
 			customRelDefinitions = new LinkedHashMap<String, RelationshipDef>();
+			customPolicies = new LinkedHashMap<String, PolicyDef>();
 			nodeTemplates = new LinkedHashMap<String, NodeDef>();
 			relTemplates = new LinkedHashMap<String, RelationshipDef>();
 			this.appContext = appContext;
@@ -146,6 +151,47 @@ public class ServiceTemplate {
 			}		
 		}
 		
+		public void parsePolicyTemplate(String name, Map<String, Object>policyMap){
+			String type = (String) policyMap.get("type");
+			
+			//try to get the definition or try to load it if its normative		
+			PolicyDef policyDefinition = customPolicies.get(type);
+			if(policyDefinition == null){
+				policyDefinition = appContext.getPolicyDef(type);
+			}
+			if(policyDefinition != null){
+				for(String key: policyMap.keySet()){
+					switch(key){
+					case "properties":
+						Map<String,Object> propMap = (Map<String,Object>)policyMap.get(key);
+						if (propMap != null){
+							for(String propertyName:propMap.keySet()){
+								Object value = propMap.get(propertyName);
+								policyDefinition.setPropertyValue(propertyName, value);
+							}
+						}
+						break;
+					case "targets":
+						List<String> targetMap = (ArrayList<String>)policyMap.get(key);
+						if (targetMap != null){
+							Builder policyBuilder = policyDefinition.getBuilder(type);
+							for(String target:targetMap){
+								policyBuilder.addTargets(target);
+								//policyDefinition..getCapability(capName).parseCapTemplate((Map<String, Object>)capMap.get(capName));
+							}
+							policyBuilder.build();
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				policyDefinition = policyDefinition.getBuilder(type).name(name).build();
+				//policyTemplates.put(name, nodeDefinition);
+			}else
+				System.out.println("No definition exists for the nodetype "+type+". Unable to parse the template.");	
+		}
+		
 		
 		@SuppressWarnings("unchecked")
 		public void parseServiceTemplate(Map<String, Object> toscaMap){
@@ -157,6 +203,23 @@ public class ServiceTemplate {
 				case "description":
 					
 					break;
+				
+				case "imports":
+					//TODO add detail here
+					break;
+					
+				case "data_types":
+					//TODO add detail here
+					break;	
+				
+				case "capability_types":
+					//TODO add detail here
+					break;	
+				
+				case "interface_types":
+					//TODO add detail here
+					break;	
+					
 				case "relationship_types":
 					//load custom relationship types
 					Map<String, Object> relTypesMap = (Map<String,Object>) toscaMap.get(key);
@@ -168,6 +231,27 @@ public class ServiceTemplate {
 						}
 					}
 					break;
+				
+				case "node_types":
+					//TODO add detail here
+					break;
+					
+				case "group_types":
+					//TODO add detail here
+					break;
+					
+				case "policy_types":
+					//load custom policy types
+					Map<String, Object> polTypesMap = (Map<String,Object>) toscaMap.get(key);
+					for (String polTypeName:polTypesMap.keySet()){
+						PolicyDef polDefinition = appContext.parsePolicyTypeDef(polTypeName,(Map<String,Object>) polTypesMap.get(polTypeName));
+						if (polDefinition != null){
+							//relDefinition = relDefinition.getBuilder(relTypeName).name(relTypeName).build();
+							customPolicies.put(polTypeName,polDefinition);
+						}
+					}
+					break;
+					
 				case "topology_template":
 					Map<String, Object> topologyTemplateMap = (Map<String,Object>) toscaMap.get(key);
 					for (String topologyItem:topologyTemplateMap.keySet()){
@@ -183,6 +267,14 @@ public class ServiceTemplate {
 							Map<String, Object> relTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
 							for(String relTemplate:relTemplateMap.keySet()){
 								relTemplates.put(relTemplate, parseRelTemplate(relTemplate,(Map<String,Object>)relTemplateMap.get(relTemplate)));
+							}
+							break;
+						case "groups":
+							break;
+						case "policies":
+							Map<String, Object> policyTemplateMap = (Map<String, Object>) topologyTemplateMap.get(topologyItem);
+							for(String policyTemplate:policyTemplateMap.keySet()){
+								parsePolicyTemplate(policyTemplate,(Map<String,Object>)policyTemplateMap.get(policyTemplate));
 							}
 							break;
 						case "outputs":	break;

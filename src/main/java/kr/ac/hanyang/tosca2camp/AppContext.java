@@ -682,13 +682,28 @@ public class AppContext{
 			//try to load the definition
 			try{
 				loadCapability(normalizeTypeName(typeName,"data")+".yml");
-				dataDefinition = (DataTypeDef) dataDefinitions.get(typeName);
+				dataDefinition = (DataTypeDef) dataDefinitions.get(typeName); //FIXME maybe normalize
 			}catch(Exception e){
 				System.out.println("The data definition "+typeName+" does not exist.");
 				return null;
 			}
 		}
 		return dataDefinition;
+	}
+	
+	public PolicyDef getPolicyDef(String typeName){
+		PolicyDef policyDefinition = (PolicyDef) policyDefinitions.get(normalizeTypeName(typeName,"policies"));
+		if(policyDefinition == null){
+			//try to load the definition
+			try{
+				loadPolicy(normalizeTypeName(typeName,"policies")+".yml");
+				policyDefinition = (PolicyDef) policyDefinitions.get(typeName); //FIXME maybe normalize
+			}catch(Exception e){
+				System.out.println("The policy definition "+typeName+" does not exist.");
+				return null;
+			}
+		}
+		return policyDefinition;
 	}
 	
 	public Map<String, NodeDef> getNodeDefs(){
