@@ -57,6 +57,7 @@ public class AppContext{
 			"tosca.datatypes.network.PortDef.yml","tosca.datatypes.range.yml","tosca.datatypes.scalar-unit.frequency.yml",
 			"tosca.datatypes.scalar-unit.size.yml","tosca.datatypes.scalar-unit.time.yml","tosca.datatypes.string.yml",
 			"tosca.datatypes.timestamp.yml","tosca.datatypes.version.yml"};
+	
 	private String[] pTypeDefFileNames = {"tosca.policies.root.yml","tosca.policies.placement.yml"};
 	
 	
@@ -366,7 +367,7 @@ public class AppContext{
 				propBuilder.description((String)propMap.get(mapItem));
 				break;
 			case "required":
-				propBuilder.required((boolean)propMap.get(mapItem));
+				propBuilder.required((Boolean)propMap.get(mapItem));
 				break;
 			case "default_value":
 				propBuilder.defaultVal((String)propMap.get(mapItem)); //TODO change to actual type

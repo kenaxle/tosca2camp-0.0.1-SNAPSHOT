@@ -14,7 +14,7 @@ policy_types:
   MyPlacementPolicy:
     derived_from: tosca.policies.Placement
     targets:
-    - type: tosca.nodes.BlockStorage
+    - tosca.nodes.BlockStorage
     
 
 topology_template:

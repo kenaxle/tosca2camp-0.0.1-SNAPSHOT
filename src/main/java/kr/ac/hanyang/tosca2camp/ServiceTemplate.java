@@ -140,10 +140,9 @@ public class ServiceTemplate {
 									 .node(nodeTemplates.get(innerMap.get("node")))
 									 .relationship(relTemplates.get(innerMap.get("relationship")))
 									 .build();
-
 					}else{						
 						toEdit = toEdit.getBuilder().node(nodeTemplates.get(innerMap.get("node")))
-										            .relationship(parseRelTemplate("",(Map<String, Object>) innerMap.get("relationship")))
+										            .relationship(relTemplates.get(innerMap.get("relationship"))/*parseRelTemplate("",(Map<String,Object>) innerMap.get("relationship"))*/)
 										            .build();
 					}
 					nodeDefinition = nodeDefinition.getBuilder(nodeDefinition.getTypeName()).addRequirement(toEdit).build();

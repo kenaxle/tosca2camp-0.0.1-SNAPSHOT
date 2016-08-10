@@ -69,11 +69,11 @@ public class RequirementDef<T> implements Cloneable{
 		}	
 	}
 	
-	public Builder<String> getBuilder(){
-		Builder<String> builder = new Builder<String>(name);
-		builder.nodeType = (String) this.nodeType;
-		builder.capability = (String) this.capability;
-		builder.relationshipType = (String) this.relationshipType;
+	public Builder<T> getBuilder(){
+		Builder<T> builder = new Builder<T>(name);
+		builder.nodeType = (T) this.nodeType;
+		builder.capability = (T) this.capability;
+		builder.relationshipType = (T) this.relationshipType;
 		builder.occurence = this.occurence;
 		return builder;	
 	}

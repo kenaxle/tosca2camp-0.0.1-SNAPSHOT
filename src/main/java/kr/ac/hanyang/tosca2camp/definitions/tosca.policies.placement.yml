@@ -5,6 +5,6 @@ tosca.policies.Placement:
   properties:
     location:
       type: string
-      required: true;
+      required: true
   targets:
-  - type: tosca.nodes.Compute
+  - tosca.nodes.Compute

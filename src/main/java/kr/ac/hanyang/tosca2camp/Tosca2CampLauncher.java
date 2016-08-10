@@ -11,7 +11,7 @@ public class Tosca2CampLauncher {
 	public static void main( String[] args ) throws Exception{
 		
 		AppContext appContext = AppContext.newAppContext();
-		File yamlFile = new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample4.yml");
+		File yamlFile = new File("C:/Users/Kena/Git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample2.yml");
 		ServiceTemplate st = ServiceTemplate.getServiceTemplate(yamlFile, appContext);
 		System.out.println(st.toString());
 		
