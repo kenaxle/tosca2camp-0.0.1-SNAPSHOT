@@ -1,2 +1,3 @@
 tosca.datatypes.integer:  
   description: Integer datatype
+  derived_from: java.lang.integer

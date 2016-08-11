@@ -1,2 +1,3 @@
 tosca.datatypes.map:  
   description: Map datatype
+  derived_from: java.util.LinkedHashMap

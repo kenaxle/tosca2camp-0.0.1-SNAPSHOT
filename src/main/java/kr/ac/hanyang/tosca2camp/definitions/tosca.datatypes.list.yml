@@ -1,2 +1,3 @@
 tosca.datatypes.list:  
   description: List datatype
+  derived_from: java.util.ArrayList

@@ -1,2 +1,3 @@
 tosca.datatypes.timestamp:  
   description: Timestamp datatype
+  derived_from: java.lang.timestamp

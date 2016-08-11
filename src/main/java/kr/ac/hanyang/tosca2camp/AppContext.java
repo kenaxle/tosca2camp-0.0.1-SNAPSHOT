@@ -34,7 +34,7 @@ import kr.ac.hanyang.tosca2camp.datatypes.RangeRepresenter;
  */
 public class AppContext{
 	
-	private final String FILEPATH = "C:\\Users\\Kena\\git\\tosca2camp-0.0.1-SNAPSHOT\\src\\main\\java\\kr\\ac\\hanyang\\tosca2camp\\definitions\\";
+	private final String FILEPATH = "/Users/Kena/git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/definitions/";
 	private final String TYPEPREFIX = "tosca.datatypes.";
 	
 	//hardcode the names of the definition files only for testing
