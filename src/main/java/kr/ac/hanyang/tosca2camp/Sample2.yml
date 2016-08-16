@@ -11,11 +11,21 @@ relationship_types:
         default: /default_location
 
 policy_types:
-  MyPlacementPolicy:
+  StoragePlacementPolicy:
     derived_from: tosca.policies.Placement
+    properties:
+      location:
+        type: string
+        required: true
+        constraints:
+        - valid_values: [AWS Virginia (us-east-1), AWS Tokyo (ap-northeast-1)]
     targets:
     - tosca.nodes.BlockStorage
     
+    
+node_types:
+  MyNodeType:
+    derived_from:     
 
 topology_template:
 
@@ -92,6 +102,15 @@ topology_template:
       type: MyAttachesTo 
       properties: 
         location: /some_other_data_location
+        
+  policies:
+    BlockStoragePlacement:
+      type: StoragePlacementPolicy
+      properties:
+        location: AWS Virginia (us-east-1)
+      targets: 
+      - my_storage
+        
  
   outputs:
     private_ip_1:

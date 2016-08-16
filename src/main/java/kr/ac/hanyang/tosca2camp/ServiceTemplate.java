@@ -23,6 +23,7 @@ public class ServiceTemplate {
 		private Map<String, PolicyDef> customPolicies;
 		private Map<String, NodeDef> nodeTemplates;
 		private Map<String, RelationshipDef> relTemplates;
+		private Map<String, PolicyDef> policies;
 		private AppContext appContext;
 		//need a list for outputs
 		
@@ -32,6 +33,7 @@ public class ServiceTemplate {
 			customPolicies = new LinkedHashMap<String, PolicyDef>();
 			nodeTemplates = new LinkedHashMap<String, NodeDef>();
 			relTemplates = new LinkedHashMap<String, RelationshipDef>();
+			policies = new LinkedHashMap<String, PolicyDef>();
 			this.appContext = appContext;
 		}
 		
@@ -186,7 +188,7 @@ public class ServiceTemplate {
 					}
 				}
 				policyDefinition = policyDefinition.getBuilder(type).name(name).build();
-				//policyTemplates.put(name, nodeDefinition);
+				policies.put(name, policyDefinition);
 			}else
 				System.out.println("No definition exists for the nodetype "+type+". Unable to parse the template.");	
 		}

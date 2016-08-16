@@ -1,0 +1,10 @@
+policies:
+- type: kr.ac.hanyang.entities.policies.FollowTheSun
+  constraints: 
+  - location:
+      type: kr.ac.hanyang.constraints.within
+      value: [AWS Virginia (us-east-1), AWS Frankfurt (eu-central-1), AWS Tokyo (ap-northeast-1)]
+  - time: 
+      type: kr.ac.hanyang.constraints.within
+      value: [08.00, 16.00]
+  targets: [service1]  
