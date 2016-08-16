@@ -1,0 +1,4 @@
+policies:
+  myPlacementPolicy:
+    type: tosca.policies.Placement.DataLocation
+    targets: myWebServerNode

@@ -1,0 +1,12 @@
+tosca.policies.Placement.DataLocation:
+  derived_from: tosca.policies.Root
+  description: The TOSCA Policy Type definition 
+  version: 1.0
+  properties:
+    location:
+      type: string
+      required: true
+      default: AWS Virginia (us-east-1)
+      constraints:
+      - valid_values: [AWS Virginia (us-east-1), AWS Tokyo (ap-northeast-1)] 
+  targets: [ tosca.nodes.Database ]
