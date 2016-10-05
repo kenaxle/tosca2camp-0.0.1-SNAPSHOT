@@ -1,3 +1,30 @@
 tosca.datatypes.version:  
   description: version datatype
-          
+  properties:       
+    major_version:        
+      type: integer        
+      required: true        
+      default: 0        
+      constraints:          
+        - greater_or_equal: 0      
+    minor_version:        
+      type: integer        
+      required: true        
+      default: 0        
+      constraints:          
+        - greater_or_equal: 0
+    fix_version:        
+      type: integer        
+      required: false        
+      default: 0        
+      constraints:          
+        - greater_or_equal: 0
+    qualifier:        
+      type: string        
+      required: false        
+    build_version:        
+      type: integer        
+      required: false        
+      default: 0        
+      constraints:          
+        - greater_or_equal: 0         

@@ -1,2 +1,9 @@
 tosca.datatypes.scalar-unit.size:  
-  description: Scalar datatype
+  description: Scalar-unit size datatype
+  derived_from: scalar-unit
+  properties:
+    unit:        
+      type: string        
+      required: true  
+      constraints:          
+        - valid_values: [B,kB,KiB,MB,MiB,GB,GiB,TB,TiB]

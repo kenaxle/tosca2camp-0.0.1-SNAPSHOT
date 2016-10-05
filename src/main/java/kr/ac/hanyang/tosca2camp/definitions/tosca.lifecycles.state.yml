@@ -1,0 +1,9 @@
+tosca.nodestates.nodestate:  
+  description: Nodestate type Definition
+  properties:       
+    value:        
+      type: string        
+      required: true              
+    transitional:        
+      type: string        
+      required: true                

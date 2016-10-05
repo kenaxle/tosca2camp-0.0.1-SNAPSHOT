@@ -1,2 +1,12 @@
 tosca.datatypes.scalar-unit:  
   description: Scalar datatype
+  properties:       
+    scalar:                
+      required: true
+      type:
+        constraints:          
+          - valid_values: [integer, float]              
+    unit:        
+      type: string        
+      required: true                
+      

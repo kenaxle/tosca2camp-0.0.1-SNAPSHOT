@@ -1,0 +1,5 @@
+tosca.nodestates.configuring:  
+  description: nodestate CONFIGURING
+  properties:       
+    value: configuring                
+    transitional: yes

@@ -1,0 +1,5 @@
+tosca.nodestates.created:  
+  description: nodestate CREATED
+  properties:       
+    value: created                
+    transitional: no

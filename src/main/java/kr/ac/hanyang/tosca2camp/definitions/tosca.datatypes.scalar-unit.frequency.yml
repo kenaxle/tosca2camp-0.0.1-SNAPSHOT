@@ -1,2 +1,9 @@
 tosca.datatypes.scalar-unit.frequency:  
   description: Scalar datatype
+  derived_from: scalar-unit
+  properties:
+    unit:        
+      type: string        
+      required: true  
+      constraints:          
+        - valid_values: [Hz,kHz,MHz,GHz]

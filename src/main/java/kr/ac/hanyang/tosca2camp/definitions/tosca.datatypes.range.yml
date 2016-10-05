@@ -1,2 +1,12 @@
 tosca.datatypes.range:  
   description: Range datatype
+  derived_from: com.google.common.collect.Range
+  properties:       
+    lower_bound:        
+      type: integer        
+      required: true              
+    upper_bound:        
+      type: integer        
+      required: true                
+      constraints:          
+        - greater_or_equal: lower_bound

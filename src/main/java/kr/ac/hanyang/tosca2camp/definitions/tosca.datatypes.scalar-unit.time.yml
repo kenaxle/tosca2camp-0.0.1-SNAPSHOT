@@ -1,2 +1,9 @@
 tosca.datatypes.scalar-unit.time:  
   description: Scalar datatype
+  derived_from: scalar-unit
+  properties:
+    unit:        
+      type: string        
+      required: true  
+      constraints:          
+        - valid_values: [d,h,m,s,ms,us,ns]

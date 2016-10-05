@@ -1,0 +1,5 @@
+tosca.nodestates.error:  
+  description: nodestate ERROR
+  properties:       
+    value: error                
+    transitional: no

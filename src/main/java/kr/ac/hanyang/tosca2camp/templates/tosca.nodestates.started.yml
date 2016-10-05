@@ -1,0 +1,5 @@
+tosca.nodestates.started:  
+  description: nodestate STARTED
+  properties:       
+    value: started                
+    transitional: no
