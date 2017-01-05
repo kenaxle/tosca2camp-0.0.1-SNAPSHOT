@@ -3,6 +3,8 @@ package kr.ac.hanyang.tosca2camp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import kr.ac.hanyang.tosca2camp.definitiontypes.ArtifactDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.CapabilityDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.DataTypeDef;
@@ -14,7 +16,8 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.VersionDef;
 
 public class ServiceTemplate implements Cloneable{
-	private VersionDef tosca_definitions_version; //Node Template name
+	private String id;
+	private VersionDef tosca_definitions_version; 
 	private Map<String,String> metaData;
 	private String description; // description are treated as their own type but for now they will be string
 	private List<String> directives; //Node template item
@@ -115,6 +118,10 @@ public class ServiceTemplate implements Cloneable{
 			return this;
 		}
 		
+		public ServiceTemplate peek(){
+			return this.build();
+		}
+		
 		public ServiceTemplate build(){
 			return new ServiceTemplate(this);
 		}
@@ -123,6 +130,7 @@ public class ServiceTemplate implements Cloneable{
 	
 	
 	protected ServiceTemplate(Builder builder){
+		this.id = UUID.randomUUID().toString();
 		this.tosca_definitions_version = builder.tosca_definitions_version;
 		this.metaData = builder.metaData;
 		this.description = builder.description;
@@ -155,7 +163,8 @@ public class ServiceTemplate implements Cloneable{
 		return builder;
 	}	
 	
-
+	public String getId() {return id;}
+	
 	public VersionDef getVersion() {return tosca_definitions_version;}
 	
 	public Map<String, String> getMetaData() {return metaData;}
@@ -174,11 +183,32 @@ public class ServiceTemplate implements Cloneable{
 	
 	public List<RelationshipDef> getRelationshipTypes() {return relationshipTypes;}
 	
+	public RelationshipDef getRelationshipType(String typeName) {
+		for(RelationshipDef relDef: relationshipTypes)
+			if (relDef.getType().equals(typeName))
+				return relDef;
+		return null;
+	}
+	
 	public List<NodeDef> getNodeTypes() {return nodeTypes;}
+	
+	public NodeDef getNodeType(String typeName) {
+		for(NodeDef nodeDef: nodeTypes)
+			if (nodeDef.getTypeName().equals(typeName))
+				return nodeDef;
+		return null;
+	}
 	
 	public List<GroupDef> getGroupTypes() {return groupTypes;}
 	
 	public List<PolicyDef> getPolicyTypes() {return policyTypes;}
+	
+	public PolicyDef getPolicyType(String typeName) {
+		for(PolicyDef polDef: policyTypes)
+			if (polDef.getTypeName().equals(typeName))
+				return polDef;
+		return null;
+	}
 	
 	public TopologyTemplate getTopologyTemplate() {return topologyTemplate;}
 	

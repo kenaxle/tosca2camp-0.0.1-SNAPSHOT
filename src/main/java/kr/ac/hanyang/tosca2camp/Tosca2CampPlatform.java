@@ -7,12 +7,9 @@ import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jws.WebService;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import kr.ac.hanyang.tosca2camp.definitiontypes.AttributeDef;
@@ -27,96 +24,17 @@ import kr.ac.hanyang.tosca2camp.definitiontypes.RelationshipDef;
 import kr.ac.hanyang.tosca2camp.definitiontypes.RequirementDef;
 
 
-/**
- * Hello world!
- *
- */
-
-@Path("/<add your restful service class name here>")
 public class Tosca2CampPlatform{
 	
+	private final Logger log = LoggerFactory.getLogger(Tosca2CampPlatform.class);
 	
 	private Map<String, NodeDef> nodeDefinitions;
 	private Map<String, CapabilityDef> capDefinitions; 
 	private Map<String, RelationshipDef> relDefinitions;
 	private Map<String, DataTypeDef> dataDefinitions;
 	private Map<String, PolicyDef> policyDefinitions;
-	private Map<String, ServiceTemplateUtilities> serviceTemplates;
+	private Map<String, ServiceTemplate> serviceTemplates;
 
-	private String normalizeTypeName(String shortTypeName, String type){
-		switch(type){
-		case "node":
-			switch(shortTypeName){
-			case "Root": return "tosca.nodes.Root"; 
-			case "Compute": return "tosca.nodes.Compute";
-			case "SoftwareComponent": return "tosca.nodes.SoftwareComponent"; 
-			case "WebServer": return "tosca.nodes.WebServer";
-			case "WebApplication": return "tosca.nodes.WebApplication"; 
-			case "DBMS": return "tosca.nodes.DBMS";
-			case "Database": return "tosca.nodes.Database"; 
-			case "ObjectStorage": return "tosca.nodes.ObjectStorage"; 
-			case "BlockStorage": return "tosca.nodes.BlockStorage";
-			case "Container.Runtime": return "tosca.nodes.Container.Runtime"; 
-			case "Container.Application": return "tosca.nodes.Container.Application";
-			case "LoadBalancer": return "tosca.nodes.LoadBalancer";
-			default: return shortTypeName;//test if the type is not empty then its long type
-			}
-		case "capability":
-			switch(shortTypeName){
-			case "Attachment": return "tosca.capabilities.Attachment"; 
-			case "Bindable": return "tosca.capabilities.Bindable";
-			case "Container": return "tosca.capabilities.Container"; 
-			case "Endpoint.Admin": return "tosca.capabilities.Endpoint.Admin";
-			case "Endpoint.Database": return "tosca.capabilities.Endpoint.Database"; 
-			case "Endpoint.Public": return "tosca.capabilities.Endpoint.Public";
-			case "Endpoint": return "tosca.capabilities.Endpoint"; 
-			case "Node": return "tosca.capabilities.Node"; 
-			case "OperatingSystem": return "tosca.capabilities.OperatingSystem";
-			case "Root": return "tosca.capabilities.Root"; 
-			case "Scalable": return "tosca.capabilities.Scalable";
-			default: return shortTypeName;//test if the type is not empty then its long type
-			}
-		case "relationship":
-			switch(shortTypeName){
-			case "Root": return "tosca.relationships.Root"; 
-			case "HostedOn": return "tosca.relationships.HostedOn"; 
-			case "DependsOn": return "tosca.relationships.DependsOn"; 
-			case "ConnectsTo": return "tosca.relationships.ConnectsTo"; 
-			case "AttachesTo": return "tosca.relationships.AttachesTo"; 
-			case "RoutesTo": return "tosca.relationships.RoutesTo"; 
-			default: return shortTypeName;//test if the type is not empty then its long type
-			}
-		case "datatype":
-			switch(shortTypeName){
-			case "boolean": return "tosca.datatypes.boolean"; 
-			case "credential": return "tosca.datatypes.credential";
-			case "float": return "tosca.datatypes.float"; 
-			case "integer": return "tosca.datatypes.integer"; 
-			case "list": return "tosca.datatypes.list"; 
-			case "map": return "tosca.datatypes.map"; 
-			case "network.NetworkInfo": return "tosca.datatypes.network.NetworkInfo"; 
-			case "network.PortDef": return "tosca.datatypes.network.PortDef"; 
-			case "network.PortSpec": return "tosca.datatypes.network.PortSpec"; 
-			case "range": return "tosca.datatypes.range";  
-			case "scalar-unit.frequency": return "tosca.datatypes.scalar-unit.frequency"; 
-			case "scalar-unit.size": return "tosca.datatypes.scalar-unit.size"; 
-			case "scalar-unit.time": return "tosca.datatypes.scalar-unit.time"; 
-			case "scalar-unit": return "tosca.datatypes.scalar-unit"; 
-			case "string": return "tosca.datatypes.string"; 
-			case "timestamp": return "tosca.datatypes.timestamp"; 
-			case "version": return "tosca.datatypes.version"; 
-			default: return shortTypeName;//test if the type is not empty then its long type
-			}
-		case "policy":
-			switch(shortTypeName){
-			case "root": return "tosca.policies.root"; 
-			case "placement": return "tosca.policies.placement";
-			default: return shortTypeName;//test if the type is not empty then its long type
-			}
-		default: return shortTypeName;
-		}
-	}
-	
 	
 	public Tosca2CampPlatform(){
 		nodeDefinitions = new LinkedHashMap<String, NodeDef>();
@@ -124,7 +42,7 @@ public class Tosca2CampPlatform{
 		relDefinitions = new LinkedHashMap<String, RelationshipDef>();
 		dataDefinitions = new LinkedHashMap<String, DataTypeDef>();
 		policyDefinitions = new LinkedHashMap<String, PolicyDef>();
-		serviceTemplates =new LinkedHashMap<String, ServiceTemplateUtilities>();
+		serviceTemplates =new LinkedHashMap<String, ServiceTemplate>();
 		
 	}
 	
@@ -230,11 +148,11 @@ public class Tosca2CampPlatform{
 			}else{
 				//try to load the parent definition
 				try{
-					loadDefinition(ToscaConstants.FILEPATH+normalizeTypeName(parentDef,"node")+".yml");
+					loadDefinition(ToscaConstants.FILEPATH+ServiceTemplateUtilities.normalizeTypeName(parentDef,"node")+".yml");
 					//clone and get builder here also
 				}catch(Exception e){
 					System.out.println(e.getMessage());
-					System.out.println("The definition "+ToscaConstants.FILEPATH+normalizeTypeName(parentDef,"node")+".yml does not exist. \n Will build incomplete def");
+					System.out.println("The definition "+ToscaConstants.FILEPATH+ServiceTemplateUtilities.normalizeTypeName(parentDef,"node")+".yml does not exist. \n Will build incomplete def");
 				}
 				nodeDefBuilder = new NodeDef.Builder(typeName); // may have to go in the try
 			}
@@ -328,11 +246,11 @@ public class Tosca2CampPlatform{
 			case "type":
 				String type = (String) propMap.get("type");
 				// load the definition from the list
-				DataTypeDef dataDef = dataDefinitions.get(normalizeTypeName(type,"datatype")); //TODO I may have to clone 
+				DataTypeDef dataDef = dataDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(type,"datatype")); //TODO I may have to clone 
 				if (dataDef == null){
 					try{
-						loadDataTypes(ToscaConstants.FILEPATH+normalizeTypeName(type,"datatype")+".yml");
-						dataDef = dataDefinitions.get(normalizeTypeName(type,"datatype"));
+						loadDataTypes(ToscaConstants.FILEPATH+ServiceTemplateUtilities.normalizeTypeName(type,"datatype")+".yml");
+						dataDef = dataDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(type,"datatype"));
 					}
 					catch(Exception e){
 						return null; // dont have the definition
@@ -511,9 +429,9 @@ public class Tosca2CampPlatform{
 			}else{
 				//try to load the parent definition
 				try{
-					loadDefinition(ToscaConstants.FILEPATH+normalizeTypeName(parentDef,"relationship")+".yml");
+					loadDefinition(ToscaConstants.FILEPATH+ServiceTemplateUtilities.normalizeTypeName(parentDef,"relationship")+".yml");
 				}catch(Exception e){
-					System.out.println("The definition "+ToscaConstants.FILEPATH+normalizeTypeName(parentDef,"relationship")+" does not exist. \n Will build incomplete def");
+					System.out.println("The definition "+ToscaConstants.FILEPATH+ServiceTemplateUtilities.normalizeTypeName(parentDef,"relationship")+" does not exist. \n Will build incomplete def");
 				}
 				relBuilder = new RelationshipDef.Builder(typeName);
 			}
@@ -609,11 +527,11 @@ public class Tosca2CampPlatform{
 	}
 	
 	public NodeDef getNodeDef(String typeName){
-		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(normalizeTypeName(typeName,"node"));
+		NodeDef nodeDefinition = (NodeDef) nodeDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(typeName,"node"));
 		if(nodeDefinition == null){
 			//try to load the definition
 			try{
-				loadDefinition(normalizeTypeName(typeName,"node")+".yml");
+				loadDefinition(ServiceTemplateUtilities.normalizeTypeName(typeName,"node")+".yml");
 				nodeDefinition = (NodeDef) nodeDefinitions.get(typeName);
 			}catch(Exception e){
 				System.out.println("The Node definition "+typeName+" does not exist.");
@@ -624,14 +542,14 @@ public class Tosca2CampPlatform{
 	}
 	
 	public RelationshipDef getRelationshipDef(String typeName){
-		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(normalizeTypeName(typeName,"relationship"));
+		RelationshipDef relDefinition = (RelationshipDef) relDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(typeName,"relationship"));
 			if(relDefinition == null){
 				//try to load the definition
 				try{
-					loadRelationship(normalizeTypeName(typeName,"relationship")+".yml");
+					loadRelationship(ServiceTemplateUtilities.normalizeTypeName(typeName,"relationship")+".yml");
 					relDefinition = (RelationshipDef) relDefinitions.get(typeName);
 				}catch(Exception e){
-					System.out.println("The relationship definition "+typeName+" does not exist.");
+					log.debug("The relationship definition "+typeName+" is not normative.");
 					return null;
 				}
 			}
@@ -640,11 +558,11 @@ public class Tosca2CampPlatform{
 	
 	
 	public CapabilityDef getCapabilityDef(String typeName){
-		CapabilityDef capDefinition = (CapabilityDef) capDefinitions.get(normalizeTypeName(typeName,"capability"));
+		CapabilityDef capDefinition = (CapabilityDef) capDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(typeName,"capability"));
 		if(capDefinition == null){
 			//try to load the definition
 			try{
-				loadCapability(normalizeTypeName(typeName,"capability")+".yml");
+				loadCapability(ServiceTemplateUtilities.normalizeTypeName(typeName,"capability")+".yml");
 				capDefinition = (CapabilityDef) capDefinitions.get(typeName);
 			}catch(Exception e){
 				System.out.println("The capability definition "+typeName+" does not exist.");
@@ -655,11 +573,11 @@ public class Tosca2CampPlatform{
 	}
 	
 	public DataTypeDef getDataTypeDef(String typeName){
-		DataTypeDef dataDefinition = (DataTypeDef) dataDefinitions.get(normalizeTypeName(typeName,"data"));
+		DataTypeDef dataDefinition = (DataTypeDef) dataDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(typeName,"data"));
 		if(dataDefinition == null){
 			//try to load the definition
 			try{
-				loadCapability(normalizeTypeName(typeName,"data")+".yml");
+				loadCapability(ServiceTemplateUtilities.normalizeTypeName(typeName,"data")+".yml");
 				dataDefinition = (DataTypeDef) dataDefinitions.get(typeName); //FIXME maybe normalize
 			}catch(Exception e){
 				System.out.println("The data definition "+typeName+" does not exist.");
@@ -670,11 +588,11 @@ public class Tosca2CampPlatform{
 	}
 	
 	public PolicyDef getPolicyDef(String typeName){
-		PolicyDef policyDefinition = (PolicyDef) policyDefinitions.get(normalizeTypeName(typeName,"policies"));
+		PolicyDef policyDefinition = (PolicyDef) policyDefinitions.get(ServiceTemplateUtilities.normalizeTypeName(typeName,"policies"));
 		if(policyDefinition == null){
 			//try to load the definition
 			try{
-				loadPolicy(normalizeTypeName(typeName,"policies")+".yml");
+				loadPolicy(ServiceTemplateUtilities.normalizeTypeName(typeName,"policies")+".yml");
 				policyDefinition = (PolicyDef) policyDefinitions.get(typeName); //FIXME maybe normalize
 			}catch(Exception e){
 				System.out.println("The policy definition "+typeName+" does not exist.");
@@ -700,22 +618,32 @@ public class Tosca2CampPlatform{
 		return dataDefinitions;
 	}
 
-	public ServiceTemplateUtilities createServiceTemplate(Map<String, Object> toscaMap){
-		ServiceTemplateUtilities st = ServiceTemplateUtilities.getServiceTemplate(toscaMap, this);
-		serviceTemplates.put(st.getId(), st);
-		return st;
+//	public ServiceTemplate createServiceTemplate(Map<String, Object> toscaMap){
+//		ServiceTemplate st = ServiceTemplateUtilities.getServiceTemplate(toscaMap, this);
+//		serviceTemplates.put(st.getId(), st);
+//		return st;
+//	}
+//	
+	public ServiceTemplate createServiceTemplate(File file){
+		Yaml yaml = new Yaml();
+        Map<String, Object> map;
+		try {
+			map = (Map<String,Object>) yaml.load(new FileInputStream(file));
+			ServiceTemplate st = ServiceTemplateUtilities.parseServiceTemplate(map, this);
+			serviceTemplates.put(st.getId(), st);
+			return st;
+		} catch (FileNotFoundException e) {
+
+			e.printStackTrace();
+		}
+		return null;
+		
 	}
-	
-	public ServiceTemplateUtilities createServiceTemplate(File file){
-		ServiceTemplateUtilities st = ServiceTemplateUtilities.getServiceTemplate(file, this);
-		serviceTemplates.put(st.getId(), st);
-		return st;
-	}
-	
-	
-	public List<ServiceTemplateUtilities> getServiceTemplates(){
-		return (List<ServiceTemplateUtilities>) serviceTemplates.values();
-	}
+//	
+//	
+//	public List<ServiceTemplateUtilities> getServiceTemplates(){
+//		return (List<ServiceTemplateUtilities>) serviceTemplates.values();
+//	}
 	
 }
 //Yaml yaml = new Yaml(new RangeConstructor(),new RangeRepresenter(), new DumperOptions());

@@ -16,12 +16,13 @@ public class Tosca2CampLauncher {
 		//server.start();
 		//server.join();
 		File yamlFile = new File("/Users/Kena/git/tosca2camp-0.0.1-SNAPSHOT/src/main/java/kr/ac/hanyang/tosca2camp/Sample2.yml");
+		platform.createServiceTemplate(yamlFile);
 		//ServiceTemplate st = platform.createServiceTemplate(yamlFile);
 		//System.out.println(st.toString());
 		
 		//System.out.println(platform.getNodeDefs());
         //Yaml yaml = new Yaml();
-       // Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream();
+        //Map<String, Object> map = (Map<String,Object>) yaml.load(new FileInputStream(yamlFile));
         
 		
 	}
